@@ -1,4 +1,4 @@
-package com.github.pyctam.my.touchtypingpractice.idea.plugin.listeners
+package com.github.pyctam.touchtypingpractice.listeners
 
 import com.intellij.openapi.application.ApplicationActivationListener
 import com.intellij.openapi.diagnostic.thisLogger

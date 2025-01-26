@@ -1,6 +1,6 @@
-# my-touchtyping-practice-idea-plugin
+# Touch Typing Practice
 
-![Build](https://github.com/pyctam/my-touchtyping-practice-idea-plugin/workflows/Build/badge.svg)
+![Build](https://github.com/pyctam/Touch Typing Practice/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 
@@ -28,7 +28,7 @@ To keep everything working, do not remove `<!-- ... -->` sections.
 
 - Using the IDE built-in plugin system:
   
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "my-touchtyping-practice-idea-plugin"</kbd> >
+  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "Touch Typing Practice"</kbd> >
   <kbd>Install</kbd>
   
 - Using JetBrains Marketplace:
@@ -40,7 +40,7 @@ To keep everything working, do not remove `<!-- ... -->` sections.
 
 - Manually:
 
-  Download the [latest release](https://github.com/pyctam/my-touchtyping-practice-idea-plugin/releases/latest) and install it manually using
+  Download the [latest release](https://github.com/pyctam/Touch Typing Practice/releases/latest) and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
 

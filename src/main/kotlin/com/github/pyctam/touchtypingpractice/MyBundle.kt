@@ -1,4 +1,4 @@
-package com.github.pyctam.my.touchtypingpractice.idea.plugin
+package com.github.pyctam.touchtypingpractice
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.NonNls

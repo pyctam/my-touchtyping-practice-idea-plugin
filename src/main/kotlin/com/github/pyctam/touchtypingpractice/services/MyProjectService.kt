@@ -1,9 +1,9 @@
-package com.github.pyctam.my.touchtypingpractice.idea.plugin.services
+package com.github.pyctam.touchtypingpractice.services
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
-import com.github.pyctam.my.touchtypingpractice.idea.plugin.MyBundle
+import com.github.pyctam.touchtypingpractice.MyBundle
 
 @Service(Service.Level.PROJECT)
 class MyProjectService(project: Project) {
