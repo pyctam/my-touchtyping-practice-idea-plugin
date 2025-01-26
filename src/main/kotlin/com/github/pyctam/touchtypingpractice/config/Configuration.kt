@@ -9,11 +9,15 @@ import javax.swing.*
 class Configuration : Configurable {
   private val logger: Logger = Logger.getInstance(Configuration::class.java)
 
+  // hand selection
   private var leftHandRadioButton: JRadioButton? = null
   private var rightHandRadioButton: JRadioButton? = null
   private var bothHandsRadioButton: JRadioButton? = null
+
+  // key radius selection
   private var keyRadiusSpinner: JSpinner? = null
 
+  // finger[s] selection
   private var allFingersRadioButton: JRadioButton? = null
   private var specificFingersRadioButton: JRadioButton? = null
   private val fingerCheckBoxes: MutableList<JCheckBox> = mutableListOf()
