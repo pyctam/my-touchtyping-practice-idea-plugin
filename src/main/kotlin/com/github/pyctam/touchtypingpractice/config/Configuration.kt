@@ -3,16 +3,8 @@ package com.github.pyctam.touchtypingpractice.config
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.Configurable
-import java.awt.event.ItemEvent
-import javax.swing.BorderFactory
-import javax.swing.BoxLayout
-import javax.swing.ButtonGroup
-import javax.swing.JCheckBox
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JRadioButton
-import javax.swing.JSpinner
-import javax.swing.SpinnerNumberModel
+import java.awt.*
+import javax.swing.*
 
 class Configuration : Configurable {
   private val logger: Logger = Logger.getInstance(Configuration::class.java)
@@ -36,85 +28,85 @@ class Configuration : Configurable {
     val panel = JPanel()
     panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
 
-    // Practice Mode Radio Buttons (Left/Right/Both Hands)
+    // Practice Mode Section
     val practiceModePanel =
-      JPanel().apply {
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
-        add(JLabel("Practice Mode:"))
+      createSectionPanel("Practice Mode:").apply {
+        val radioPanel = JPanel().apply { layout = BoxLayout(this, BoxLayout.Y_AXIS) }
+
+        leftHandRadioButton = JRadioButton("Left Hand")
+        rightHandRadioButton = JRadioButton("Right Hand")
+        bothHandsRadioButton = JRadioButton("Both Hands")
+
+        val handGroup = ButtonGroup()
+        handGroup.add(leftHandRadioButton)
+        handGroup.add(rightHandRadioButton)
+        handGroup.add(bothHandsRadioButton)
+
+        when (settings.hands) {
+          Hands.LEFT_HAND -> leftHandRadioButton?.isSelected = true
+          Hands.RIGHT_HAND -> rightHandRadioButton?.isSelected = true
+          Hands.BOTH_HANDS -> bothHandsRadioButton?.isSelected = true
+        }
+
+        leftHandRadioButton?.addActionListener { settings.hands = Hands.LEFT_HAND }
+        rightHandRadioButton?.addActionListener { settings.hands = Hands.RIGHT_HAND }
+        bothHandsRadioButton?.addActionListener { settings.hands = Hands.BOTH_HANDS }
+
+        radioPanel.add(leftHandRadioButton)
+        radioPanel.add(rightHandRadioButton)
+        radioPanel.add(bothHandsRadioButton)
+        add(radioPanel, BorderLayout.CENTER)
       }
-
-    leftHandRadioButton = JRadioButton("Left Hand")
-    rightHandRadioButton = JRadioButton("Right Hand")
-    bothHandsRadioButton = JRadioButton("Both Hands")
-
-    val handGroup = ButtonGroup()
-    handGroup.add(leftHandRadioButton)
-    handGroup.add(rightHandRadioButton)
-    handGroup.add(bothHandsRadioButton)
-
-    // Set initial selected option based on settings
-    when (settings.hands) {
-      Hands.LEFT_HAND -> leftHandRadioButton?.isSelected = true
-      Hands.RIGHT_HAND -> rightHandRadioButton?.isSelected = true
-      Hands.BOTH_HANDS -> bothHandsRadioButton?.isSelected = true
-    }
-
-    leftHandRadioButton?.addActionListener { settings.hands = Hands.LEFT_HAND }
-    rightHandRadioButton?.addActionListener { settings.hands = Hands.RIGHT_HAND }
-    bothHandsRadioButton?.addActionListener { settings.hands = Hands.BOTH_HANDS }
-
-    practiceModePanel.add(leftHandRadioButton)
-    practiceModePanel.add(rightHandRadioButton)
-    practiceModePanel.add(bothHandsRadioButton)
     panel.add(practiceModePanel)
 
-    // Key Radius Spinner
-    val keyRadiusLabel = JLabel("Key Radius (0 to 3):")
-    keyRadiusSpinner = JSpinner(SpinnerNumberModel(settings.keyRadius, 0, 3, 1))
-    keyRadiusSpinner?.addChangeListener { settings.keyRadius = keyRadiusSpinner?.value as Int }
-    panel.add(keyRadiusLabel)
-    panel.add(keyRadiusSpinner)
+    // Key Radius Section
+    val keyRadiusPanel =
+      createSectionPanel("Key Radius (0 to 3):").apply {
+        keyRadiusSpinner =
+          JSpinner(SpinnerNumberModel(settings.keyRadius, 0, 3, 1)).apply {
+            addChangeListener { settings.keyRadius = value as Int }
+          }
+        add(keyRadiusSpinner, BorderLayout.CENTER)
+      }
+    panel.add(keyRadiusPanel)
 
-    // Finger Selection Panel
+    // Finger Selection Section
     val fingerSelectionPanel =
-      JPanel().apply {
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
-        border = BorderFactory.createTitledBorder("Finger Selection")
-      }
+      createSectionPanel("Finger Selection:").apply {
+        val radioPanel = JPanel().apply { layout = BoxLayout(this, BoxLayout.Y_AXIS) }
 
-    allFingersRadioButton =
-      JRadioButton("Practice all fingers").apply {
-        isSelected = true
-        addItemListener {
-          if (it.stateChange == ItemEvent.SELECTED) {
-            enableFingerSelection(false)
+        allFingersRadioButton =
+          JRadioButton("Practice all fingers").apply {
+            isSelected = true
+            addItemListener { if (isSelected) enableFingerSelection(false) }
           }
-        }
-      }
 
-    specificFingersRadioButton =
-      JRadioButton("Select specific fingers").apply {
-        addItemListener {
-          if (it.stateChange == ItemEvent.SELECTED) {
-            enableFingerSelection(true)
+        specificFingersRadioButton =
+          JRadioButton("Select specific fingers").apply {
+            addItemListener { if (isSelected) enableFingerSelection(true) }
           }
-        }
+
+        val fingerGroup = ButtonGroup()
+        fingerGroup.add(allFingersRadioButton)
+        fingerGroup.add(specificFingersRadioButton)
+
+        radioPanel.add(allFingersRadioButton)
+        radioPanel.add(specificFingersRadioButton)
+
+        val fingerCheckPanel =
+          JPanel(GridLayout(0, 2)).apply {
+            isEnabled = false
+            val fingerNames = listOf("Thumb", "Index", "Middle", "Ring", "Little")
+            fingerNames.forEach { fingerName ->
+              val checkBox = JCheckBox(fingerName).apply { isEnabled = false }
+              fingerCheckBoxes.add(checkBox)
+              add(checkBox)
+            }
+          }
+
+        add(radioPanel, BorderLayout.NORTH)
+        add(fingerCheckPanel, BorderLayout.CENTER)
       }
-
-    val fingerGroup = ButtonGroup()
-    fingerGroup.add(allFingersRadioButton)
-    fingerGroup.add(specificFingersRadioButton)
-
-    fingerSelectionPanel.add(allFingersRadioButton)
-    fingerSelectionPanel.add(specificFingersRadioButton)
-
-    val fingerNames = listOf("Thumb", "Index", "Middle", "Ring", "Little")
-    fingerNames.forEach { fingerName ->
-      val checkBox = JCheckBox(fingerName).apply { isEnabled = false }
-      fingerCheckBoxes.add(checkBox)
-      fingerSelectionPanel.add(checkBox)
-    }
-
     panel.add(fingerSelectionPanel)
 
     return panel
@@ -130,7 +122,6 @@ class Configuration : Configurable {
   }
 
   override fun apply() {
-    // Save settings
     val selectedFingers = fingerCheckBoxes.filter { it.isSelected }.map { it.text }
     settings.selectedFingers = selectedFingers
     settings.allFingers = allFingersRadioButton?.isSelected == true
@@ -181,5 +172,12 @@ class Configuration : Configurable {
       properties.getValue("selectedFingers", "").split(",").filter { it.isNotEmpty() }
 
     return Settings(hands, keyRadius, allFingers, selectedFingers)
+  }
+
+  private fun createSectionPanel(title: String): JPanel {
+    return JPanel(BorderLayout()).apply {
+      border = BorderFactory.createTitledBorder(title)
+      layout = BorderLayout(5, 5)
+    }
   }
 }
