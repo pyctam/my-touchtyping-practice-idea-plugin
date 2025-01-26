@@ -30,9 +30,7 @@ class Configuration : Configurable {
 
     // Practice Mode Section
     val practiceModePanel =
-      createSectionPanel("Practice Mode:").apply {
-        val radioPanel = JPanel().apply { layout = BoxLayout(this, BoxLayout.Y_AXIS) }
-
+      createResponsiveSection("Practice Mode:").apply {
         leftHandRadioButton = JRadioButton("Left Hand")
         rightHandRadioButton = JRadioButton("Right Hand")
         bothHandsRadioButton = JRadioButton("Both Hands")
@@ -52,10 +50,14 @@ class Configuration : Configurable {
         rightHandRadioButton?.addActionListener { settings.hands = Hands.RIGHT_HAND }
         bothHandsRadioButton?.addActionListener { settings.hands = Hands.BOTH_HANDS }
 
-        radioPanel.add(leftHandRadioButton)
-        radioPanel.add(rightHandRadioButton)
-        radioPanel.add(bothHandsRadioButton)
-        add(radioPanel, BorderLayout.CENTER)
+        val radioContainer =
+          JPanel(FlowLayout(FlowLayout.LEFT, 10, 5)).apply {
+            add(leftHandRadioButton)
+            add(rightHandRadioButton)
+            add(bothHandsRadioButton)
+          }
+
+        add(radioContainer, BorderLayout.CENTER)
       }
     panel.add(practiceModePanel)
 
@@ -172,6 +174,13 @@ class Configuration : Configurable {
       properties.getValue("selectedFingers", "").split(",").filter { it.isNotEmpty() }
 
     return Settings(hands, keyRadius, allFingers, selectedFingers)
+  }
+
+  private fun createResponsiveSection(title: String): JPanel {
+    return JPanel(BorderLayout()).apply {
+      border = BorderFactory.createTitledBorder(title)
+      layout = BorderLayout(5, 5)
+    }
   }
 
   private fun createSectionPanel(title: String): JPanel {
