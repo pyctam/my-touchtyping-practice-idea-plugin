@@ -54,14 +54,14 @@ class Configuration : Configurable {
                 handGroup.add(bothHandsRadioButton)
 
                 when (settings.practiceMode) {
-                    Hand.LEFT_HAND -> leftHandRadioButton?.isSelected = true
-                    Hand.RIGHT_HAND -> rightHandRadioButton?.isSelected = true
-                    Hand.BOTH_HANDS -> bothHandsRadioButton?.isSelected = true
+                    PracticeMode.LEFT_HAND -> leftHandRadioButton?.isSelected = true
+                    PracticeMode.RIGHT_HAND -> rightHandRadioButton?.isSelected = true
+                    PracticeMode.BOTH_HANDS -> bothHandsRadioButton?.isSelected = true
                 }
 
-                leftHandRadioButton?.addActionListener { settings.practiceMode = Hand.LEFT_HAND }
-                rightHandRadioButton?.addActionListener { settings.practiceMode = Hand.RIGHT_HAND }
-                bothHandsRadioButton?.addActionListener { settings.practiceMode = Hand.BOTH_HANDS }
+                leftHandRadioButton?.addActionListener { settings.practiceMode = PracticeMode.LEFT_HAND }
+                rightHandRadioButton?.addActionListener { settings.practiceMode = PracticeMode.RIGHT_HAND }
+                bothHandsRadioButton?.addActionListener { settings.practiceMode = PracticeMode.BOTH_HANDS }
 
                 val radioContainer =
                     JPanel(FlowLayout(FlowLayout.LEFT, 10, 5)).apply {
@@ -149,9 +149,9 @@ class Configuration : Configurable {
         settings = loadSettings()
 
         when (settings.practiceMode) {
-            Hand.LEFT_HAND -> leftHandRadioButton?.isSelected = true
-            Hand.RIGHT_HAND -> rightHandRadioButton?.isSelected = true
-            Hand.BOTH_HANDS -> bothHandsRadioButton?.isSelected = true
+            PracticeMode.LEFT_HAND -> leftHandRadioButton?.isSelected = true
+            PracticeMode.RIGHT_HAND -> rightHandRadioButton?.isSelected = true
+            PracticeMode.BOTH_HANDS -> bothHandsRadioButton?.isSelected = true
         }
 
         keyRadiusSpinner?.value = settings.keyLimitPerFinger
@@ -175,13 +175,13 @@ class Configuration : Configurable {
         properties.setValue("practiceMode", settings.practiceMode.name)
         properties.setValue("keyRadius", settings.keyLimitPerFinger.toString())
         properties.setValue("allFingers", settings.useAllFingers.toString())
-        properties.setValue("selectedFingers", settings.selectedFingers.joinToString(","))
+        //properties.setValue("selectedFingers", settings.selectedFingers.joinToString(","))
         logger.info("Settings saved: $settings")
     }
 
     private fun loadSettings(): Settings {
         val properties = PropertiesComponent.getInstance()
-        val hand = Hand.valueOf(properties.getValue("practiceMode", Hand.BOTH_HANDS.name))
+        val practiceMode = PracticeMode.valueOf(properties.getValue("practiceMode", PracticeMode.BOTH_HANDS.name))
         val keyRadius = properties.getInt("keyRadius", 1)
         val allFingers = properties.getBoolean("allFingers", true)
         val selectedFingers =

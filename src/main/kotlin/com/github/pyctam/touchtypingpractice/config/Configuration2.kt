@@ -1,10 +1,11 @@
 package com.github.pyctam.touchtypingpractice.config
 
-import com.github.pyctam.touchtypingpractice.config.Hand.BOTH_HANDS
-import com.github.pyctam.touchtypingpractice.config.Hand.LEFT_HAND
-import com.github.pyctam.touchtypingpractice.config.Hand.RIGHT_HAND
+import com.github.pyctam.touchtypingpractice.config.PracticeMode.BOTH_HANDS
+import com.github.pyctam.touchtypingpractice.config.PracticeMode.LEFT_HAND
+import com.github.pyctam.touchtypingpractice.config.PracticeMode.RIGHT_HAND
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_KEY_LIMIT_PER_FINGER
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_PRACTICE_MODE
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_USE_ALL_FINGERS
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.BoundConfigurable
@@ -65,7 +66,20 @@ class Configuration2 : BoundConfigurable("Touch Typing Practice (2)") {
                 row {
                     checkBox("Use All Fingers").bindSelected(settings::useAllFingers)
                 }
-                row("Select Specific Fingers") {}
+                buttonsGroup {
+                    row("Select Specific Fingers") {
+                        for (finger in Finger.values()) {
+                            val name = finger.name
+                            checkBox(name).bindSelected(
+                                { isFingerSelected(finger) },
+                                { selectFinger(finger) })
+
+                        }
+
+                    }
+
+                }
+
             }
         }
     }
@@ -84,27 +98,36 @@ class Configuration2 : BoundConfigurable("Touch Typing Practice (2)") {
         val properties = PropertiesComponent.getInstance()
 
         val practiceModeName = properties.getValue(PROPERTY_PRACTICE_MODE, BOTH_HANDS.name)
-        val practiceMode = Hand.valueOf(practiceModeName)
-
+        val practiceMode = PracticeMode.valueOf(practiceModeName)
         val keyLimitPerFinger = properties.getInt(PROPERTY_KEY_LIMIT_PER_FINGER, 1)
+        val allFingers = properties.getBoolean(PROPERTY_USE_ALL_FINGERS, true)
 
-        val allFingers = properties.getBoolean("allFingers", true)
         val selectedFingers =
             properties.getValue("selectedFingers", "").split(",").filter { it.isNotEmpty() }
 
-        return Settings(practiceMode, keyLimitPerFinger, allFingers, emptyList())
+        return Settings(practiceMode, keyLimitPerFinger, allFingers, mutableMapOf())
 
     }
 
     private fun saveSettings() {
         val practiceMode = settings.practiceMode.name
         val keyLimitPerFinger = settings.keyLimitPerFinger.toString()
+        val useAllFingers = this.settings.useAllFingers.toString()
 
         val properties = PropertiesComponent.getInstance()
         properties.setValue(PROPERTY_PRACTICE_MODE, practiceMode)
         properties.setValue(PROPERTY_KEY_LIMIT_PER_FINGER, keyLimitPerFinger)
-        properties.setValue("allFingers", this.settings.useAllFingers.toString())
-        properties.setValue("selectedFingers", this.settings.selectedFingers.joinToString(","))
+        properties.setValue(PROPERTY_USE_ALL_FINGERS, useAllFingers)
+
+        //properties.setValue("selectedFingers", this.settings.selectedFingers.joinToString(","))
         logger.info("Settings saved: ${this.settings}")
+    }
+
+    private fun isFingerSelected(finger: Finger): Boolean {
+        return settings.selectedFingers[finger] ?: false
+    }
+
+    private fun selectFinger(finger: Finger): Unit {
+        settings.selectedFingers[finger] = true
     }
 }
