@@ -78,8 +78,8 @@ class Configuration : Configurable {
         val keyRadiusPanel =
             createSectionPanel("Key Radius (0 to 3):").apply {
                 keyRadiusSpinner =
-                    JSpinner(SpinnerNumberModel(settings.keyRadius, 0, 3, 1)).apply {
-                        addChangeListener { settings.keyRadius = value as Int }
+                    JSpinner(SpinnerNumberModel(settings.keyLimitPerFinger, 0, 3, 1)).apply {
+                        addChangeListener { settings.keyLimitPerFinger = value as Int }
                     }
                 add(keyRadiusSpinner, BorderLayout.CENTER)
             }
@@ -132,7 +132,7 @@ class Configuration : Configurable {
         val currentSettings = loadSettings()
         val selectedFingers = fingerCheckBoxes.filter { it.isSelected }.map { it.text }
         return currentSettings.practiceMode != settings.practiceMode ||
-                currentSettings.keyRadius != settings.keyRadius ||
+                currentSettings.keyLimitPerFinger != settings.keyLimitPerFinger ||
                 currentSettings.allFingers != settings.allFingers ||
                 currentSettings.selectedFingers != selectedFingers
     }
@@ -154,7 +154,7 @@ class Configuration : Configurable {
             Hands.BOTH_HANDS -> bothHandsRadioButton?.isSelected = true
         }
 
-        keyRadiusSpinner?.value = settings.keyRadius
+        keyRadiusSpinner?.value = settings.keyLimitPerFinger
 
         if (settings.allFingers) {
             allFingersRadioButton?.isSelected = true
@@ -173,7 +173,7 @@ class Configuration : Configurable {
     private fun saveSettings(settings: Settings) {
         val properties = PropertiesComponent.getInstance()
         properties.setValue("practiceMode", settings.practiceMode.name)
-        properties.setValue("keyRadius", settings.keyRadius.toString())
+        properties.setValue("keyRadius", settings.keyLimitPerFinger.toString())
         properties.setValue("allFingers", settings.allFingers.toString())
         properties.setValue("selectedFingers", settings.selectedFingers.joinToString(","))
         logger.info("Settings saved: $settings")

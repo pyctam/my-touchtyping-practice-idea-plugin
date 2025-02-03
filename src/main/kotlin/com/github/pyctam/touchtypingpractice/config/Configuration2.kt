@@ -3,18 +3,20 @@ package com.github.pyctam.touchtypingpractice.config
 import com.github.pyctam.touchtypingpractice.config.Hands.BOTH_HANDS
 import com.github.pyctam.touchtypingpractice.config.Hands.LEFT_HAND
 import com.github.pyctam.touchtypingpractice.config.Hands.RIGHT_HAND
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_KEY_LIMIT_PER_FINGER
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_PRACTICE_MODE
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.dsl.builder.bind
+import com.intellij.ui.dsl.builder.bindIntValue
 import com.intellij.ui.dsl.builder.panel
 
 class Configuration2 : BoundConfigurable("Touch Typing Practice (2)") {
     private val logger: Logger = Logger.getInstance(Configuration2::class.java)
 
-    private var settings: Settings = loadSettings();
+    private val settings: Settings = loadSettings();
 
     override fun createPanel(): DialogPanel {
         return panel {
@@ -47,6 +49,9 @@ class Configuration2 : BoundConfigurable("Touch Typing Practice (2)") {
                                 "flexibility in key coverage."
                     )
                 }
+                row {
+                    spinner(1..6).bindIntValue(settings::keyLimitPerFinger)
+                }
             }
             group("Finger Selection:") {
                 row {
@@ -73,24 +78,25 @@ class Configuration2 : BoundConfigurable("Touch Typing Practice (2)") {
     private fun loadSettings(): Settings {
         val properties = PropertiesComponent.getInstance()
 
-        val practiceModeName = properties.getValue(PROPERTY_PRACTICE_MODE, BOTH_HANDS.name);
+        val practiceModeName = properties.getValue(PROPERTY_PRACTICE_MODE, BOTH_HANDS.name)
         val practiceMode = Hands.valueOf(practiceModeName)
 
+        val keyLimitPerFinger = properties.getInt(PROPERTY_KEY_LIMIT_PER_FINGER, 1)
 
-        val keyRadius = properties.getInt("keyRadius", 1)
         val allFingers = properties.getBoolean("allFingers", true)
         val selectedFingers =
             properties.getValue("selectedFingers", "").split(",").filter { it.isNotEmpty() }
 
-        return Settings(practiceMode, keyRadius, allFingers, selectedFingers)
+        return Settings(practiceMode, keyLimitPerFinger, allFingers, selectedFingers)
     }
 
     private fun saveSettings() {
-        val practiceMode = this.settings.practiceMode.name;
+        val practiceMode = settings.practiceMode.name
+        val keyLimitPerFinger = settings.keyLimitPerFinger.toString()
 
         val properties = PropertiesComponent.getInstance()
         properties.setValue(PROPERTY_PRACTICE_MODE, practiceMode)
-        properties.setValue("keyRadius", this.settings.keyRadius.toString())
+        properties.setValue(PROPERTY_KEY_LIMIT_PER_FINGER, keyLimitPerFinger)
         properties.setValue("allFingers", this.settings.allFingers.toString())
         properties.setValue("selectedFingers", this.settings.selectedFingers.joinToString(","))
         logger.info("Settings saved: ${this.settings}")
