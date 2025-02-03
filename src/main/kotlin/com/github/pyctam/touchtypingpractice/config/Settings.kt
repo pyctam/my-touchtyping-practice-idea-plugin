@@ -1,12 +1,12 @@
 package com.github.pyctam.touchtypingpractice.config
 
-import com.github.pyctam.touchtypingpractice.config.Hands.BOTH_HANDS
+import com.github.pyctam.touchtypingpractice.config.Hand.BOTH_HANDS
 
 data class Settings(
-    var practiceMode: Hands = BOTH_HANDS,
+    var practiceMode: Hand = BOTH_HANDS,
     var keyLimitPerFinger: Int = 1,
-    var allFingers: Boolean = true,
-    var selectedFingers: List<String> = emptyList()
+    var useAllFingers: Boolean = true,
+    var selectedFingers: List<Finger> = emptyList()
 ) {
     companion object {
         const val PROPERTY_PRACTICE_MODE = "conf.practiceMode"

@@ -1,8 +1,8 @@
 package com.github.pyctam.touchtypingpractice.config
 
-import com.github.pyctam.touchtypingpractice.config.Hands.BOTH_HANDS
-import com.github.pyctam.touchtypingpractice.config.Hands.LEFT_HAND
-import com.github.pyctam.touchtypingpractice.config.Hands.RIGHT_HAND
+import com.github.pyctam.touchtypingpractice.config.Hand.BOTH_HANDS
+import com.github.pyctam.touchtypingpractice.config.Hand.LEFT_HAND
+import com.github.pyctam.touchtypingpractice.config.Hand.RIGHT_HAND
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_KEY_LIMIT_PER_FINGER
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_PRACTICE_MODE
 import com.intellij.ide.util.PropertiesComponent
@@ -11,6 +11,7 @@ import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.dsl.builder.bind
 import com.intellij.ui.dsl.builder.bindIntValue
+import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 
 class Configuration2 : BoundConfigurable("Touch Typing Practice (2)") {
@@ -61,6 +62,10 @@ class Configuration2 : BoundConfigurable("Touch Typing Practice (2)") {
                                 "to your typing style and comfort level."
                     )
                 }
+                row {
+                    checkBox("Use All Fingers").bindSelected(settings::useAllFingers)
+                }
+                row("Select Specific Fingers") {}
             }
         }
     }
@@ -79,7 +84,7 @@ class Configuration2 : BoundConfigurable("Touch Typing Practice (2)") {
         val properties = PropertiesComponent.getInstance()
 
         val practiceModeName = properties.getValue(PROPERTY_PRACTICE_MODE, BOTH_HANDS.name)
-        val practiceMode = Hands.valueOf(practiceModeName)
+        val practiceMode = Hand.valueOf(practiceModeName)
 
         val keyLimitPerFinger = properties.getInt(PROPERTY_KEY_LIMIT_PER_FINGER, 1)
 
@@ -87,7 +92,8 @@ class Configuration2 : BoundConfigurable("Touch Typing Practice (2)") {
         val selectedFingers =
             properties.getValue("selectedFingers", "").split(",").filter { it.isNotEmpty() }
 
-        return Settings(practiceMode, keyLimitPerFinger, allFingers, selectedFingers)
+        return Settings(practiceMode, keyLimitPerFinger, allFingers, emptyList())
+
     }
 
     private fun saveSettings() {
@@ -97,7 +103,7 @@ class Configuration2 : BoundConfigurable("Touch Typing Practice (2)") {
         val properties = PropertiesComponent.getInstance()
         properties.setValue(PROPERTY_PRACTICE_MODE, practiceMode)
         properties.setValue(PROPERTY_KEY_LIMIT_PER_FINGER, keyLimitPerFinger)
-        properties.setValue("allFingers", this.settings.allFingers.toString())
+        properties.setValue("allFingers", this.settings.useAllFingers.toString())
         properties.setValue("selectedFingers", this.settings.selectedFingers.joinToString(","))
         logger.info("Settings saved: ${this.settings}")
     }

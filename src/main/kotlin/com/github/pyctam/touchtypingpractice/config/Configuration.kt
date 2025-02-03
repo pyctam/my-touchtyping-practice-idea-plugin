@@ -54,14 +54,14 @@ class Configuration : Configurable {
                 handGroup.add(bothHandsRadioButton)
 
                 when (settings.practiceMode) {
-                    Hands.LEFT_HAND -> leftHandRadioButton?.isSelected = true
-                    Hands.RIGHT_HAND -> rightHandRadioButton?.isSelected = true
-                    Hands.BOTH_HANDS -> bothHandsRadioButton?.isSelected = true
+                    Hand.LEFT_HAND -> leftHandRadioButton?.isSelected = true
+                    Hand.RIGHT_HAND -> rightHandRadioButton?.isSelected = true
+                    Hand.BOTH_HANDS -> bothHandsRadioButton?.isSelected = true
                 }
 
-                leftHandRadioButton?.addActionListener { settings.practiceMode = Hands.LEFT_HAND }
-                rightHandRadioButton?.addActionListener { settings.practiceMode = Hands.RIGHT_HAND }
-                bothHandsRadioButton?.addActionListener { settings.practiceMode = Hands.BOTH_HANDS }
+                leftHandRadioButton?.addActionListener { settings.practiceMode = Hand.LEFT_HAND }
+                rightHandRadioButton?.addActionListener { settings.practiceMode = Hand.RIGHT_HAND }
+                bothHandsRadioButton?.addActionListener { settings.practiceMode = Hand.BOTH_HANDS }
 
                 val radioContainer =
                     JPanel(FlowLayout(FlowLayout.LEFT, 10, 5)).apply {
@@ -133,14 +133,14 @@ class Configuration : Configurable {
         val selectedFingers = fingerCheckBoxes.filter { it.isSelected }.map { it.text }
         return currentSettings.practiceMode != settings.practiceMode ||
                 currentSettings.keyLimitPerFinger != settings.keyLimitPerFinger ||
-                currentSettings.allFingers != settings.allFingers ||
+                currentSettings.useAllFingers != settings.useAllFingers ||
                 currentSettings.selectedFingers != selectedFingers
     }
 
     override fun apply() {
-        val selectedFingers = fingerCheckBoxes.filter { it.isSelected }.map { it.text }
-        settings.selectedFingers = selectedFingers
-        settings.allFingers = allFingersRadioButton?.isSelected == true
+        val selectedFingers = fingerCheckBoxes.filter { it.isSelected }.map { it.name }
+        //settings.selectedFingers = selectedFingers
+        settings.useAllFingers = allFingersRadioButton?.isSelected == true
 
         saveSettings(settings)
     }
@@ -149,20 +149,20 @@ class Configuration : Configurable {
         settings = loadSettings()
 
         when (settings.practiceMode) {
-            Hands.LEFT_HAND -> leftHandRadioButton?.isSelected = true
-            Hands.RIGHT_HAND -> rightHandRadioButton?.isSelected = true
-            Hands.BOTH_HANDS -> bothHandsRadioButton?.isSelected = true
+            Hand.LEFT_HAND -> leftHandRadioButton?.isSelected = true
+            Hand.RIGHT_HAND -> rightHandRadioButton?.isSelected = true
+            Hand.BOTH_HANDS -> bothHandsRadioButton?.isSelected = true
         }
 
         keyRadiusSpinner?.value = settings.keyLimitPerFinger
 
-        if (settings.allFingers) {
+        if (settings.useAllFingers) {
             allFingersRadioButton?.isSelected = true
             enableFingerSelection(false)
         } else {
             specificFingersRadioButton?.isSelected = true
             enableFingerSelection(true)
-            fingerCheckBoxes.forEach { it.isSelected = settings.selectedFingers.contains(it.text) }
+            //fingerCheckBoxes.forEach { it.isSelected = settings.selectedFingers.contains(it.text) }
         }
     }
 
@@ -174,20 +174,22 @@ class Configuration : Configurable {
         val properties = PropertiesComponent.getInstance()
         properties.setValue("practiceMode", settings.practiceMode.name)
         properties.setValue("keyRadius", settings.keyLimitPerFinger.toString())
-        properties.setValue("allFingers", settings.allFingers.toString())
+        properties.setValue("allFingers", settings.useAllFingers.toString())
         properties.setValue("selectedFingers", settings.selectedFingers.joinToString(","))
         logger.info("Settings saved: $settings")
     }
 
     private fun loadSettings(): Settings {
         val properties = PropertiesComponent.getInstance()
-        val hands = Hands.valueOf(properties.getValue("practiceMode", Hands.BOTH_HANDS.name))
+        val hand = Hand.valueOf(properties.getValue("practiceMode", Hand.BOTH_HANDS.name))
         val keyRadius = properties.getInt("keyRadius", 1)
         val allFingers = properties.getBoolean("allFingers", true)
         val selectedFingers =
             properties.getValue("selectedFingers", "").split(",").filter { it.isNotEmpty() }
 
-        return Settings(hands, keyRadius, allFingers, selectedFingers)
+        //return Settings(hand, keyRadius, allFingers, selectedFingers)
+
+        throw RuntimeException("TBD");
     }
 
     private fun createResponsiveSection(title: String): JPanel {
