@@ -1,4 +1,4 @@
-# my-touchtyping-practice-idea-plugin
+# Touch Typing Practice
 
 ![Build](https://github.com/pyctam/my-touchtyping-practice-idea-plugin/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
@@ -28,7 +28,7 @@ To keep everything working, do not remove `<!-- ... -->` sections.
 
 - Using the IDE built-in plugin system:
   
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "my-touchtyping-practice-idea-plugin"</kbd> >
+  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "Touch Typing Practice"</kbd> >
   <kbd>Install</kbd>
   
 - Using JetBrains Marketplace:

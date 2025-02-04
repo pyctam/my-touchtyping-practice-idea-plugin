@@ -1,6 +1,6 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# my-touchtyping-practice-idea-plugin Changelog
+# Touch Typing Practice Changelog
 
 ## [Unreleased]
 ### Added

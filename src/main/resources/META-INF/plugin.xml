@@ -1,18 +1,22 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.pyctam.mytouchtypingpracticeideaplugin</id>
-    <name>my-touchtyping-practice-idea-plugin</name>
+    <id>com.github.pyctam.touchtypingpractice</id>
+    <name>Touch Typing Practice</name>
     <vendor>pyctam</vendor>
-
     <depends>com.intellij.modules.platform</depends>
-
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.pyctam.mytouchtypingpracticeideaplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <toolWindow factoryClass="com.github.pyctam.touchtypingpractice.toolWindow.MyToolWindowFactory"
+                    id="MyToolWindow"/>
+
+        <projectConfigurable instance="com.github.pyctam.touchtypingpractice.config.Configuration"
+                             displayName="Touch Typing Practice"
+                             id="com.github.pyctam.touchtypingpractice.config.Configuration"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.pyctam.mytouchtypingpracticeideaplugin.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="com.github.pyctam.touchtypingpractice.listeners.MyApplicationActivationListener"
+                  topic="com.intellij.openapi.application.ApplicationActivationListener"/>
     </applicationListeners>
 </idea-plugin>

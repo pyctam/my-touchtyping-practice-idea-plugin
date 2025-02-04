@@ -1,0 +1,117 @@
+package com.github.pyctam.touchtypingpractice.config
+
+import com.github.pyctam.touchtypingpractice.config.PracticeMode.BOTH_HANDS
+import com.github.pyctam.touchtypingpractice.config.PracticeMode.LEFT_HAND
+import com.github.pyctam.touchtypingpractice.config.PracticeMode.RIGHT_HAND
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_KEY_LIMIT_PER_FINGER
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_PRACTICE_MODE
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_SELECTED_FINGERS
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_USE_ALL_FINGERS
+import com.intellij.ide.util.PropertiesComponent
+import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.options.BoundConfigurable
+import com.intellij.openapi.ui.DialogPanel
+import com.intellij.ui.dsl.builder.bind
+import com.intellij.ui.dsl.builder.bindIntValue
+import com.intellij.ui.dsl.builder.bindSelected
+import com.intellij.ui.dsl.builder.panel
+
+class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
+  private val logger: Logger = Logger.getInstance(Configuration::class.java)
+
+  private val settings: Settings = loadSettings()
+
+  override fun createPanel(): DialogPanel {
+    return panel {
+      group("Practice Mode:") {
+        buttonsGroup {
+            row {
+              comment(
+                "Select which hand you want to use for touch typing practice. 'Left Hand' focuses on " +
+                  "left-hand keys, 'Right Hand' trains right-hand keys, and 'Both Hands' provides " +
+                  "a full-keyboard experience."
+              )
+            }
+            row {
+              radioButton("Left Hand", LEFT_HAND)
+              radioButton("Right Hand", RIGHT_HAND)
+              radioButton("Both Hands", BOTH_HANDS)
+            }
+          }
+          .bind({ settings.practiceMode }, { settings.practiceMode = it })
+      }
+      group("Key Limit Per Finger (1-6):") {
+        row {
+          comment(
+            "Defines the maximum number of keys each finger can be assigned during practice. A lower " +
+              "value enforces strict finger placement, while a higher value allows more " +
+              "flexibility in key coverage."
+          )
+        }
+        row { spinner(1..6).bindIntValue(settings::keyLimitPerFinger) }
+      }
+      group("Finger Selection:") {
+        row {
+          comment(
+            "Choose which fingers to use for touch typing practice. Select specific fingers or enable " +
+              "all fingers for a full-hand experience. This setting helps tailor the practice " +
+              "to your typing style and comfort level."
+          )
+        }
+        row { checkBox("Use All Fingers").bindSelected(settings::useAllFingers) }
+        buttonsGroup("Select Specific Fingers") {
+          for (finger in Finger.entries) {
+            row {
+              checkBox(finger.label)
+                .bindSelected({ isFingerSelected(finger) }, { selectFinger(finger) })
+            }
+          }
+        }
+      }
+    }
+  }
+
+  override fun apply() {
+    settings.unSelectedAllFingers()
+    super.apply()
+    saveSettings()
+  }
+
+  override fun reset() {
+    super.reset()
+    saveSettings()
+  }
+
+  private fun loadSettings(): Settings {
+    val properties = PropertiesComponent.getInstance()
+
+    val practiceModeName = properties.getValue(PROPERTY_PRACTICE_MODE, BOTH_HANDS.name)
+    val practiceMode = PracticeMode.valueOf(practiceModeName)
+    val keyLimitPerFinger = properties.getInt(PROPERTY_KEY_LIMIT_PER_FINGER, 1)
+    val allFingers = properties.getBoolean(PROPERTY_USE_ALL_FINGERS, true)
+    val selectedFingers = properties.getInt(PROPERTY_SELECTED_FINGERS, 0)
+
+    return Settings(practiceMode, keyLimitPerFinger, allFingers, selectedFingers)
+  }
+
+  private fun saveSettings() {
+    val practiceMode = settings.practiceMode.name
+    val keyLimitPerFinger = settings.keyLimitPerFinger.toString()
+    val useAllFingers = settings.useAllFingers.toString()
+    val selectedFingers = settings.selectedFingers.toString()
+
+    val properties = PropertiesComponent.getInstance()
+    properties.setValue(PROPERTY_PRACTICE_MODE, practiceMode)
+    properties.setValue(PROPERTY_KEY_LIMIT_PER_FINGER, keyLimitPerFinger)
+    properties.setValue(PROPERTY_USE_ALL_FINGERS, useAllFingers)
+    properties.setValue(PROPERTY_SELECTED_FINGERS, selectedFingers)
+  }
+
+  private fun isFingerSelected(finger: Finger): Boolean {
+    return Finger.isFingerSelected(settings.selectedFingers, finger)
+  }
+
+  private fun selectFinger(finger: Finger) {
+    settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
+  }
+}
