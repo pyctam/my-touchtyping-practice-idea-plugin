@@ -111,7 +111,7 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
     return Finger.isFingerSelected(settings.selectedFingers, finger)
   }
 
-  private fun selectFinger(finger: Finger): Unit {
+  private fun selectFinger(finger: Finger) {
     settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
   }
 }

@@ -8,7 +8,7 @@ data class Settings(
   var useAllFingers: Boolean = true,
   var selectedFingers: Int = 0
 ) {
-  fun unSelectedAllFingers(): Unit {
+  fun unSelectedAllFingers() {
     this.selectedFingers = 0
   }
 
