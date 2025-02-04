@@ -1,5 +1,11 @@
 package com.github.pyctam.touchtypingpractice.config
 
+import com.github.pyctam.touchtypingpractice.UIBundle
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_HINT
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_LABEL
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_BOTHHANDS
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_LEFTHAND
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_RIGHTHAND
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.BOTH_HANDS
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.LEFT_HAND
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.RIGHT_HAND
@@ -23,19 +29,22 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
 
   override fun createPanel(): DialogPanel {
     return panel {
-      group("Practice Mode:") {
+      val title = UIBundle.message(CONFIG_PRACTICE_MODE_LABEL)
+
+      group(title) {
         buttonsGroup {
             row {
-              comment(
-                "Select which hand you want to use for touch typing practice. 'Left Hand' focuses on " +
-                  "left-hand keys, 'Right Hand' trains right-hand keys, and 'Both Hands' provides " +
-                  "a full-keyboard experience."
-              )
+              val hint = UIBundle.message(CONFIG_PRACTICE_MODE_HINT)
+              comment(hint)
             }
             row {
-              radioButton("Left Hand", LEFT_HAND)
-              radioButton("Right Hand", RIGHT_HAND)
-              radioButton("Both Hands", BOTH_HANDS)
+              val textLeftHand = UIBundle.message(CONFIG_PRACTICE_MODE_RADIO_LEFTHAND)
+              val textRightHand = UIBundle.message(CONFIG_PRACTICE_MODE_RADIO_RIGHTHAND)
+              val textBothHands = UIBundle.message(CONFIG_PRACTICE_MODE_RADIO_BOTHHANDS)
+
+              radioButton(textLeftHand, LEFT_HAND)
+              radioButton(textRightHand, RIGHT_HAND)
+              radioButton(textBothHands, BOTH_HANDS)
             }
           }
           .bind({ settings.practiceMode }, { settings.practiceMode = it })
