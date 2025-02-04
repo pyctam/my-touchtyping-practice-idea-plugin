@@ -10,14 +10,9 @@
         <toolWindow factoryClass="com.github.pyctam.touchtypingpractice.toolWindow.MyToolWindowFactory"
                     id="MyToolWindow"/>
 
-        <!--
         <projectConfigurable instance="com.github.pyctam.touchtypingpractice.config.Configuration"
                              displayName="Touch Typing Practice"
                              id="com.github.pyctam.touchtypingpractice.config.Configuration"/>
-        -->
-        <projectConfigurable instance="com.github.pyctam.touchtypingpractice.config.Configuration2"
-                             displayName="Touch Typing Practice (2)"
-                             id="com.github.pyctam.touchtypingpractice.config.Configuration2"/>
     </extensions>
 
     <applicationListeners>
