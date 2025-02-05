@@ -7,11 +7,13 @@ import org.jetbrains.annotations.PropertyKey
 @NonNls private const val BUNDLE = "messages.UI"
 
 object UIBundle : DynamicBundle(BUNDLE) {
-  const val CONFIG_PRACTICE_MODE_LABEL = "ui.config.practice-mode.title"
+  const val CONFIG_PRACTICE_MODE_TITLE = "ui.config.practice-mode.title"
   const val CONFIG_PRACTICE_MODE_HINT = "ui.config.practice-mode.hint"
   const val CONFIG_PRACTICE_MODE_RADIO_LEFTHAND = "ui.config.practice-mode.radio.left-hand"
   const val CONFIG_PRACTICE_MODE_RADIO_RIGHTHAND = "ui.config.practice-mode.radio.right-hand"
   const val CONFIG_PRACTICE_MODE_RADIO_BOTHHANDS = "ui.config.practice-mode.radio.both-hands"
+  const val CONFIG_KEY_LIMIT_PER_FINDER_TITLE = "ui.config.key-limit-per-finder.title"
+  const val CONFIG_KEY_LIMIT_PER_FINDER_HINT = "ui.config.key-limit-per-finder.hint"
 
   @JvmStatic
   fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any) =

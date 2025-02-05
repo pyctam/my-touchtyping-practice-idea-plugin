@@ -1,11 +1,13 @@
 package com.github.pyctam.touchtypingpractice.config
 
 import com.github.pyctam.touchtypingpractice.UIBundle
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_HINT
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_TITLE
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_HINT
-import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_LABEL
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_BOTHHANDS
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_LEFTHAND
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_RIGHTHAND
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_TITLE
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.BOTH_HANDS
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.LEFT_HAND
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.RIGHT_HAND
@@ -29,9 +31,9 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
 
   override fun createPanel(): DialogPanel {
     return panel {
-      val title = UIBundle.message(CONFIG_PRACTICE_MODE_LABEL)
+      val titlePracticeMode = UIBundle.message(CONFIG_PRACTICE_MODE_TITLE)
 
-      group(title) {
+      group(titlePracticeMode) {
         buttonsGroup {
             row {
               val hint = UIBundle.message(CONFIG_PRACTICE_MODE_HINT)
@@ -49,13 +51,13 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
           }
           .bind({ settings.practiceMode }, { settings.practiceMode = it })
       }
-      group("Key Limit Per Finger (1-6):") {
+
+      val titleKeyLimitPerFinder = UIBundle.message(CONFIG_KEY_LIMIT_PER_FINDER_TITLE)
+
+      group(titleKeyLimitPerFinder) {
         row {
-          comment(
-            "Defines the maximum number of keys each finger can be assigned during practice. A lower " +
-              "value enforces strict finger placement, while a higher value allows more " +
-              "flexibility in key coverage."
-          )
+          val hint = UIBundle.message(CONFIG_KEY_LIMIT_PER_FINDER_HINT)
+          comment(hint)
         }
         row { spinner(1..6).bindIntValue(settings::keyLimitPerFinger) }
       }
