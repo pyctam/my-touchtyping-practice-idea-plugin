@@ -14,6 +14,12 @@ object UIBundle : DynamicBundle(BUNDLE) {
   const val CONFIG_PRACTICE_MODE_RADIO_BOTHHANDS = "ui.config.practice-mode.radio.both-hands"
   const val CONFIG_KEY_LIMIT_PER_FINDER_TITLE = "ui.config.key-limit-per-finder.title"
   const val CONFIG_KEY_LIMIT_PER_FINDER_HINT = "ui.config.key-limit-per-finder.hint"
+  const val CONFIG_FINGER_SELECTION_TITLE = "ui.config.finger-selection.title"
+  const val CONFIG_FINGER_SELECTION_HINT = "ui.config.finger-selection.hint"
+  const val CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS =
+    "ui.config.finger-selection.checkbox.use-all-fingers"
+  const val CONFIG_FINGER_SELECTION_CHECKBOX_SPECIFIC_FINGERS =
+    "ui.config.finger-selection.checkbox.specific-fingers"
 
   @JvmStatic
   fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any) =

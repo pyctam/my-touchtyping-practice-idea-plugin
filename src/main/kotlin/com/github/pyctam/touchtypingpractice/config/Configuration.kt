@@ -1,6 +1,10 @@
 package com.github.pyctam.touchtypingpractice.config
 
 import com.github.pyctam.touchtypingpractice.UIBundle
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_CHECKBOX_SPECIFIC_FINGERS
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_HINT
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_TITLE
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_HINT
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_TITLE
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_HINT
@@ -61,16 +65,23 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
         }
         row { spinner(1..6).bindIntValue(settings::keyLimitPerFinger) }
       }
-      group("Finger Selection:") {
+
+      val titleFingerSelection = UIBundle.message(CONFIG_FINGER_SELECTION_TITLE)
+
+      group(titleFingerSelection) {
         row {
-          comment(
-            "Choose which fingers to use for touch typing practice. Select specific fingers or enable " +
-              "all fingers for a full-hand experience. This setting helps tailor the practice " +
-              "to your typing style and comfort level."
-          )
+          val hint = UIBundle.message(CONFIG_FINGER_SELECTION_HINT)
+          comment(hint)
         }
-        row { checkBox("Use All Fingers").bindSelected(settings::useAllFingers) }
-        buttonsGroup("Select Specific Fingers") {
+        row {
+          val textUseAllFingers = UIBundle.message(CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS)
+          checkBox(textUseAllFingers).bindSelected(settings::useAllFingers)
+        }
+
+        val titleSpecificFingers =
+          UIBundle.message(CONFIG_FINGER_SELECTION_CHECKBOX_SPECIFIC_FINGERS)
+
+        buttonsGroup(titleSpecificFingers) {
           for (finger in Finger.entries) {
             row {
               checkBox(finger.label)
