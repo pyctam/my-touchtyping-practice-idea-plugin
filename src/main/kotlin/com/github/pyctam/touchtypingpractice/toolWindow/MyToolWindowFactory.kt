@@ -1,6 +1,6 @@
 package com.github.pyctam.touchtypingpractice.toolWindow
 
-import com.github.pyctam.touchtypingpractice.MyBundle
+import com.github.pyctam.touchtypingpractice.UIBundle
 import com.github.pyctam.touchtypingpractice.services.MyProjectService
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
@@ -35,13 +35,13 @@ class MyToolWindowFactory : ToolWindowFactory {
 
     fun getContent() =
       JBPanel<JBPanel<*>>().apply {
-        val label = JBLabel(MyBundle.message("randomLabel", "?"))
+        val label = JBLabel(UIBundle.message("randomLabel", "?"))
 
         add(label)
         add(
-          JButton(MyBundle.message("shuffle")).apply {
+          JButton(UIBundle.message("shuffle")).apply {
             addActionListener {
-              label.text = MyBundle.message("randomLabel", service.getRandomNumber())
+              label.text = UIBundle.message("randomLabel", service.getRandomNumber())
             }
           }
         )

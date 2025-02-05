@@ -1,5 +1,17 @@
 package com.github.pyctam.touchtypingpractice.config
 
+import com.github.pyctam.touchtypingpractice.UIBundle
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_CHECKBOX_SPECIFIC_FINGERS
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_HINT
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_TITLE
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_HINT
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_TITLE
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_HINT
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_BOTHHANDS
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_LEFTHAND
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_RIGHTHAND
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_TITLE
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.BOTH_HANDS
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.LEFT_HAND
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.RIGHT_HAND
@@ -23,43 +35,53 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
 
   override fun createPanel(): DialogPanel {
     return panel {
-      group("Practice Mode:") {
+      val titlePracticeMode = UIBundle.message(CONFIG_PRACTICE_MODE_TITLE)
+
+      group(titlePracticeMode) {
         buttonsGroup {
             row {
-              comment(
-                "Select which hand you want to use for touch typing practice. 'Left Hand' focuses on " +
-                  "left-hand keys, 'Right Hand' trains right-hand keys, and 'Both Hands' provides " +
-                  "a full-keyboard experience."
-              )
+              val hint = UIBundle.message(CONFIG_PRACTICE_MODE_HINT)
+              comment(hint)
             }
             row {
-              radioButton("Left Hand", LEFT_HAND)
-              radioButton("Right Hand", RIGHT_HAND)
-              radioButton("Both Hands", BOTH_HANDS)
+              val textLeftHand = UIBundle.message(CONFIG_PRACTICE_MODE_RADIO_LEFTHAND)
+              val textRightHand = UIBundle.message(CONFIG_PRACTICE_MODE_RADIO_RIGHTHAND)
+              val textBothHands = UIBundle.message(CONFIG_PRACTICE_MODE_RADIO_BOTHHANDS)
+
+              radioButton(textLeftHand, LEFT_HAND)
+              radioButton(textRightHand, RIGHT_HAND)
+              radioButton(textBothHands, BOTH_HANDS)
             }
           }
           .bind({ settings.practiceMode }, { settings.practiceMode = it })
       }
-      group("Key Limit Per Finger (1-6):") {
+
+      val titleKeyLimitPerFinder = UIBundle.message(CONFIG_KEY_LIMIT_PER_FINDER_TITLE)
+
+      group(titleKeyLimitPerFinder) {
         row {
-          comment(
-            "Defines the maximum number of keys each finger can be assigned during practice. A lower " +
-              "value enforces strict finger placement, while a higher value allows more " +
-              "flexibility in key coverage."
-          )
+          val hint = UIBundle.message(CONFIG_KEY_LIMIT_PER_FINDER_HINT)
+          comment(hint)
         }
         row { spinner(1..6).bindIntValue(settings::keyLimitPerFinger) }
       }
-      group("Finger Selection:") {
+
+      val titleFingerSelection = UIBundle.message(CONFIG_FINGER_SELECTION_TITLE)
+
+      group(titleFingerSelection) {
         row {
-          comment(
-            "Choose which fingers to use for touch typing practice. Select specific fingers or enable " +
-              "all fingers for a full-hand experience. This setting helps tailor the practice " +
-              "to your typing style and comfort level."
-          )
+          val hint = UIBundle.message(CONFIG_FINGER_SELECTION_HINT)
+          comment(hint)
         }
-        row { checkBox("Use All Fingers").bindSelected(settings::useAllFingers) }
-        buttonsGroup("Select Specific Fingers") {
+        row {
+          val textUseAllFingers = UIBundle.message(CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS)
+          checkBox(textUseAllFingers).bindSelected(settings::useAllFingers)
+        }
+
+        val titleSpecificFingers =
+          UIBundle.message(CONFIG_FINGER_SELECTION_CHECKBOX_SPECIFIC_FINGERS)
+
+        buttonsGroup(titleSpecificFingers) {
           for (finger in Finger.entries) {
             row {
               checkBox(finger.label)
