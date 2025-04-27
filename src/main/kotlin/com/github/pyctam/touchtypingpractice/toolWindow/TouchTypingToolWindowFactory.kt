@@ -4,11 +4,16 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.JBSplitter
+import com.intellij.ui.StatusPanel
+import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.content.ContentFactory
+import com.intellij.util.ui.JBFont
+import com.intellij.util.ui.UIUtil
+import com.intellij.util.ui.components.BorderLayoutPanel
 import java.awt.BorderLayout
 import java.awt.Dimension
-import javax.swing.JLabel
-import javax.swing.JPanel
 import javax.swing.JTextArea
 import javax.swing.JTextPane
 
@@ -16,29 +21,39 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
   override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
     val typingArea = createTypingArea()
     val statusPanel = createStatusPanel()
+    val mainPanel = createMainPanel()
 
-    val mainPanel = createMainPanel(toolWindow)
     mainPanel.add(typingArea, BorderLayout.CENTER)
     mainPanel.add(statusPanel, BorderLayout.SOUTH)
+
+    val contentFactory = ContentFactory.getInstance()
+    val content = contentFactory.createContent(mainPanel, null, false)
+    toolWindow.contentManager.addContent(content)
   }
 
-  private fun createStatusPanel(): JPanel {
-    val statusLabel = JLabel("Typing speed: 0 WPM")
+  private fun createMainPanel(): BorderLayoutPanel {
+    return BorderLayoutPanel()
+  }
 
-    val statusPanel = JPanel(BorderLayout())
-    statusPanel.add(statusLabel, BorderLayout.WEST)
-    statusPanel.preferredSize = Dimension(0, 30) // Fixed height
+  private fun createStatusPanel(): JBPanel<StatusPanel> {
+    val statusLabel = JBLabel("Typing speed: 0 WPM")
+    statusLabel.font = JBFont.medium()
 
-    return statusPanel
+    val panel = JBPanel<StatusPanel>()
+    panel.layout = BorderLayout()
+    panel.add(statusLabel, BorderLayout.WEST)
+    panel.preferredSize = Dimension(0, 30)
+    panel.background = UIUtil.getPanelBackground()
+
+    return panel
   }
 
   private fun createTypingArea(): JBSplitter {
     val textPane = createTextPane()
     val typingPane = createTypingPane()
 
-    val splitter = JBSplitter(true, 0.25f) // vertical split, 25% for top
+    val splitter = JBSplitter(true, 0.25f)
     splitter.setHonorComponentsMinimumSize(true)
-
     splitter.firstComponent = textPane
     splitter.secondComponent = typingPane
 
@@ -64,24 +79,13 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
 
   private fun createText(): String {
     return """
-      <html>
-      <body>
-      <h2>Welcome to the Typing Practice</h2>
-      <p>Type the text you see above in the input area below!</p>
-      </body>
-      </html>
-      """
+            <html>
+            <body>
+            <h2>Welcome to the Typing Practice</h2>
+            <p>Type the text you see above in the input area below!</p>
+            </body>
+            </html>
+        """
       .trimIndent()
-  }
-
-  private fun createMainPanel(toolWindow: ToolWindow): JPanel {
-    val mainPanel = JPanel(BorderLayout())
-
-    // Add main panel to the tool window
-    val contentFactory = toolWindow.contentManager.factory
-    val content = contentFactory.createContent(mainPanel, null, false)
-    toolWindow.contentManager.addContent(content)
-
-    return mainPanel
   }
 }
