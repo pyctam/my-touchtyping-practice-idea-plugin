@@ -4,16 +4,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.JBSplitter
-import com.intellij.ui.StatusPanel
 import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.ui.JBFont
+import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
-import java.awt.BorderLayout
-import java.awt.Dimension
 import javax.swing.JTextArea
 import javax.swing.JTextPane
 
@@ -23,8 +20,8 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
     val statusPanel = createStatusPanel()
     val mainPanel = createMainPanel()
 
-    mainPanel.add(typingArea, BorderLayout.CENTER)
-    mainPanel.add(statusPanel, BorderLayout.SOUTH)
+    mainPanel.addToCenter(typingArea)
+    mainPanel.addToBottom(statusPanel)
 
     val contentFactory = ContentFactory.getInstance()
     val content = contentFactory.createContent(mainPanel, null, false)
@@ -35,15 +32,22 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
     return BorderLayoutPanel()
   }
 
-  private fun createStatusPanel(): JBPanel<StatusPanel> {
+  private fun createStatusPanel(): BorderLayoutPanel {
     val statusLabel = JBLabel("Typing speed: 0 WPM")
     statusLabel.font = JBFont.medium()
 
-    val panel = JBPanel<StatusPanel>()
-    panel.layout = BorderLayout()
-    panel.add(statusLabel, BorderLayout.WEST)
-    panel.preferredSize = Dimension(0, 30)
+    val panel = BorderLayoutPanel()
+    panel.border = JBUI.Borders.empty(4, 8) // Padding: top-bottom 4px, left-right 8px
     panel.background = UIUtil.getPanelBackground()
+    panel.addToLeft(statusLabel)
+
+    // Dynamically set minimum and preferred height based on font + padding
+    val labelHeight = statusLabel.preferredSize.height
+    val verticalPadding = JBUI.scale(4) * 2 // 4px top + 4px bottom
+    val totalHeight = labelHeight + verticalPadding
+
+    panel.minimumSize = JBUI.size(0, totalHeight)
+    panel.preferredSize = JBUI.size(0, totalHeight)
 
     return panel
   }
@@ -56,7 +60,7 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
     splitter.setHonorComponentsMinimumSize(true)
     splitter.firstComponent = textPane
     splitter.secondComponent = typingPane
-
+    splitter.border = JBUI.Borders.empty(8) // Padding inside splitter
     return splitter
   }
 
@@ -65,7 +69,9 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
     typingArea.lineWrap = true
     typingArea.wrapStyleWord = true
 
-    return JBScrollPane(typingArea)
+    val scrollPane = JBScrollPane(typingArea)
+    scrollPane.border = JBUI.Borders.empty() // Remove ugly default border
+    return scrollPane
   }
 
   private fun createTextPane(): JBScrollPane {
@@ -74,7 +80,9 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
     richTextPane.text = createText()
     richTextPane.isEditable = false
 
-    return JBScrollPane(richTextPane)
+    val scrollPane = JBScrollPane(richTextPane)
+    scrollPane.border = JBUI.Borders.empty() // Clean native look
+    return scrollPane
   }
 
   private fun createText(): String {
