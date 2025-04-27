@@ -15,6 +15,10 @@ import javax.swing.JTextArea
 import javax.swing.JTextPane
 
 class TouchTypingToolWindowFactory : ToolWindowFactory {
+  private companion object {
+    private const val PADDING = 4
+  }
+
   override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
     val typingArea = createTypingArea()
     val statusPanel = createStatusPanel()
@@ -37,13 +41,13 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
     statusLabel.font = JBFont.medium()
 
     val panel = BorderLayoutPanel()
-    panel.border = JBUI.Borders.empty(4, 8) // Padding: top-bottom 4px, left-right 8px
+    panel.border = JBUI.Borders.empty(PADDING, PADDING) // Padding: top-bottom 4px, left-right 8px
     panel.background = UIUtil.getPanelBackground()
     panel.addToLeft(statusLabel)
 
     // Dynamically set minimum and preferred height based on font + padding
     val labelHeight = statusLabel.preferredSize.height
-    val verticalPadding = JBUI.scale(4) * 2 // 4px top + 4px bottom
+    val verticalPadding = JBUI.scale(PADDING) * 2 // 4px top + 4px bottom
     val totalHeight = labelHeight + verticalPadding
 
     panel.minimumSize = JBUI.size(0, totalHeight)
@@ -60,7 +64,7 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
     splitter.setHonorComponentsMinimumSize(true)
     splitter.firstComponent = textPane
     splitter.secondComponent = typingPane
-    splitter.border = JBUI.Borders.empty(8) // Padding inside splitter
+    splitter.border = JBUI.Borders.empty(PADDING) // Padding inside splitter
     return splitter
   }
 
