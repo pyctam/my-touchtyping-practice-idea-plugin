@@ -11,6 +11,7 @@ import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
+import java.awt.BorderLayout
 import javax.swing.JTextArea
 import javax.swing.JTextPane
 
@@ -80,9 +81,13 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
 
   private fun createTextPane(): JBScrollPane {
     val richTextPane = JTextPane()
-    richTextPane.contentType = "text/html"
+    richTextPane.contentType = "text/plain"
     richTextPane.text = createText()
     richTextPane.isEditable = false
+
+    val textPanel = BorderLayoutPanel()
+    textPanel.border = JBUI.Borders.empty(PADDING) // Adding padding around the JTextPane
+    textPanel.add(richTextPane, BorderLayout.CENTER)
 
     val scrollPane = JBScrollPane(richTextPane)
     scrollPane.border = JBUI.Borders.empty() // Clean native look
@@ -90,14 +95,6 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
   }
 
   private fun createText(): String {
-    return """
-            <html>
-            <body>
-            <h2>Welcome to the Typing Practice</h2>
-            <p>Type the text you see above in the input area below!</p>
-            </body>
-            </html>
-        """
-      .trimIndent()
+    return "The quick brown fox jumps over the lazy dog.".trimIndent()
   }
 }
