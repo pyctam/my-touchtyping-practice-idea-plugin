@@ -1,6 +1,5 @@
 package com.github.pyctam.touchtypingpractice.ui
 
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
@@ -11,21 +10,19 @@ import javax.swing.JTextPane
 
 class TouchTypingUIComponentsFactory {
   companion object {
-    private val logger: Logger = Logger.getInstance(TouchTypingUIComponentsFactory::class.java)
-
     const val PADDING = 4
 
     fun createMainPanel(): BorderLayoutPanel {
       return BorderLayoutPanel()
     }
 
-    fun createTypingArea(typingText: String): JBSplitter {
+    fun createTypingArea(typingText: String, errorCounter: ErrorCounter): JBSplitter {
       val richTextPane = createTextPane(typingText)
       // Wrap the text pane into a scroll pane for the splitter
       val textScrollPane = JBScrollPane(richTextPane)
       textScrollPane.border = JBUI.Borders.empty()
 
-      val typingPane = createTypingPane(richTextPane, typingText)
+      val typingPane = createTypingPane(richTextPane, typingText, errorCounter)
 
       val splitter = JBSplitter(true, 0.25f)
       splitter.setHonorComponentsMinimumSize(true)
@@ -52,12 +49,17 @@ class TouchTypingUIComponentsFactory {
     }
 
     // Accept the reference text pane and the original text so the listener can highlight mismatches
-    fun createTypingPane(referenceTextPane: JTextPane, originalText: String): JBScrollPane {
+    fun createTypingPane(
+      referenceTextPane: JTextPane,
+      originalText: String,
+      errorCounter: ErrorCounter
+    ): JBScrollPane {
       val typingArea = JTextArea()
       typingArea.lineWrap = true
       typingArea.wrapStyleWord = true
 
-      val listener = TouchTypingDocumentListener(typingArea, referenceTextPane, originalText)
+      val listener =
+        TouchTypingDocumentListener(typingArea, referenceTextPane, originalText, errorCounter)
       typingArea.document.addDocumentListener(listener)
 
       val scrollPane = JBScrollPane(typingArea)

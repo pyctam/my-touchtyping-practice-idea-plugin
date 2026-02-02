@@ -1,5 +1,6 @@
 package com.github.pyctam.touchtypingpractice.toolWindow
 
+import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.PADDING
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createMainPanel
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTypingArea
@@ -17,8 +18,9 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
 
   override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
     val typingText = createText()
-    val typingArea = createTypingArea(typingText)
-    val statusPanel = createStatusPanel()
+    val errorCounter = ErrorCounter()
+    val typingArea = createTypingArea(typingText, errorCounter)
+    val statusPanel = createStatusPanel(errorCounter)
 
     val mainPanel = createMainPanel()
     mainPanel.addToCenter(typingArea)
@@ -29,9 +31,12 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
     toolWindow.contentManager.addContent(content)
   }
 
-  private fun createStatusPanel(): BorderLayoutPanel {
-    val statusLabel = JBLabel("Typing speed: 0 WPM")
+  private fun createStatusPanel(errorCounter: ErrorCounter): BorderLayoutPanel {
+    val statusLabel = JBLabel("Typing speed: 0 WPM | Typing errors: 0")
     statusLabel.font = JBFont.medium()
+
+    // Store reference to status label in error counter for updates
+    errorCounter.statusLabel = statusLabel
 
     val panel = BorderLayoutPanel()
     panel.border = JBUI.Borders.empty(PADDING, PADDING) // Padding: top-bottom 4px, left-right 8px
