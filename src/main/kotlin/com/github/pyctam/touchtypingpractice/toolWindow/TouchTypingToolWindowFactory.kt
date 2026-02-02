@@ -1,29 +1,28 @@
 package com.github.pyctam.touchtypingpractice.toolWindow
 
+import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
+import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.PADDING
+import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createMainPanel
+import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTypingArea
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
-import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
-import javax.swing.JTextArea
-import javax.swing.JTextPane
 
 class TouchTypingToolWindowFactory : ToolWindowFactory {
-  private companion object {
-    private const val PADDING = 4
-  }
 
   override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-    val typingArea = createTypingArea()
-    val statusPanel = createStatusPanel()
-    val mainPanel = createMainPanel()
+    val typingText = createText()
+    val errorCounter = ErrorCounter()
+    val typingArea = createTypingArea(typingText, errorCounter)
+    val statusPanel = createStatusPanel(errorCounter)
 
+    val mainPanel = createMainPanel()
     mainPanel.addToCenter(typingArea)
     mainPanel.addToBottom(statusPanel)
 
@@ -32,13 +31,12 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
     toolWindow.contentManager.addContent(content)
   }
 
-  private fun createMainPanel(): BorderLayoutPanel {
-    return BorderLayoutPanel()
-  }
-
-  private fun createStatusPanel(): BorderLayoutPanel {
-    val statusLabel = JBLabel("Typing speed: 0 WPM")
+  private fun createStatusPanel(errorCounter: ErrorCounter): BorderLayoutPanel {
+    val statusLabel = JBLabel("Typing speed: 0 WPM | Typing errors: 0")
     statusLabel.font = JBFont.medium()
+
+    // Store reference to status label in error counter for updates
+    errorCounter.statusLabel = statusLabel
 
     val panel = BorderLayoutPanel()
     panel.border = JBUI.Borders.empty(PADDING, PADDING) // Padding: top-bottom 4px, left-right 8px
@@ -56,48 +54,7 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
     return panel
   }
 
-  private fun createTypingArea(): JBSplitter {
-    val textPane = createTextPane()
-    val typingPane = createTypingPane()
-
-    val splitter = JBSplitter(true, 0.25f)
-    splitter.setHonorComponentsMinimumSize(true)
-    splitter.firstComponent = textPane
-    splitter.secondComponent = typingPane
-    splitter.border = JBUI.Borders.empty(PADDING) // Padding inside splitter
-    return splitter
-  }
-
-  private fun createTypingPane(): JBScrollPane {
-    val typingArea = JTextArea()
-    typingArea.lineWrap = true
-    typingArea.wrapStyleWord = true
-
-    val scrollPane = JBScrollPane(typingArea)
-    scrollPane.border = JBUI.Borders.empty() // Remove ugly default border
-    return scrollPane
-  }
-
-  private fun createTextPane(): JBScrollPane {
-    val richTextPane = JTextPane()
-    richTextPane.contentType = "text/html"
-    richTextPane.text = createText()
-    richTextPane.isEditable = false
-
-    val scrollPane = JBScrollPane(richTextPane)
-    scrollPane.border = JBUI.Borders.empty() // Clean native look
-    return scrollPane
-  }
-
   private fun createText(): String {
-    return """
-            <html>
-            <body>
-            <h2>Welcome to the Typing Practice</h2>
-            <p>Type the text you see above in the input area below!</p>
-            </body>
-            </html>
-        """
-      .trimIndent()
+    return "The quick brown fox jumps over the lazy dog.".trimIndent()
   }
 }
