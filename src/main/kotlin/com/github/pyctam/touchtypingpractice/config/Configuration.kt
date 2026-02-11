@@ -26,44 +26,19 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
-import com.intellij.ui.dsl.builder.MutableProperty
 import com.intellij.ui.dsl.builder.bind
 import com.intellij.ui.dsl.builder.bindIntValue
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
+import javax.swing.SwingUtilities
 
 class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   private val logger: Logger = Logger.getInstance(Configuration::class.java)
   private val settings: Settings = loadSettings()
-
-  // Create a mutable property that handles bidirectional binding
-  private val useAllFingersProperty =
-    object : MutableProperty<Boolean> {
-      override fun get(): Boolean {
-        logger.info("useAllFingersProperty.get() -> ${settings.useAllFingers}")
-        return settings.useAllFingers
-      }
-
-      override fun set(value: Boolean) {
-        logger.info("useAllFingersProperty.set($value) called")
-        settings.useAllFingers = value
-        // When "Use All Fingers" is checked, select all fingers
-        if (value) {
-          logger.info("useAllFingersProperty: Selecting all fingers because useAllFingers=$value")
-          settings.selectedFingers = 0
-          for (finger in Finger.entries) {
-            settings.selectedFingers =
-              Finger.encodeSelectedFingers(settings.selectedFingers, finger)
-          }
-          logger.info(
-            "useAllFingersProperty: After selecting all, selectedFingers=${settings.selectedFingers} (binary: ${settings.selectedFingers.toString(2).padStart(5, '0')})"
-          )
-        }
-      }
-    }
+  private var dialogPanel: DialogPanel? = null
 
   override fun createPanel(): DialogPanel {
-    return panel {
+    dialogPanel = panel {
       val titleTextFontSize = UIBundle.message(TEXT_FONT_SIZE_TITLE)
 
       group(titleTextFontSize) {
@@ -114,7 +89,18 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
         }
 
         val textUseAllFingers = UIBundle.message(CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS)
-        row { checkBox(textUseAllFingers).bindSelected(useAllFingersProperty) }
+        row {
+          checkBox(textUseAllFingers)
+            .bindSelected(
+              { settings.useAllFingers },
+              { value ->
+                logger.info("User toggled 'Use All Fingers' to: $value")
+                settings.useAllFingers = value
+                updateFingerSelectionBasedOnUseAll()
+                refreshUI()
+              }
+            )
+        }
 
         val titleSpecificFingers =
           UIBundle.message(CONFIG_FINGER_SELECTION_CHECKBOX_SPECIFIC_FINGERS)
@@ -123,11 +109,42 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
           for (finger in Finger.entries) {
             row {
               checkBox(finger.label)
-                .bindSelected({ isFingerSelected(finger) }, { selectFinger(finger) })
+                .bindSelected(
+                  { isFingerSelected(finger) },
+                  { value ->
+                    logger.info("User toggled $finger to: $value")
+                    if (value) {
+                      // Add finger
+                      settings.selectedFingers =
+                        Finger.encodeSelectedFingers(settings.selectedFingers, finger)
+                    } else {
+                      // Remove finger
+                      settings.selectedFingers = settings.selectedFingers xor (1 shl finger.ordinal)
+                    }
+                    updateUseAllFingersBasedOnSelection()
+                    refreshUI()
+                  }
+                )
             }
           }
         }
       }
+    }
+    return dialogPanel!!
+  }
+
+  /**
+   * Refresh the UI to reflect current state changes. This is needed because changing dependent
+   * properties doesn't automatically trigger UI updates.
+   */
+  private fun refreshUI() {
+    logger.info("refreshUI called")
+    // Schedule the refresh on the EDT (Event Dispatch Thread)
+    SwingUtilities.invokeLater {
+      logger.info(
+        "Refreshing UI with current state: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers}"
+      )
+      dialogPanel?.apply()
     }
   }
 
@@ -225,27 +242,79 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
     return Finger.isFingerSelected(settings.selectedFingers, finger)
   }
 
-  private fun selectFinger(finger: Finger) {
-    val beforeValue = settings.selectedFingers
-    val beforeBinary = beforeValue.toString(2).padStart(5, '0')
-    val isCurrentlySelected = Finger.isFingerSelected(settings.selectedFingers, finger)
+  /**
+   * Updates finger selections when "Use All Fingers" is toggled.
+   *
+   * When "Use All Fingers" is checked: Select all fingers. When "Use All Fingers" is unchecked:
+   * Clear all selections (let user select specific fingers).
+   */
+  private fun updateFingerSelectionBasedOnUseAll() {
+    logger.info("updateFingerSelectionBasedOnUseAll: useAllFingers=${settings.useAllFingers}")
 
+    if (settings.useAllFingers) {
+      // Select all fingers
+      logger.info("Selecting all fingers because useAllFingers=true")
+      settings.selectedFingers = 0
+      for (finger in Finger.entries) {
+        settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
+      }
+      logger.info(
+        "After selecting all: selectedFingers=${settings.selectedFingers} (binary: ${settings.selectedFingers.toString(2).padStart(5, '0')})"
+      )
+    } else {
+      // Uncheck all fingers (let user select specific ones)
+      logger.info("Clearing all fingers because useAllFingers=false")
+      settings.selectedFingers = 0
+      logger.info("After clearing: selectedFingers=${settings.selectedFingers}")
+    }
+  }
+
+  /**
+   * Updates "Use All Fingers" checkbox based on individual finger selections.
+   *
+   * Rules:
+   * - If all 5 fingers are selected: Check "Use All Fingers"
+   * - If some (but not all) fingers are selected: Uncheck "Use All Fingers"
+   * - If no fingers are selected: Check "Use All Fingers" (invalid state prevention)
+   */
+  private fun updateUseAllFingersBasedOnSelection() {
     logger.info(
-      "selectFinger($finger) called: beforeValue=$beforeValue (binary: $beforeBinary), isCurrentlySelected=$isCurrentlySelected"
+      "updateUseAllFingersBasedOnSelection: selectedFingers=${settings.selectedFingers} (binary: ${settings.selectedFingers.toString(2).padStart(5, '0')})"
     )
 
-    // Toggle the finger bit
-    settings.selectedFingers = settings.selectedFingers xor (1 shl finger.ordinal)
+    val allFingersSelected =
+      Finger.entries.all { finger -> Finger.isFingerSelected(settings.selectedFingers, finger) }
+    val noFingersSelected = settings.selectedFingers == 0
 
-    val afterValue = settings.selectedFingers
-    val afterBinary = afterValue.toString(2).padStart(5, '0')
-    logger.info("selectFinger($finger) result: afterValue=$afterValue (binary: $afterBinary)")
+    logger.info("allFingersSelected=$allFingersSelected, noFingersSelected=$noFingersSelected")
 
-    // Log which fingers are selected
+    when {
+      allFingersSelected -> {
+        logger.info("All fingers selected, enabling 'Use All Fingers'")
+        settings.useAllFingers = true
+      }
+      noFingersSelected -> {
+        logger.info(
+          "No fingers selected (invalid state), auto-enabling 'Use All Fingers' and selecting all"
+        )
+        settings.useAllFingers = true
+        for (finger in Finger.entries) {
+          settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
+        }
+        logger.info("After auto-correction: selectedFingers=${settings.selectedFingers}")
+      }
+      else -> {
+        logger.info("Some (but not all) fingers selected, disabling 'Use All Fingers'")
+        settings.useAllFingers = false
+      }
+    }
+
     val selectedFingersList =
       Finger.entries
         .filter { Finger.isFingerSelected(settings.selectedFingers, it) }
         .map { it.label }
-    logger.info("selectFinger($finger): Currently selected fingers: $selectedFingersList")
+    logger.info(
+      "Final state: useAllFingers=${settings.useAllFingers}, selectedFingers=$selectedFingersList"
+    )
   }
 }
