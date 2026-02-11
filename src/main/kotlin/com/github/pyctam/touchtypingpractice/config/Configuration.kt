@@ -23,7 +23,6 @@ import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_TEXT_FONT_SIZE
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_USE_ALL_FINGERS
 import com.intellij.ide.util.PropertiesComponent
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.dsl.builder.bind
@@ -32,7 +31,6 @@ import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 
 class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
-  private val logger: Logger = Logger.getInstance(Configuration::class.java)
   private val settings: Settings = loadSettings()
 
   override fun createPanel(): DialogPanel {
@@ -85,6 +83,7 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
           val hint = UIBundle.message(CONFIG_FINGER_SELECTION_HINT)
           comment(hint)
         }
+
         row {
           val textUseAllFingers = UIBundle.message(CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS)
           checkBox(textUseAllFingers).bindSelected(settings::useAllFingers)
@@ -108,6 +107,24 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   override fun apply() {
     settings.unSelectedAllFingers()
     super.apply()
+
+    // If no fingers are selected, enable "Use All Fingers" and select all
+    if (settings.selectedFingers == 0) {
+      settings.useAllFingers = true
+      // Select all fingers
+      for (finger in Finger.entries) {
+        settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
+      }
+    }
+
+    // If "Use All Fingers" is enabled, make sure all fingers are selected
+    if (settings.useAllFingers) {
+      settings.selectedFingers = 0
+      for (finger in Finger.entries) {
+        settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
+      }
+    }
+
     saveSettings()
   }
 
