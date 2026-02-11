@@ -34,13 +34,21 @@ import com.intellij.ui.dsl.builder.panel
 class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   private val settings: Settings = loadSettings()
 
-  // Create a mutable property that triggers UI refresh on change
+  // Create a mutable property that handles bidirectional binding
   private val useAllFingersProperty =
     object : MutableProperty<Boolean> {
       override fun get(): Boolean = settings.useAllFingers
 
       override fun set(value: Boolean) {
         settings.useAllFingers = value
+        // When "Use All Fingers" is checked, select all fingers
+        if (value) {
+          settings.selectedFingers = 0
+          for (finger in Finger.entries) {
+            settings.selectedFingers =
+              Finger.encodeSelectedFingers(settings.selectedFingers, finger)
+          }
+        }
       }
     }
 
@@ -117,21 +125,22 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
     settings.unSelectedAllFingers()
     super.apply()
 
-    // If no fingers are selected, enable "Use All Fingers" and select all
-    if (settings.selectedFingers == 0) {
-      settings.useAllFingers = true
-      // Select all fingers
-      for (finger in Finger.entries) {
-        settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
-      }
-    }
+    // Check if all fingers are selected
+    val allFingersSelected =
+      Finger.entries.all { finger -> Finger.isFingerSelected(settings.selectedFingers, finger) }
 
-    // If "Use All Fingers" is enabled, make sure all fingers are selected
-    if (settings.useAllFingers) {
-      settings.selectedFingers = 0
+    // If all fingers are selected, enable "Use All Fingers"
+    if (allFingersSelected) {
+      settings.useAllFingers = true
+    } else if (settings.selectedFingers == 0) {
+      // If no fingers are selected, enable "Use All Fingers" and select all
+      settings.useAllFingers = true
       for (finger in Finger.entries) {
         settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
       }
+    } else {
+      // If some (but not all) fingers are selected, disable "Use All Fingers"
+      settings.useAllFingers = false
     }
 
     saveSettings()
