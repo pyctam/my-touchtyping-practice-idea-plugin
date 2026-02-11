@@ -19,24 +19,26 @@ class PracticeTextGeneratorService {
 
   // Keyboard layout for different hands and fingers
   private companion object {
-    // Left hand keys (organized by finger)
+    // Left hand keys - organized by finger, with keys in order of progression (for key limits)
+    // Home row position is first, then extensions based on key limit
     private val LEFT_HAND_KEYS =
       mapOf(
-        Finger.THUMB to "space",
-        Finger.INDEX to "fvghy", // f, v, g, h, y from common touch typing positions
-        Finger.MIDDLE to "djuke",
-        Finger.RING to "skio",
-        Finger.LITTLE to "la;p"
+        Finger.THUMB to listOf("space"),
+        Finger.INDEX to listOf("f", "v", "g", "t"), // f (home), v, g, t
+        Finger.MIDDLE to listOf("d", "x", "c"), // d (home), x, c
+        Finger.RING to listOf("s", "z"), // s (home), z
+        Finger.LITTLE to listOf("a", "q", "w") // a (home), q, w
       )
 
-    // Right hand keys (organized by finger)
+    // Right hand keys - organized by finger, with keys in order of progression (for key limits)
     private val RIGHT_HAND_KEYS =
       mapOf(
-        Finger.THUMB to "space",
-        Finger.INDEX to "jmn", // j, m, n from common touch typing positions
-        Finger.MIDDLE to "u,ki",
-        Finger.RING to "opl",
-        Finger.LITTLE to ";'[]"
+        Finger.THUMB to listOf("space"),
+        Finger.INDEX to listOf("j", "m", "n", "h"), // j (home), m, n, h
+        Finger.MIDDLE to listOf("k", "comma", "i"), // k (home), comma, i
+        Finger.RING to listOf("l", "period"), // l (home), period
+        Finger.LITTLE to
+          listOf(";", "'", "p", "bracketleft", "bracketright") // ; (home), ', p, [, ]
       )
 
     // Sample texts for touch typing practice (organized by difficulty)
@@ -70,19 +72,17 @@ class PracticeTextGeneratorService {
    */
   fun generatePracticeText(): String {
     val settings = loadSettings()
-    return when {
-      shouldGenerateCustomText() -> generateCustomText(settings)
-      else -> generateSampleText()
-    }
+    return generateConfigurationAwareText(settings)
   }
 
   /**
-   * Generates a custom text based on character type settings and configuration.
+   * Generates practice text that respects the configuration settings for hand, fingers, and key
+   * limit per finger.
    *
    * @param settings The current practice settings
-   * @return A randomly generated practice text
+   * @return A randomly generated practice text using only allowed keys
    */
-  private fun generateCustomText(settings: Settings): String {
+  private fun generateConfigurationAwareText(settings: Settings): String {
     val availableChars = buildAvailableCharacterSet(settings)
     if (availableChars.isEmpty()) {
       logger.warn("No characters available for practice. Using default sample text.")
@@ -90,23 +90,6 @@ class PracticeTextGeneratorService {
     }
 
     return generateRandomText(availableChars)
-  }
-
-  /**
-   * Generates a sample text from the predefined collection. Optionally augments it with numbers or
-   * punctuation based on settings.
-   *
-   * @return A sample practice text
-   */
-  private fun generateSampleText(): String {
-    var text = SAMPLE_TEXTS.random()
-
-    // Optionally add numbers and punctuation to sample text
-    if (shouldIncludeNumbers() || shouldIncludePunctuation()) {
-      text = augmentTextWithCharacters(text)
-    }
-
-    return text
   }
 
   /**
@@ -159,27 +142,24 @@ class PracticeTextGeneratorService {
 
     if (settings.useAllFingers) {
       // Use all available fingers for the selected practice mode
-      fingerKeyMap.values.forEach { keys.append(it) }
+      fingerKeyMap.forEach { (_, keyList) ->
+        // Apply key limit per finger
+        val limitedKeys = keyList.take(settings.keyLimitPerFinger)
+        keys.append(limitedKeys.joinToString(""))
+      }
     } else {
       // Use only selected fingers
       Finger.entries.forEach { finger ->
         if (Finger.isFingerSelected(settings.selectedFingers, finger)) {
-          keys.append(fingerKeyMap[finger] ?: "")
+          val keyList = fingerKeyMap[finger] ?: emptyList()
+          // Apply key limit per finger
+          val limitedKeys = keyList.take(settings.keyLimitPerFinger)
+          keys.append(limitedKeys.joinToString(""))
         }
       }
     }
 
     return keys.toString()
-  }
-
-  /**
-   * Determines if custom text should be generated. Currently returns false to use sample texts by
-   * default. Can be extended to support configuration-based custom text generation.
-   */
-  private fun shouldGenerateCustomText(): Boolean {
-    // This can be extended in the future to support a configuration option
-    // for enabling/disabling custom text generation
-    return false
   }
 
   /**
@@ -213,30 +193,6 @@ class PracticeTextGeneratorService {
     repeat(100) { text.append(chars[random.nextInt(chars.length)]) }
 
     return text.toString()
-  }
-
-  /**
-   * Augments a base text with numbers and punctuation.
-   *
-   * @param baseText The original text to augment
-   * @return The augmented text
-   */
-  private fun augmentTextWithCharacters(baseText: String): String {
-    val result = StringBuilder(baseText)
-    val random = Random(System.currentTimeMillis())
-
-    // Add punctuation and numbers at random positions
-    if (shouldIncludePunctuation()) {
-      val punctIndex = random.nextInt(maxOf(1, result.length - 5))
-      result.insert(punctIndex, ". ")
-    }
-
-    if (shouldIncludeNumbers()) {
-      val numIndex = random.nextInt(maxOf(1, result.length - 5))
-      result.insert(numIndex, "${random.nextInt(10)} ")
-    }
-
-    return result.toString()
   }
 
   /**
