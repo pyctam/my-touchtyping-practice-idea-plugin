@@ -89,6 +89,12 @@ class PracticeTextGeneratorService {
       return SAMPLE_TEXTS.random()
     }
 
+    logger.info(
+      "Practice text generated with settings: practiceMode=${settings.practiceMode}, " +
+        "keyLimitPerFinger=${settings.keyLimitPerFinger}, useAllFingers=${settings.useAllFingers}, " +
+        "selectedFingers=${settings.selectedFingers}, availableChars='${availableChars.take(20)}...'"
+    )
+
     return generateRandomText(availableChars)
   }
 

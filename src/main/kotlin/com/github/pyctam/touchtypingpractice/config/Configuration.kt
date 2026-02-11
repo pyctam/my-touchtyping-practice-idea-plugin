@@ -149,6 +149,7 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   }
 
   private fun selectFinger(finger: Finger) {
-    settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
+    // Toggle the finger bit
+    settings.selectedFingers = settings.selectedFingers xor (1 shl finger.ordinal)
   }
 }
