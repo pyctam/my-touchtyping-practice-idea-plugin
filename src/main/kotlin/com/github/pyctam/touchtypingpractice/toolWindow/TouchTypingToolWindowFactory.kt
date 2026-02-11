@@ -1,5 +1,6 @@
 package com.github.pyctam.touchtypingpractice.toolWindow
 
+import com.github.pyctam.touchtypingpractice.services.PracticeTextGeneratorService
 import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.PADDING
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createMainPanel
@@ -17,7 +18,8 @@ import com.intellij.util.ui.components.BorderLayoutPanel
 class TouchTypingToolWindowFactory : ToolWindowFactory {
 
   override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-    val typingText = createText()
+    val textGenerator = PracticeTextGeneratorService()
+    val typingText = textGenerator.generatePracticeText()
     val errorCounter = ErrorCounter()
     val typingArea = createTypingArea(typingText, errorCounter)
     val statusPanel = createStatusPanel(errorCounter)
@@ -52,9 +54,5 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
     panel.preferredSize = JBUI.size(0, totalHeight)
 
     return panel
-  }
-
-  private fun createText(): String {
-    return "The quick brown fox jumps over the lazy dog.".trimIndent()
   }
 }
