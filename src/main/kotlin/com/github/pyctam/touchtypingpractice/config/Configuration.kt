@@ -23,6 +23,7 @@ import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_TEXT_FONT_SIZE
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_USE_ALL_FINGERS
 import com.intellij.ide.util.PropertiesComponent
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.dsl.builder.MutableProperty
@@ -32,22 +33,31 @@ import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 
 class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
+  private val logger: Logger = Logger.getInstance(Configuration::class.java)
   private val settings: Settings = loadSettings()
 
   // Create a mutable property that handles bidirectional binding
   private val useAllFingersProperty =
     object : MutableProperty<Boolean> {
-      override fun get(): Boolean = settings.useAllFingers
+      override fun get(): Boolean {
+        logger.info("useAllFingersProperty.get() -> ${settings.useAllFingers}")
+        return settings.useAllFingers
+      }
 
       override fun set(value: Boolean) {
+        logger.info("useAllFingersProperty.set($value) called")
         settings.useAllFingers = value
         // When "Use All Fingers" is checked, select all fingers
         if (value) {
+          logger.info("useAllFingersProperty: Selecting all fingers because useAllFingers=$value")
           settings.selectedFingers = 0
           for (finger in Finger.entries) {
             settings.selectedFingers =
               Finger.encodeSelectedFingers(settings.selectedFingers, finger)
           }
+          logger.info(
+            "useAllFingersProperty: After selecting all, selectedFingers=${settings.selectedFingers} (binary: ${settings.selectedFingers.toString(2).padStart(5, '0')})"
+          )
         }
       }
     }
@@ -122,28 +132,60 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   }
 
   override fun apply() {
+    logger.info("============ APPLY START ============")
+    logger.info(
+      "Before apply: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers} (binary: ${settings.selectedFingers.toString(2).padStart(5, '0')})"
+    )
+
     settings.unSelectedAllFingers()
+    logger.info("After unSelectedAllFingers: selectedFingers=${settings.selectedFingers}")
+
     super.apply()
+    logger.info(
+      "After super.apply: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers} (binary: ${settings.selectedFingers.toString(2).padStart(5, '0')})"
+    )
+
+    // Log current state
+    val selectedFingersList =
+      Finger.entries
+        .filter { Finger.isFingerSelected(settings.selectedFingers, it) }
+        .map { it.label }
+    logger.info("apply: Selected fingers after super.apply: $selectedFingersList")
 
     // Check if all fingers are selected
     val allFingersSelected =
       Finger.entries.all { finger -> Finger.isFingerSelected(settings.selectedFingers, finger) }
 
+    logger.info("apply: allFingersSelected=$allFingersSelected")
+    logger.info(
+      "apply: selectedFingers=${settings.selectedFingers}, Finger.entries.size=${Finger.entries.size}"
+    )
+
     // If all fingers are selected, enable "Use All Fingers"
     if (allFingersSelected) {
+      logger.info("apply: All fingers selected, enabling useAllFingers")
       settings.useAllFingers = true
     } else if (settings.selectedFingers == 0) {
       // If no fingers are selected, enable "Use All Fingers" and select all
+      logger.info("apply: No fingers selected (invalid state), auto-correcting...")
       settings.useAllFingers = true
       for (finger in Finger.entries) {
         settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
       }
+      logger.info(
+        "apply: After auto-correction: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers}"
+      )
     } else {
       // If some (but not all) fingers are selected, disable "Use All Fingers"
+      logger.info("apply: Some (but not all) fingers selected, disabling useAllFingers")
       settings.useAllFingers = false
     }
 
+    logger.info(
+      "Before saveSettings: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers}"
+    )
     saveSettings()
+    logger.info("============ APPLY END ============")
   }
 
   override fun reset() {
@@ -184,7 +226,26 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   }
 
   private fun selectFinger(finger: Finger) {
+    val beforeValue = settings.selectedFingers
+    val beforeBinary = beforeValue.toString(2).padStart(5, '0')
+    val isCurrentlySelected = Finger.isFingerSelected(settings.selectedFingers, finger)
+
+    logger.info(
+      "selectFinger($finger) called: beforeValue=$beforeValue (binary: $beforeBinary), isCurrentlySelected=$isCurrentlySelected"
+    )
+
     // Toggle the finger bit
     settings.selectedFingers = settings.selectedFingers xor (1 shl finger.ordinal)
+
+    val afterValue = settings.selectedFingers
+    val afterBinary = afterValue.toString(2).padStart(5, '0')
+    logger.info("selectFinger($finger) result: afterValue=$afterValue (binary: $afterBinary)")
+
+    // Log which fingers are selected
+    val selectedFingersList =
+      Finger.entries
+        .filter { Finger.isFingerSelected(settings.selectedFingers, it) }
+        .map { it.label }
+    logger.info("selectFinger($finger): Currently selected fingers: $selectedFingersList")
   }
 }
