@@ -25,6 +25,7 @@ import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
+import com.intellij.ui.dsl.builder.MutableProperty
 import com.intellij.ui.dsl.builder.bind
 import com.intellij.ui.dsl.builder.bindIntValue
 import com.intellij.ui.dsl.builder.bindSelected
@@ -32,6 +33,16 @@ import com.intellij.ui.dsl.builder.panel
 
 class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   private val settings: Settings = loadSettings()
+
+  // Create a mutable property that triggers UI refresh on change
+  private val useAllFingersProperty =
+    object : MutableProperty<Boolean> {
+      override fun get(): Boolean = settings.useAllFingers
+
+      override fun set(value: Boolean) {
+        settings.useAllFingers = value
+      }
+    }
 
   override fun createPanel(): DialogPanel {
     return panel {
@@ -84,10 +95,8 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
           comment(hint)
         }
 
-        row {
-          val textUseAllFingers = UIBundle.message(CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS)
-          checkBox(textUseAllFingers).bindSelected(settings::useAllFingers)
-        }
+        val textUseAllFingers = UIBundle.message(CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS)
+        row { checkBox(textUseAllFingers).bindSelected(useAllFingersProperty) }
 
         val titleSpecificFingers =
           UIBundle.message(CONFIG_FINGER_SELECTION_CHECKBOX_SPECIFIC_FINGERS)
