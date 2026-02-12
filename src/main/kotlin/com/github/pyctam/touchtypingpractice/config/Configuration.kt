@@ -26,16 +26,19 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
+import com.intellij.ui.dsl.builder.Cell
 import com.intellij.ui.dsl.builder.bind
 import com.intellij.ui.dsl.builder.bindIntValue
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
+import javax.swing.JCheckBox
 import javax.swing.SwingUtilities
 
 class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   private val logger: Logger = Logger.getInstance(Configuration::class.java)
   private val settings: Settings = loadSettings()
   private var dialogPanel: DialogPanel? = null
+  private val fingerCheckboxes: MutableMap<Finger, Cell<JCheckBox>> = mutableMapOf()
 
   override fun createPanel(): DialogPanel {
     dialogPanel = panel {
@@ -97,7 +100,7 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
                 logger.info("User toggled 'Use All Fingers' to: $value")
                 settings.useAllFingers = value
                 updateFingerSelectionBasedOnUseAll()
-                refreshUI()
+                updateFingerCheckboxesUI()
               }
             )
         }
@@ -108,23 +111,26 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
         buttonsGroup(titleSpecificFingers) {
           for (finger in Finger.entries) {
             row {
-              checkBox(finger.label)
-                .bindSelected(
-                  { isFingerSelected(finger) },
-                  { value ->
-                    logger.info("User toggled $finger to: $value")
-                    if (value) {
-                      // Add finger
-                      settings.selectedFingers =
-                        Finger.encodeSelectedFingers(settings.selectedFingers, finger)
-                    } else {
-                      // Remove finger
-                      settings.selectedFingers = settings.selectedFingers xor (1 shl finger.ordinal)
+              val checkBoxCell =
+                checkBox(finger.label)
+                  .bindSelected(
+                    { isFingerSelected(finger) },
+                    { value ->
+                      logger.info("User toggled $finger to: $value")
+                      if (value) {
+                        // Add finger
+                        settings.selectedFingers =
+                          Finger.encodeSelectedFingers(settings.selectedFingers, finger)
+                      } else {
+                        // Remove finger
+                        settings.selectedFingers =
+                          settings.selectedFingers xor (1 shl finger.ordinal)
+                      }
+                      updateUseAllFingersBasedOnSelection()
+                      updateFingerCheckboxesUI()
                     }
-                    updateUseAllFingersBasedOnSelection()
-                    refreshUI()
-                  }
-                )
+                  )
+              fingerCheckboxes[finger] = checkBoxCell
             }
           }
         }
@@ -134,17 +140,20 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   }
 
   /**
-   * Refresh the UI to reflect current state changes. This is needed because changing dependent
-   * properties doesn't automatically trigger UI updates.
+   * Updates the UI state of individual finger checkboxes based on current model state. This
+   * directly updates the checkbox components without calling apply().
    */
-  private fun refreshUI() {
-    logger.info("refreshUI called")
-    // Schedule the refresh on the EDT (Event Dispatch Thread)
+  private fun updateFingerCheckboxesUI() {
+    logger.info("updateFingerCheckboxesUI called")
     SwingUtilities.invokeLater {
       logger.info(
-        "Refreshing UI with current state: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers}"
+        "Updating finger checkboxes UI: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers} (binary: ${settings.selectedFingers.toString(2).padStart(5, '0')})"
       )
-      dialogPanel?.apply()
+      for ((finger, checkBoxCell) in fingerCheckboxes) {
+        val isSelected = Finger.isFingerSelected(settings.selectedFingers, finger)
+        logger.info("Setting $finger checkbox to isSelected=$isSelected")
+        checkBoxCell.component.isSelected = isSelected
+      }
     }
   }
 

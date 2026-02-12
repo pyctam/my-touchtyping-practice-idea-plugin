@@ -2,7 +2,14 @@ package com.github.pyctam.touchtypingpractice.services
 
 import com.github.pyctam.touchtypingpractice.config.Finger
 import com.github.pyctam.touchtypingpractice.config.PracticeMode
+import com.github.pyctam.touchtypingpractice.config.PracticeMode.BOTH_HANDS
 import com.github.pyctam.touchtypingpractice.config.Settings
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.DEFAULT_TEXT_FONT_SIZE
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_KEY_LIMIT_PER_FINGER
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_PRACTICE_MODE
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_SELECTED_FINGERS
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_TEXT_FONT_SIZE
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_USE_ALL_FINGERS
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
@@ -209,13 +216,13 @@ class PracticeTextGeneratorService {
   private fun loadSettings(): Settings {
     val properties = PropertiesComponent.getInstance()
 
-    val practiceModeName =
-      properties.getValue(Settings.PROPERTY_PRACTICE_MODE, PracticeMode.BOTH_HANDS.name)
+    val textFontSize = properties.getInt(PROPERTY_TEXT_FONT_SIZE, DEFAULT_TEXT_FONT_SIZE)
+    val practiceModeName = properties.getValue(PROPERTY_PRACTICE_MODE, BOTH_HANDS.name)
     val practiceMode = PracticeMode.valueOf(practiceModeName)
-    val keyLimitPerFinger = properties.getInt(Settings.PROPERTY_KEY_LIMIT_PER_FINGER, 1)
-    val allFingers = properties.getBoolean(Settings.PROPERTY_USE_ALL_FINGERS, true)
-    val selectedFingers = properties.getInt(Settings.PROPERTY_SELECTED_FINGERS, 0)
+    val keyLimitPerFinger = properties.getInt(PROPERTY_KEY_LIMIT_PER_FINGER, 1)
+    val allFingers = properties.getBoolean(PROPERTY_USE_ALL_FINGERS, true)
+    val selectedFingers = properties.getInt(PROPERTY_SELECTED_FINGERS, 0)
 
-    return Settings(practiceMode, keyLimitPerFinger, allFingers, selectedFingers)
+    return Settings(textFontSize, practiceMode, keyLimitPerFinger, allFingers, selectedFingers)
   }
 }
