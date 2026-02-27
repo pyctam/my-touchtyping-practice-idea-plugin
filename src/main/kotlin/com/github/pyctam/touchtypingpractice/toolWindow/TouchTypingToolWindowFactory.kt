@@ -3,7 +3,8 @@ package com.github.pyctam.touchtypingpractice.toolWindow
 import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.PADDING
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createMainPanel
-import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTypingArea
+import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTextPane
+import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTypingPane
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
@@ -19,7 +20,9 @@ class TouchTypingToolWindowFactory : ToolWindowFactory {
   override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
     val typingText = createText()
     val errorCounter = ErrorCounter()
-    val typingArea = createTypingArea(typingText, errorCounter)
+    val textPane = createTextPane(typingText, 14 /*settings.textFontSize*/)
+    val typingArea =
+      createTypingPane(textPane, typingText, errorCounter, 14 /*settings.textFontSize*/)
     val statusPanel = createStatusPanel(errorCounter)
 
     val mainPanel = createMainPanel()

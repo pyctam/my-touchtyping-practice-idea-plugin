@@ -7,6 +7,8 @@ import org.jetbrains.annotations.PropertyKey
 @NonNls private const val BUNDLE = "messages.UI"
 
 object UIBundle : DynamicBundle(BUNDLE) {
+  const val TEXT_FONT_SIZE_TITLE = "ui.config.font-size.title"
+  const val TEXT_FONT_SIZE_HINT = "ui.config.font-size.hint"
   const val CONFIG_PRACTICE_MODE_TITLE = "ui.config.practice-mode.title"
   const val CONFIG_PRACTICE_MODE_HINT = "ui.config.practice-mode.hint"
   const val CONFIG_PRACTICE_MODE_RADIO_LEFTHAND = "ui.config.practice-mode.radio.left-hand"

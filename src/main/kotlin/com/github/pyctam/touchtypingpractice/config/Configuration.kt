@@ -12,12 +12,15 @@ import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_LEFTHAND
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_RIGHTHAND
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_TITLE
+import com.github.pyctam.touchtypingpractice.UIBundle.TEXT_FONT_SIZE_TITLE
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.BOTH_HANDS
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.LEFT_HAND
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.RIGHT_HAND
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.DEFAULT_TEXT_FONT_SIZE
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_KEY_LIMIT_PER_FINGER
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_PRACTICE_MODE
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_SELECTED_FINGERS
+import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_TEXT_FONT_SIZE
 import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_USE_ALL_FINGERS
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.diagnostic.Logger
@@ -27,14 +30,39 @@ import com.intellij.ui.dsl.builder.bind
 import com.intellij.ui.dsl.builder.bindIntValue
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
+import javax.swing.JSpinner
+import javax.swing.SpinnerNumberModel
 
 class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   private val logger: Logger = Logger.getInstance(Configuration::class.java)
 
   private val settings: Settings = loadSettings()
 
+  private var fontSizeSpinner: JSpinner? = null
+
   override fun createPanel(): DialogPanel {
     return panel {
+      val titleTextFontSize = UIBundle.message(TEXT_FONT_SIZE_TITLE)
+
+      group(titleTextFontSize) {
+        row {
+          val hint = UIBundle.message(UIBundle.TEXT_FONT_SIZE_HINT)
+          comment(hint)
+        }
+        row { spinner(8..24, 1).bindIntValue(settings::textFontSize) }
+        row {
+          fontSizeSpinner =
+            JSpinner(
+              SpinnerNumberModel(
+                settings.textFontSize,
+                8, // min
+                24, // max
+                1 // step
+              )
+            )
+        }
+      }
+
       val titlePracticeMode = UIBundle.message(CONFIG_PRACTICE_MODE_TITLE)
 
       group(titlePracticeMode) {
@@ -56,9 +84,9 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
           .bind({ settings.practiceMode }, { settings.practiceMode = it })
       }
 
-      val titleKeyLimitPerFinder = UIBundle.message(CONFIG_KEY_LIMIT_PER_FINDER_TITLE)
+      val titleKeyLimitPerFinger = UIBundle.message(CONFIG_KEY_LIMIT_PER_FINDER_TITLE)
 
-      group(titleKeyLimitPerFinder) {
+      group(titleKeyLimitPerFinger) {
         row {
           val hint = UIBundle.message(CONFIG_KEY_LIMIT_PER_FINDER_HINT)
           comment(hint)
@@ -107,22 +135,25 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   private fun loadSettings(): Settings {
     val properties = PropertiesComponent.getInstance()
 
+    val textFontSize = properties.getInt(PROPERTY_TEXT_FONT_SIZE, DEFAULT_TEXT_FONT_SIZE)
     val practiceModeName = properties.getValue(PROPERTY_PRACTICE_MODE, BOTH_HANDS.name)
     val practiceMode = PracticeMode.valueOf(practiceModeName)
     val keyLimitPerFinger = properties.getInt(PROPERTY_KEY_LIMIT_PER_FINGER, 1)
     val allFingers = properties.getBoolean(PROPERTY_USE_ALL_FINGERS, true)
     val selectedFingers = properties.getInt(PROPERTY_SELECTED_FINGERS, 0)
 
-    return Settings(practiceMode, keyLimitPerFinger, allFingers, selectedFingers)
+    return Settings(textFontSize, practiceMode, keyLimitPerFinger, allFingers, selectedFingers)
   }
 
   private fun saveSettings() {
+    val textFontSize = settings.textFontSize.toString()
     val practiceMode = settings.practiceMode.name
     val keyLimitPerFinger = settings.keyLimitPerFinger.toString()
     val useAllFingers = settings.useAllFingers.toString()
     val selectedFingers = settings.selectedFingers.toString()
 
     val properties = PropertiesComponent.getInstance()
+    properties.setValue(PROPERTY_TEXT_FONT_SIZE, textFontSize)
     properties.setValue(PROPERTY_PRACTICE_MODE, practiceMode)
     properties.setValue(PROPERTY_KEY_LIMIT_PER_FINGER, keyLimitPerFinger)
     properties.setValue(PROPERTY_USE_ALL_FINGERS, useAllFingers)
