@@ -3,8 +3,9 @@ package com.github.pyctam.touchtypingpractice.ui
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
-import java.awt.BorderLayout
+import java.awt.Font
 import javax.swing.JTextArea
 import javax.swing.JTextPane
 
@@ -33,30 +34,25 @@ class TouchTypingUIComponentsFactory {
     }
 
     // Return the actual JTextPane so callers can attach listeners/highlighters
-    fun createTextPane(typingText: String): JTextPane {
-      val richTextPane = JTextPane()
-      richTextPane.contentType = "text/plain"
-      richTextPane.text = typingText
-      richTextPane.isEditable = false
-
-      // We keep the panel creation in case layout consumers need it elsewhere
-      val textPanel = BorderLayoutPanel()
-      textPanel.name = "Text Panel"
-      textPanel.border = JBUI.Borders.empty(PADDING) // Adding padding around the JTextPane
-      textPanel.add(richTextPane, BorderLayout.CENTER)
-
-      return richTextPane
+    fun createTextPane(typingText: String, fontSizePt: Int = 12): JTextPane {
+      val pane = JTextPane()
+      pane.text = typingText
+      pane.isEditable = false
+      pane.font = applyFontSize(pane.font, fontSizePt)
+      return pane
     }
 
     // Accept the reference text pane and the original text so the listener can highlight mismatches
     fun createTypingPane(
       referenceTextPane: JTextPane,
       originalText: String,
-      errorCounter: ErrorCounter
+      errorCounter: ErrorCounter,
+      fontSizePt: Int = 12
     ): JBScrollPane {
       val typingArea = JTextArea()
       typingArea.lineWrap = true
       typingArea.wrapStyleWord = true
+      typingArea.font = applyFontSize(UIUtil.getLabelFont(), fontSizePt)
 
       val listener =
         TouchTypingDocumentListener(typingArea, referenceTextPane, originalText, errorCounter)
@@ -65,6 +61,10 @@ class TouchTypingUIComponentsFactory {
       val scrollPane = JBScrollPane(typingArea)
       scrollPane.border = JBUI.Borders.empty() // Remove ugly default border
       return scrollPane
+    }
+
+    private fun applyFontSize(baseFont: Font, sizePt: Int): Font {
+      return baseFont.deriveFont(sizePt.toFloat())
     }
   }
 }
