@@ -30,15 +30,10 @@ import com.intellij.ui.dsl.builder.bind
 import com.intellij.ui.dsl.builder.bindIntValue
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
-import javax.swing.JSpinner
-import javax.swing.SpinnerNumberModel
 
 class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   private val logger: Logger = Logger.getInstance(Configuration::class.java)
-
   private val settings: Settings = loadSettings()
-
-  private var fontSizeSpinner: JSpinner? = null
 
   override fun createPanel(): DialogPanel {
     return panel {
@@ -50,17 +45,6 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
           comment(hint)
         }
         row { spinner(8..24, 1).bindIntValue(settings::textFontSize) }
-        row {
-          fontSizeSpinner =
-            JSpinner(
-              SpinnerNumberModel(
-                settings.textFontSize,
-                8, // min
-                24, // max
-                1 // step
-              )
-            )
-        }
       }
 
       val titlePracticeMode = UIBundle.message(CONFIG_PRACTICE_MODE_TITLE)
