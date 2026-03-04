@@ -131,8 +131,10 @@ class PracticeTextGeneratorService {
       chars.append(PUNCTUATION)
     }
 
-    // Add space
+    // Add space only once (it will be added with a reduced frequency in random generation)
     chars.append(" ")
+
+    logger.info("buildAvailableCharacterSet: chars='$chars'")
 
     return chars.toString()
   }
@@ -146,31 +148,67 @@ class PracticeTextGeneratorService {
   private fun getAvailableKeysForFingers(settings: Settings): String {
     val keys = StringBuilder()
 
-    val fingerKeyMap =
-      when (settings.practiceMode) {
-        PracticeMode.LEFT_HAND -> LEFT_HAND_KEYS
-        PracticeMode.RIGHT_HAND -> RIGHT_HAND_KEYS
-        PracticeMode.BOTH_HANDS -> LEFT_HAND_KEYS + RIGHT_HAND_KEYS
-      }
-
     if (settings.useAllFingers) {
       // Use all available fingers for the selected practice mode
-      fingerKeyMap.forEach { (_, keyList) ->
-        // Apply key limit per finger
-        val limitedKeys = keyList.take(settings.keyLimitPerFinger)
-        keys.append(limitedKeys.joinToString(""))
+      when (settings.practiceMode) {
+        PracticeMode.LEFT_HAND -> {
+          LEFT_HAND_KEYS.forEach { (_, keyList) ->
+            val limitedKeys = keyList.take(settings.keyLimitPerFinger)
+            keys.append(limitedKeys.joinToString(""))
+          }
+        }
+        PracticeMode.RIGHT_HAND -> {
+          RIGHT_HAND_KEYS.forEach { (_, keyList) ->
+            val limitedKeys = keyList.take(settings.keyLimitPerFinger)
+            keys.append(limitedKeys.joinToString(""))
+          }
+        }
+        PracticeMode.BOTH_HANDS -> {
+          LEFT_HAND_KEYS.forEach { (_, keyList) ->
+            val limitedKeys = keyList.take(settings.keyLimitPerFinger)
+            keys.append(limitedKeys.joinToString(""))
+          }
+          RIGHT_HAND_KEYS.forEach { (_, keyList) ->
+            val limitedKeys = keyList.take(settings.keyLimitPerFinger)
+            keys.append(limitedKeys.joinToString(""))
+          }
+        }
       }
     } else {
       // Use only selected fingers
       Finger.entries.forEach { finger ->
         if (Finger.isFingerSelected(settings.selectedFingers, finger)) {
-          val keyList = fingerKeyMap[finger] ?: emptyList()
-          // Apply key limit per finger
-          val limitedKeys = keyList.take(settings.keyLimitPerFinger)
-          keys.append(limitedKeys.joinToString(""))
+          // For BOTH_HANDS mode, check both hand maps
+          when (settings.practiceMode) {
+            PracticeMode.LEFT_HAND -> {
+              val keyList = LEFT_HAND_KEYS[finger] ?: emptyList()
+              val limitedKeys = keyList.take(settings.keyLimitPerFinger)
+              keys.append(limitedKeys.joinToString(""))
+            }
+            PracticeMode.RIGHT_HAND -> {
+              val keyList = RIGHT_HAND_KEYS[finger] ?: emptyList()
+              val limitedKeys = keyList.take(settings.keyLimitPerFinger)
+              keys.append(limitedKeys.joinToString(""))
+            }
+            PracticeMode.BOTH_HANDS -> {
+              // Include keys from both hands for this finger
+              val leftKeyList = LEFT_HAND_KEYS[finger] ?: emptyList()
+              val rightKeyList = RIGHT_HAND_KEYS[finger] ?: emptyList()
+              val leftLimited = leftKeyList.take(settings.keyLimitPerFinger)
+              val rightLimited = rightKeyList.take(settings.keyLimitPerFinger)
+              keys.append(leftLimited.joinToString(""))
+              keys.append(rightLimited.joinToString(""))
+            }
+          }
         }
       }
     }
+
+    logger.info(
+      "getAvailableKeysForFingers: practiceMode=${settings.practiceMode}, " +
+        "useAllFingers=${settings.useAllFingers}, keyLimitPerFinger=${settings.keyLimitPerFinger}, " +
+        "availableKeys='$keys'"
+    )
 
     return keys.toString()
   }
@@ -196,14 +234,53 @@ class PracticeTextGeneratorService {
   /**
    * Generates random text from the provided character set.
    *
+   * Rules:
+   * - First character is never a space
+   * - Consecutive spaces are limited to 1 maximum (no repeated spaces)
+   * - Space frequency is approximately 10% of the text
+   *
    * @param chars Available characters for text generation
    * @return A randomly generated text string of 100 characters
    */
   private fun generateRandomText(chars: String): String {
     val random = Random(System.currentTimeMillis())
     val text = StringBuilder()
+    val nonSpaceChars = chars.replace(" ", "")
+    var lastWasSpace = false
 
-    repeat(100) { text.append(chars[random.nextInt(chars.length)]) }
+    // Ensure first character is not a space
+    if (nonSpaceChars.isEmpty()) {
+      logger.warn("No non-space characters available. Using space only.")
+      return " ".repeat(100)
+    }
+
+    repeat(100) { index ->
+      val charToAdd =
+        if (index == 0) {
+          // First character must not be space
+          nonSpaceChars[random.nextInt(nonSpaceChars.length)]
+        } else if (lastWasSpace) {
+          // If last character was space, never add another space
+          nonSpaceChars[random.nextInt(nonSpaceChars.length)]
+        } else {
+          // 90% chance of non-space character, 10% chance of space
+          val rand = random.nextDouble()
+          if (rand < 0.1 && chars.contains(' ')) {
+            lastWasSpace = true
+            ' '
+          } else {
+            nonSpaceChars[random.nextInt(nonSpaceChars.length)]
+          }
+        }
+
+      if (charToAdd != ' ') {
+        lastWasSpace = false
+      }
+
+      text.append(charToAdd)
+    }
+
+    logger.info("generateRandomText: generated='${text.take(50)}...' (length=${text.length})")
 
     return text.toString()
   }
