@@ -30,22 +30,47 @@ class PracticeTextGeneratorService {
     // Home row position is first, then extensions based on key limit
     private val LEFT_HAND_KEYS =
       mapOf(
-        Finger.THUMB to listOf("space"),
-        Finger.INDEX to listOf("f", "v", "g", "t"), // f (home), v, g, t
-        Finger.MIDDLE to listOf("d", "x", "c"), // d (home), x, c
-        Finger.RING to listOf("s", "z"), // s (home), z
-        Finger.LITTLE to listOf("a", "q", "w") // a (home), q, w
+        Finger.THUMB to listOf(" "),
+        Finger.INDEX to
+          listOf("f", "g", "v", "b", "t", "r", "4", "5"), // f (home), g, v, b, t, r, 4, 5
+        Finger.MIDDLE to listOf("d", "c", "e", "3"), // d (home), c, e, 3
+        Finger.RING to listOf("s", "x", "w", "2"), // s (home), x, w, 2
+        Finger.LITTLE to
+          listOf(
+            "a",
+            "z",
+            "q",
+            "`",
+            "1",
+            "tab",
+            "capslock",
+            "shift"
+          ) // a (home), z, q, `, 1, Tab, CapsLock, Shift
       )
 
     // Right hand keys - organized by finger, with keys in order of progression (for key limits)
     private val RIGHT_HAND_KEYS =
       mapOf(
-        Finger.THUMB to listOf("space"),
-        Finger.INDEX to listOf("j", "m", "n", "h"), // j (home), m, n, h
-        Finger.MIDDLE to listOf("k", "comma", "i"), // k (home), comma, i
-        Finger.RING to listOf("l", "period"), // l (home), period
+        Finger.THUMB to listOf(" "),
+        Finger.INDEX to
+          listOf("j", "h", "n", "m", "u", "y", "6", "7"), // j (home), h, n, m, u, y, 6, 7
+        Finger.MIDDLE to listOf("k", ",", "i", "8"), // k (home), comma, i, 8
+        Finger.RING to listOf("l", ".", "o", "9"), // l (home), period, o, 9
         Finger.LITTLE to
-          listOf(";", "'", "p", "bracketleft", "bracketright") // ; (home), ', p, [, ]
+          listOf(
+            ";",
+            "'",
+            "/",
+            "p",
+            "[",
+            "]",
+            "\\",
+            "-",
+            "=",
+            "0",
+            "enter",
+            "shift"
+          ) // ; (home), ', /, p, [, ], \, -, =, 0, Enter, Shift
       )
 
     // Sample texts for touch typing practice (organized by difficulty)
