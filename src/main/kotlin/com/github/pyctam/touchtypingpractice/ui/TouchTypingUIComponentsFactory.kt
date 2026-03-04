@@ -17,13 +17,17 @@ class TouchTypingUIComponentsFactory {
       return BorderLayoutPanel()
     }
 
-    fun createTypingArea(typingText: String, errorCounter: ErrorCounter): JBSplitter {
-      val richTextPane = createTextPane(typingText)
+    fun createTypingArea(
+      typingText: String,
+      errorCounter: ErrorCounter,
+      textFontSize: Int
+    ): JBSplitter {
+      val richTextPane = createTextPane(typingText, textFontSize)
       // Wrap the text pane into a scroll pane for the splitter
       val textScrollPane = JBScrollPane(richTextPane)
       textScrollPane.border = JBUI.Borders.empty()
 
-      val typingPane = createTypingPane(richTextPane, typingText, errorCounter)
+      val typingPane = createTypingPane(richTextPane, typingText, errorCounter, textFontSize)
 
       val splitter = JBSplitter(true, 0.25f)
       splitter.setHonorComponentsMinimumSize(true)

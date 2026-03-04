@@ -7,7 +7,10 @@ import javax.swing.JTextPane
 import javax.swing.SwingUtilities
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
+import javax.swing.text.AbstractDocument
+import javax.swing.text.AttributeSet
 import javax.swing.text.DefaultHighlighter
+import javax.swing.text.DocumentFilter
 
 class TouchTypingDocumentListener(
   private val typingArea: JTextArea,
@@ -18,6 +21,15 @@ class TouchTypingDocumentListener(
   private val logger: Logger = Logger.getInstance(TouchTypingDocumentListener::class.java)
   private val mismatchPainter =
     DefaultHighlighter.DefaultHighlightPainter(JBColor(0xFFCCCC, 0xFFCCCC))
+
+  init {
+    // Install a DocumentFilter to prevent typing beyond the original text length
+    val doc = typingArea.document
+    if (doc is AbstractDocument) {
+      doc.documentFilter = TextLengthLimiterFilter(originalText.length)
+      logger.info("TextLengthLimiterFilter installed with maxLength=${originalText.length}")
+    }
+  }
 
   override fun insertUpdate(event: DocumentEvent?) {
     updateHighlights()
@@ -59,6 +71,58 @@ class TouchTypingDocumentListener(
       } catch (t: Throwable) {
         logger.warn("Failed to update highlights", t)
       }
+    }
+  }
+
+  /**
+   * DocumentFilter that prevents typing beyond the maximum text length. Any attempt to insert text
+   * that would exceed the limit is silently ignored.
+   */
+  private inner class TextLengthLimiterFilter(private val maxLength: Int) : DocumentFilter() {
+    override fun insertString(fb: FilterBypass, offset: Int, string: String, attr: AttributeSet?) {
+      val currentLength = fb.document.length
+      val newLength = currentLength + string.length
+
+      logger.info(
+        "insertString: currentLength=$currentLength, stringLength=${string.length}, newLength=$newLength, maxLength=$maxLength"
+      )
+
+      // Only allow insertion if it doesn't exceed the max length
+      if (newLength <= maxLength) {
+        super.insertString(fb, offset, string, attr)
+        logger.info("insertString: Allowed insertion")
+      } else {
+        logger.info("insertString: Rejected insertion - would exceed max length")
+      }
+    }
+
+    override fun replace(
+      fb: FilterBypass,
+      offset: Int,
+      length: Int,
+      text: String,
+      attrs: AttributeSet?
+    ) {
+      val currentLength = fb.document.length
+      val newLength = currentLength - length + text.length
+
+      logger.info(
+        "replace: currentLength=$currentLength, replaceLength=$length, textLength=${text.length}, newLength=$newLength, maxLength=$maxLength"
+      )
+
+      // Only allow replace if it doesn't exceed the max length
+      if (newLength <= maxLength) {
+        super.replace(fb, offset, length, text, attrs)
+        logger.info("replace: Allowed replacement")
+      } else {
+        logger.info("replace: Rejected replacement - would exceed max length")
+      }
+    }
+
+    override fun remove(fb: FilterBypass, offset: Int, length: Int) {
+      logger.info("remove: offset=$offset, length=$length")
+      // Always allow removals (delete/backspace)
+      super.remove(fb, offset, length)
     }
   }
 }
