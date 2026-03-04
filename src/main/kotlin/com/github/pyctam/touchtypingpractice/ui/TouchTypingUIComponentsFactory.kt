@@ -1,5 +1,6 @@
 package com.github.pyctam.touchtypingpractice.ui
 
+import com.intellij.ui.JBColor
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
@@ -14,7 +15,14 @@ class TouchTypingUIComponentsFactory {
     const val PADDING = 4
 
     fun createMainPanel(): BorderLayoutPanel {
-      return BorderLayoutPanel()
+      return BorderLayoutPanel().apply {
+        border =
+          JBUI.Borders.compound(
+            JBUI.Borders.empty(4), // optional padding
+            JBUI.Borders.customLine(JBColor.border(), 1) // or a custom etched-like border
+          )
+        background = UIUtil.getPanelBackground()
+      }
     }
 
     fun createTypingArea(
@@ -43,6 +51,12 @@ class TouchTypingUIComponentsFactory {
       pane.text = typingText
       pane.isEditable = false
       pane.font = applyFontSize(pane.font, fontSizePt)
+      pane.border =
+        JBUI.Borders.compound(
+          JBUI.Borders.empty(4), // optional padding
+          JBUI.Borders.customLine(JBColor.border(), 1) // or a custom etched-like border
+        )
+
       return pane
     }
 
@@ -63,7 +77,11 @@ class TouchTypingUIComponentsFactory {
       typingArea.document.addDocumentListener(listener)
 
       val scrollPane = JBScrollPane(typingArea)
-      scrollPane.border = JBUI.Borders.empty() // Remove ugly default border
+      scrollPane.border =
+        JBUI.Borders.compound(
+          JBUI.Borders.empty(4), // optional padding
+          JBUI.Borders.customLine(JBColor.border(), 1) // or a custom etched-like border
+        )
       return scrollPane
     }
 
