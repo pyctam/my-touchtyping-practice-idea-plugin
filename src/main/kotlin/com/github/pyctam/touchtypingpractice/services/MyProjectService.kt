@@ -1,20 +1,28 @@
 package com.github.pyctam.touchtypingpractice.services
 
-import com.github.pyctam.touchtypingpractice.UIBundle
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 
+/**
+ * Project-level service for managing Touch Typing Practice session state and statistics.
+ *
+ * This service is created once per project and can be used to track typing sessions, store
+ * statistics, and manage project-specific typing practice data.
+ */
+@Suppress("unused")
 @Service(Service.Level.PROJECT)
-class MyProjectService(project: Project) {
+class TouchTypingSessionService(project: Project) {
 
   init {
-    thisLogger().info(UIBundle.message("projectService", project.name))
     thisLogger()
-      .warn(
-        "Don't forget to remove all non-needed sample code files with their corresponding registration entries in `plugin.xml`."
-      )
+      .info("Touch Typing Practice session service initialized for project: ${project.name}")
   }
 
-  fun getRandomNumber() = (1..100).random()
+  // TODO: Add session state management, statistics tracking, and persistence
+  // Examples:
+  // - Track current typing session duration
+  // - Store session statistics (WPM, accuracy, etc.)
+  // - Manage session history and analytics
+  // - Integrate with project-specific configurations
 }

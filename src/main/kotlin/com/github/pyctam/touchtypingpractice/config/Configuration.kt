@@ -16,13 +16,6 @@ import com.github.pyctam.touchtypingpractice.UIBundle.TEXT_FONT_SIZE_TITLE
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.BOTH_HANDS
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.LEFT_HAND
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.RIGHT_HAND
-import com.github.pyctam.touchtypingpractice.config.Settings.Companion.DEFAULT_TEXT_FONT_SIZE
-import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_KEY_LIMIT_PER_FINGER
-import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_PRACTICE_MODE
-import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_SELECTED_FINGERS
-import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_TEXT_FONT_SIZE
-import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_USE_ALL_FINGERS
-import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
@@ -36,7 +29,7 @@ import javax.swing.SwingUtilities
 
 class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   private val logger: Logger = Logger.getInstance(Configuration::class.java)
-  private val settings: Settings = loadSettings()
+  private val settings: Settings = Settings.getInstance()
   private var dialogPanel: DialogPanel? = null
   private val fingerCheckboxes: MutableMap<Finger, Cell<JCheckBox>> = mutableMapOf()
 
@@ -208,43 +201,13 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
     }
 
     logger.info(
-      "Before saveSettings: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers}"
+      "Before save: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers}"
     )
-    saveSettings()
     logger.info("============ APPLY END ============")
   }
 
   override fun reset() {
     super.reset()
-    saveSettings()
-  }
-
-  private fun loadSettings(): Settings {
-    val properties = PropertiesComponent.getInstance()
-
-    val textFontSize = properties.getInt(PROPERTY_TEXT_FONT_SIZE, DEFAULT_TEXT_FONT_SIZE)
-    val practiceModeName = properties.getValue(PROPERTY_PRACTICE_MODE, BOTH_HANDS.name)
-    val practiceMode = PracticeMode.valueOf(practiceModeName)
-    val keyLimitPerFinger = properties.getInt(PROPERTY_KEY_LIMIT_PER_FINGER, 1)
-    val allFingers = properties.getBoolean(PROPERTY_USE_ALL_FINGERS, true)
-    val selectedFingers = properties.getInt(PROPERTY_SELECTED_FINGERS, 0)
-
-    return Settings(textFontSize, practiceMode, keyLimitPerFinger, allFingers, selectedFingers)
-  }
-
-  private fun saveSettings() {
-    val textFontSize = settings.textFontSize.toString()
-    val practiceMode = settings.practiceMode.name
-    val keyLimitPerFinger = settings.keyLimitPerFinger.toString()
-    val useAllFingers = settings.useAllFingers.toString()
-    val selectedFingers = settings.selectedFingers.toString()
-
-    val properties = PropertiesComponent.getInstance()
-    properties.setValue(PROPERTY_TEXT_FONT_SIZE, textFontSize)
-    properties.setValue(PROPERTY_PRACTICE_MODE, practiceMode)
-    properties.setValue(PROPERTY_KEY_LIMIT_PER_FINGER, keyLimitPerFinger)
-    properties.setValue(PROPERTY_USE_ALL_FINGERS, useAllFingers)
-    properties.setValue(PROPERTY_SELECTED_FINGERS, selectedFingers)
   }
 
   private fun isFingerSelected(finger: Finger): Boolean {
