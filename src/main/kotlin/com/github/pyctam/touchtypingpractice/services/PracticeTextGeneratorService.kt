@@ -1,16 +1,10 @@
 package com.github.pyctam.touchtypingpractice.services
 
 import com.github.pyctam.touchtypingpractice.config.Finger
-import com.github.pyctam.touchtypingpractice.config.PracticeMode
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.BOTH_HANDS
+import com.github.pyctam.touchtypingpractice.config.PracticeMode.LEFT_HAND
+import com.github.pyctam.touchtypingpractice.config.PracticeMode.RIGHT_HAND
 import com.github.pyctam.touchtypingpractice.config.Settings
-import com.github.pyctam.touchtypingpractice.config.Settings.Companion.DEFAULT_TEXT_FONT_SIZE
-import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_KEY_LIMIT_PER_FINGER
-import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_PRACTICE_MODE
-import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_SELECTED_FINGERS
-import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_TEXT_FONT_SIZE
-import com.github.pyctam.touchtypingpractice.config.Settings.Companion.PROPERTY_USE_ALL_FINGERS
-import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
 import kotlin.random.Random
@@ -19,6 +13,8 @@ import kotlin.random.Random
  * Service for generating practice text based on plugin configuration. Supports different character
  * types: lowercase letters, numbers, punctuation, and spaces. Adapts text generation based on
  * practice mode, finger selection, and key limit per finger.
+ *
+ * This is an APPLICATION-level service, meaning one instance is shared across the IDE.
  */
 @Service
 class PracticeTextGeneratorService {
@@ -103,7 +99,7 @@ class PracticeTextGeneratorService {
    * @return A practice text string optimized for the current configuration
    */
   fun generatePracticeText(): String {
-    val settings = loadSettings()
+    val settings = Settings.getInstance()
     return generateConfigurationAwareText(settings)
   }
 
@@ -176,19 +172,19 @@ class PracticeTextGeneratorService {
     if (settings.useAllFingers) {
       // Use all available fingers for the selected practice mode
       when (settings.practiceMode) {
-        PracticeMode.LEFT_HAND -> {
+        LEFT_HAND -> {
           LEFT_HAND_KEYS.forEach { (_, keyList) ->
             val limitedKeys = keyList.take(settings.keyLimitPerFinger)
             keys.append(limitedKeys.joinToString(""))
           }
         }
-        PracticeMode.RIGHT_HAND -> {
+        RIGHT_HAND -> {
           RIGHT_HAND_KEYS.forEach { (_, keyList) ->
             val limitedKeys = keyList.take(settings.keyLimitPerFinger)
             keys.append(limitedKeys.joinToString(""))
           }
         }
-        PracticeMode.BOTH_HANDS -> {
+        BOTH_HANDS -> {
           LEFT_HAND_KEYS.forEach { (_, keyList) ->
             val limitedKeys = keyList.take(settings.keyLimitPerFinger)
             keys.append(limitedKeys.joinToString(""))
@@ -205,17 +201,17 @@ class PracticeTextGeneratorService {
         if (Finger.isFingerSelected(settings.selectedFingers, finger)) {
           // For BOTH_HANDS mode, check both hand maps
           when (settings.practiceMode) {
-            PracticeMode.LEFT_HAND -> {
+            LEFT_HAND -> {
               val keyList = LEFT_HAND_KEYS[finger] ?: emptyList()
               val limitedKeys = keyList.take(settings.keyLimitPerFinger)
               keys.append(limitedKeys.joinToString(""))
             }
-            PracticeMode.RIGHT_HAND -> {
+            RIGHT_HAND -> {
               val keyList = RIGHT_HAND_KEYS[finger] ?: emptyList()
               val limitedKeys = keyList.take(settings.keyLimitPerFinger)
               keys.append(limitedKeys.joinToString(""))
             }
-            PracticeMode.BOTH_HANDS -> {
+            BOTH_HANDS -> {
               // Include keys from both hands for this finger
               val leftKeyList = LEFT_HAND_KEYS[finger] ?: emptyList()
               val rightKeyList = RIGHT_HAND_KEYS[finger] ?: emptyList()
@@ -308,23 +304,5 @@ class PracticeTextGeneratorService {
     logger.info("generateRandomText: generated='${text.take(50)}...' (length=${text.length})")
 
     return text.toString()
-  }
-
-  /**
-   * Loads current practice settings from IntelliJ properties.
-   *
-   * @return The current Settings configuration
-   */
-  private fun loadSettings(): Settings {
-    val properties = PropertiesComponent.getInstance()
-
-    val textFontSize = properties.getInt(PROPERTY_TEXT_FONT_SIZE, DEFAULT_TEXT_FONT_SIZE)
-    val practiceModeName = properties.getValue(PROPERTY_PRACTICE_MODE, BOTH_HANDS.name)
-    val practiceMode = PracticeMode.valueOf(practiceModeName)
-    val keyLimitPerFinger = properties.getInt(PROPERTY_KEY_LIMIT_PER_FINGER, 1)
-    val allFingers = properties.getBoolean(PROPERTY_USE_ALL_FINGERS, true)
-    val selectedFingers = properties.getInt(PROPERTY_SELECTED_FINGERS, 0)
-
-    return Settings(textFontSize, practiceMode, keyLimitPerFinger, allFingers, selectedFingers)
   }
 }
