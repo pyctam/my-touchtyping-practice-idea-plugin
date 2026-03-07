@@ -22,6 +22,11 @@ import com.intellij.util.ui.components.BorderLayoutPanel
  * typing with real-time feedback.
  *
  * Implements DumbAware to allow the tool window to be available during IDE indexing operations.
+ *
+ * UI Design:
+ * - Uses IntelliJ's 8px base unit spacing system (12px standard padding)
+ * - Follows IntelliJ Typography Hierarchy (body text = 12pt regular, status = medium weight)
+ * - Automatic dark/light theme support via JBColor
  */
 class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
 
@@ -42,7 +47,12 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     toolWindow.contentManager.addContent(content)
   }
 
+  /**
+   * Creates the status panel with typing speed and error count. Uses IntelliJ's standard spacing
+   * (12px padding) and typography (medium weight).
+   */
   private fun createStatusPanel(errorCounter: ErrorCounter): BorderLayoutPanel {
+    // Status label with IntelliJ medium font weight for emphasis
     val statusLabel = JBLabel("Typing speed: 0 WPM | Typing errors: 0")
     statusLabel.font = JBFont.medium()
 
@@ -52,13 +62,15 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     }
 
     val panel = BorderLayoutPanel()
-    panel.border = JBUI.Borders.empty(PADDING) // Uniform padding
+    // IntelliJ standard: 12px padding (1.5 x 8px base unit) for consistent spacing
+    panel.border = JBUI.Borders.empty(PADDING)
     panel.background = UIUtil.getPanelBackground()
     panel.addToLeft(statusLabel)
 
     // Dynamically set minimum and preferred height based on font + padding
+    // Ensures status panel has proper visual weight without being too cramped
     val labelHeight = statusLabel.preferredSize.height
-    val verticalPadding = JBUI.scale(PADDING) * 2 // 4px top + 4px bottom
+    val verticalPadding = JBUI.scale(PADDING) * 2 // 12px top + 12px bottom = 24px total
     val totalHeight = labelHeight + verticalPadding
 
     panel.minimumSize = JBUI.size(0, totalHeight)
