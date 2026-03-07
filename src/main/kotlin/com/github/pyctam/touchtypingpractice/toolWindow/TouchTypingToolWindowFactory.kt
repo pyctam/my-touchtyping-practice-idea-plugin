@@ -10,6 +10,7 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
+import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.ui.JBFont
@@ -62,8 +63,13 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     }
 
     val panel = BorderLayoutPanel()
-    // IntelliJ standard: 12px padding (1.5 x 8px base unit) for consistent spacing
-    panel.border = JBUI.Borders.empty(PADDING)
+    // IntelliJ standard: 12px padding (1.5 x 8px base unit) with 1px top border for visual
+    // separation from typing area
+    panel.border =
+      JBUI.Borders.compound(
+        JBUI.Borders.empty(PADDING),
+        JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0) // 1px border on top only
+      )
     panel.background = UIUtil.getPanelBackground()
     panel.addToLeft(statusLabel)
 
