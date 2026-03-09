@@ -12,7 +12,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.JBColor
-import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.ui.JBFont
@@ -39,23 +38,18 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     val typingText = textGenerator.generatePracticeText()
     val errorCounter = ErrorCounter()
 
-    // Create individual panels: sample text and typing input with 50/50 height split
+    // Create individual panels: sample text and typing input
     val sampleTextPanel = createSampleTextPanel(typingText, settings.textFontSize)
     val typingInputPanel = createTypingInputPanel(typingText, errorCounter, settings.textFontSize)
-
-    // Compose sample text and typing panels in a vertical splitter with equal proportion
-    val contentSplitter = JBSplitter(true, 0.5f)
-    contentSplitter.setHonorComponentsMinimumSize(true)
-    contentSplitter.firstComponent = sampleTextPanel
-    contentSplitter.secondComponent = typingInputPanel
-    contentSplitter.border = JBUI.Borders.empty(PADDING)
 
     // Create status panel with fixed height
     val statusPanel = createStatusPanel(errorCounter)
 
-    // Add all panels to main container: splitter (center) + status (bottom)
+    // Add all panels directly to main container: top (sample text 50%) + center (typing 50%) +
+    // bottom (status fixed)
     val mainPanel = createMainPanel()
-    mainPanel.addToCenter(contentSplitter)
+    mainPanel.addToTop(sampleTextPanel)
+    mainPanel.addToCenter(typingInputPanel)
     mainPanel.addToBottom(statusPanel)
 
     val contentFactory = ContentFactory.getInstance()
