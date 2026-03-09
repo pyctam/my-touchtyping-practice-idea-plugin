@@ -52,7 +52,7 @@ class TouchTypingUIComponentsFactory {
       pane.border =
         JBUI.Borders.compound(
           JBUI.Borders.empty(PADDING_SMALL),
-          JBUI.Borders.customLine(JBColor.border(), 1)
+          // JBUI.Borders.customLine(JBColor.border(), 1)
         )
       return pane
     }
@@ -66,7 +66,7 @@ class TouchTypingUIComponentsFactory {
       textScrollPane.border =
         JBUI.Borders.compound(
           JBUI.Borders.empty(0, PADDING_SMALL, PADDING_SMALL, PADDING_SMALL),
-          JBUI.Borders.customLine(JBColor.border(), 1)
+          JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0)
         )
       return textScrollPane
     }
@@ -101,7 +101,7 @@ class TouchTypingUIComponentsFactory {
       typingArea.border =
         JBUI.Borders.compound(
           JBUI.Borders.empty(PADDING_SMALL),
-          JBUI.Borders.customLine(JBColor.border(), 1)
+          // JBUI.Borders.customLine(JBColor.border(), 1)
         )
 
       val listener =
@@ -112,7 +112,7 @@ class TouchTypingUIComponentsFactory {
       scrollPane.border =
         JBUI.Borders.compound(
           JBUI.Borders.empty(0, PADDING_SMALL, PADDING_SMALL, PADDING_SMALL),
-          JBUI.Borders.customLine(JBColor.border(), 1)
+          JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0)
         )
       return scrollPane
     }
