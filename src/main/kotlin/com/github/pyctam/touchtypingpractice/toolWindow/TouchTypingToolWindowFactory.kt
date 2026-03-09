@@ -5,12 +5,14 @@ import com.github.pyctam.touchtypingpractice.services.PracticeTextGeneratorServi
 import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.PADDING
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createMainPanel
-import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTypingArea
+import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createSampleTextPanel
+import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTypingInputPanel
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.JBColor
+import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.ui.JBFont
@@ -36,11 +38,24 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     val textGenerator = PracticeTextGeneratorService()
     val typingText = textGenerator.generatePracticeText()
     val errorCounter = ErrorCounter()
-    val typingArea = createTypingArea(typingText, errorCounter, settings.textFontSize)
+
+    // Create individual panels: sample text and typing input with 50/50 height split
+    val sampleTextPanel = createSampleTextPanel(typingText, settings.textFontSize)
+    val typingInputPanel = createTypingInputPanel(typingText, errorCounter, settings.textFontSize)
+
+    // Compose sample text and typing panels in a vertical splitter with equal proportion
+    val contentSplitter = JBSplitter(true, 0.5f)
+    contentSplitter.setHonorComponentsMinimumSize(true)
+    contentSplitter.firstComponent = sampleTextPanel
+    contentSplitter.secondComponent = typingInputPanel
+    contentSplitter.border = JBUI.Borders.empty(PADDING)
+
+    // Create status panel with fixed height
     val statusPanel = createStatusPanel(errorCounter)
 
+    // Add all panels to main container: splitter (center) + status (bottom)
     val mainPanel = createMainPanel()
-    mainPanel.addToCenter(typingArea)
+    mainPanel.addToCenter(contentSplitter)
     mainPanel.addToBottom(statusPanel)
 
     val contentFactory = ContentFactory.getInstance()

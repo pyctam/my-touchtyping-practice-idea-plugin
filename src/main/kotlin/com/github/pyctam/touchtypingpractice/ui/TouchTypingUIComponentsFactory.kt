@@ -1,7 +1,6 @@
 package com.github.pyctam.touchtypingpractice.ui
 
 import com.intellij.ui.JBColor
-import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
@@ -41,31 +40,41 @@ class TouchTypingUIComponentsFactory {
       }
     }
 
-    fun createTypingArea(
+    /**
+     * Creates the sample text panel showing the text to type. Public factory method for composing
+     * layouts at the ToolWindow level. Uses 12px standard padding with subtle border styling.
+     */
+    fun createSampleTextPanel(typingText: String, fontSizePt: Int = 12): JBScrollPane {
+      val richTextPane = createTextPane(typingText, fontSizePt)
+      val textScrollPane = JBScrollPane(richTextPane)
+      textScrollPane.border =
+        JBUI.Borders.compound(
+          JBUI.Borders.empty(PADDING),
+          JBUI.Borders.customLine(JBColor.border(), 1)
+        )
+      return textScrollPane
+    }
+
+    /**
+     * Creates the typing input panel with document listener for real-time feedback. Public factory
+     * method for composing layouts at the ToolWindow level. Uses 12px standard padding for
+     * consistency with sample text panel.
+     */
+    fun createTypingInputPanel(
       typingText: String,
       errorCounter: ErrorCounter,
-      textFontSize: Int
-    ): JBSplitter {
-      val richTextPane = createTextPane(typingText, textFontSize)
-      val textScrollPane = JBScrollPane(richTextPane)
-      textScrollPane.border = JBUI.Borders.empty()
-
-      val typingPane = createTypingPane(richTextPane, typingText, errorCounter, textFontSize)
-
-      val splitter = JBSplitter(true, 0.25f)
-      splitter.setHonorComponentsMinimumSize(true)
-      splitter.firstComponent = textScrollPane
-      splitter.secondComponent = typingPane
-      // Standard 12px padding between reference text and input area
-      splitter.border = JBUI.Borders.empty(PADDING)
-      return splitter
+      fontSizePt: Int = 12
+    ): JBScrollPane {
+      val richTextPane = createTextPane(typingText, fontSizePt)
+      val typingPane = createTypingPane(richTextPane, typingText, errorCounter, fontSizePt)
+      return typingPane
     }
 
     /**
      * Creates the reference text pane showing the text to type. Uses 12px standard padding with
      * subtle border styling.
      */
-    fun createTextPane(typingText: String, fontSizePt: Int = 12): JTextPane {
+    private fun createTextPane(typingText: String, fontSizePt: Int = 12): JTextPane {
       val pane = JTextPane()
       pane.text = typingText
       pane.isEditable = false
