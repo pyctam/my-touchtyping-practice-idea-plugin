@@ -3,7 +3,7 @@ package com.github.pyctam.touchtypingpractice.toolWindow
 import com.github.pyctam.touchtypingpractice.config.Settings
 import com.github.pyctam.touchtypingpractice.services.PracticeTextGeneratorService
 import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
-import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.PADDING
+import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.PADDING_SMALL
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createMainPanel
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createSampleTextPanel
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTextPane
@@ -67,20 +67,30 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     errorCounter.addChangeListener {
       statusLabel.text = "Typing speed: 0 WPM | Typing errors: ${errorCounter.getCount()}"
     }
+    // statusLabel.border = JBUI.Borders.compound(
+    //  JBUI.Borders.empty(PADDING),
+    //  JBUI.Borders.customLine(JBColor.border(), 1)
+    // )
+
     val panel = BorderLayoutPanel()
     // IntelliJ standard: 12px padding (1.5 x 8px base unit) with 1px top border for visual
     // separation from typing area
     panel.border =
       JBUI.Borders.compound(
-        JBUI.Borders.empty(PADDING),
-        JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0) // 1px border on top only
+        JBUI.Borders.empty(PADDING_SMALL),
+        JBUI.Borders.customLine(JBColor.border(), 1)
       )
+    // panel.border =
+    //  JBUI.Borders.compound(
+    //    JBUI.Borders.empty(PADDING),
+    //    JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0) // 1px border on top only
+    //  )
     panel.background = UIUtil.getPanelBackground()
     panel.addToLeft(statusLabel)
     // Dynamically set minimum and preferred height based on font + padding
     // Ensures status panel has proper visual weight without being too cramped
     val labelHeight = statusLabel.preferredSize.height
-    val verticalPadding = JBUI.scale(PADDING) * 2 // 12px top + 12px bottom = 24px total
+    val verticalPadding = JBUI.scale(PADDING_SMALL) * 2 // 12px top + 12px bottom = 24px total
     val totalHeight = labelHeight + verticalPadding
     panel.minimumSize = JBUI.size(0, totalHeight)
     panel.preferredSize = JBUI.size(0, totalHeight)

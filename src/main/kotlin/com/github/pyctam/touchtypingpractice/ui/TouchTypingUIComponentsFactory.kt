@@ -31,12 +31,12 @@ class TouchTypingUIComponentsFactory {
     fun createMainPanel(): BorderLayoutPanel {
       return BorderLayoutPanel().apply {
         // 12px standard padding with subtle border for visual separation
-        border =
-          JBUI.Borders.compound(
-            JBUI.Borders.empty(PADDING),
-            JBUI.Borders.customLine(JBColor.border(), 1)
-          )
-        background = UIUtil.getPanelBackground()
+        // border =
+        //  JBUI.Borders.compound(
+        //    JBUI.Borders.empty(PADDING),
+        //    JBUI.Borders.customLine(JBColor.border(), 1)
+        //  )
+        // background = UIUtil.getPanelBackground()
       }
     }
     /**
@@ -49,11 +49,11 @@ class TouchTypingUIComponentsFactory {
       pane.isEditable = false
       pane.font = applyFontSize(pane.font, fontSizePt)
       // IntelliJ standard: 12px padding with light border for definition
-      pane.border =
-        JBUI.Borders.compound(
-          JBUI.Borders.empty(PADDING),
-          JBUI.Borders.customLine(JBColor.border(), 1)
-        )
+      // pane.border =
+      //  JBUI.Borders.compound(
+      //    JBUI.Borders.empty(PADDING),
+      //    JBUI.Borders.customLine(JBColor.border(), 1)
+      //  )
       return pane
     }
     /**
@@ -65,7 +65,7 @@ class TouchTypingUIComponentsFactory {
       val textScrollPane = JBScrollPane(referenceTextPane)
       textScrollPane.border =
         JBUI.Borders.compound(
-          JBUI.Borders.empty(PADDING),
+          JBUI.Borders.empty(PADDING_SMALL),
           JBUI.Borders.customLine(JBColor.border(), 1)
         )
       return textScrollPane
@@ -98,6 +98,11 @@ class TouchTypingUIComponentsFactory {
       typingArea.lineWrap = true
       typingArea.wrapStyleWord = true
       typingArea.font = applyFontSize(UIUtil.getLabelFont(), fontSizePt)
+      // typingArea.border = JBUI.Borders.compound(
+      //  JBUI.Borders.empty(PADDING),
+      //  JBUI.Borders.customLine(JBColor.border(), 1)
+      // )
+
       val listener =
         TouchTypingDocumentListener(typingArea, referenceTextPane, originalText, errorCounter)
       typingArea.document.addDocumentListener(listener)
@@ -105,7 +110,7 @@ class TouchTypingUIComponentsFactory {
       // IntelliJ standard: 12px padding with light border for visual consistency
       scrollPane.border =
         JBUI.Borders.compound(
-          JBUI.Borders.empty(PADDING),
+          JBUI.Borders.empty(PADDING_SMALL),
           JBUI.Borders.customLine(JBColor.border(), 1)
         )
       return scrollPane
