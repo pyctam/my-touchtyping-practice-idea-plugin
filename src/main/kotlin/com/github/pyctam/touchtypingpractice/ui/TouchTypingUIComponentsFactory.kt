@@ -65,8 +65,8 @@ class TouchTypingUIComponentsFactory {
       val textScrollPane = JBScrollPane(referenceTextPane)
       textScrollPane.border =
         JBUI.Borders.compound(
-          JBUI.Borders.empty(PADDING_SMALL),
-          JBUI.Borders.customLine(JBColor.border(), 1)
+          JBUI.Borders.empty(0, PADDING_SMALL, PADDING_SMALL, PADDING_SMALL),
+          JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0)
         )
       return textScrollPane
     }
@@ -110,8 +110,8 @@ class TouchTypingUIComponentsFactory {
       // IntelliJ standard: 12px padding with light border for visual consistency
       scrollPane.border =
         JBUI.Borders.compound(
-          JBUI.Borders.empty(PADDING_SMALL),
-          JBUI.Borders.customLine(JBColor.border(), 1)
+          JBUI.Borders.empty(0, PADDING_SMALL, PADDING_SMALL, PADDING_SMALL),
+          JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0)
         )
       return scrollPane
     }
