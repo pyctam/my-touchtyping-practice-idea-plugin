@@ -69,9 +69,9 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     }
     statusLabel.border =
       JBUI.Borders.compound(
-        // JBUI.Borders.empty(PADDING_SMALL)
-        // , JBUI.Borders.customLine(JBColor.border(), 1)
-        )
+        JBUI.Borders.empty(PADDING_SMALL),
+        JBUI.Borders.customLine(JBColor.border(), 1)
+      )
 
     val panel = BorderLayoutPanel()
     // IntelliJ standard: 12px padding (1.5 x 8px base unit) with 1px top border for visual
@@ -92,8 +92,8 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     panel.preferredSize = JBUI.size(0, totalHeight)
     panel.border =
       JBUI.Borders.compound(
-        JBUI.Borders.empty(0, PADDING_SMALL, 0, PADDING_SMALL),
-        JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0)
+        JBUI.Borders.empty(0, PADDING_SMALL, PADDING_SMALL, PADDING_SMALL),
+        JBUI.Borders.customLine(JBColor.border(), 1)
       )
     return panel
   }
