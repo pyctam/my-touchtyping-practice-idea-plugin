@@ -39,42 +39,11 @@ class TouchTypingUIComponentsFactory {
         background = UIUtil.getPanelBackground()
       }
     }
-
     /**
-     * Creates the sample text panel showing the text to type. Public factory method for composing
-     * layouts at the ToolWindow level. Uses 12px standard padding with subtle border styling.
+     * Creates the reference text pane showing the text to type. Public factory method. Uses 12px
+     * standard padding with subtle border styling.
      */
-    fun createSampleTextPanel(typingText: String, fontSizePt: Int = 12): JBScrollPane {
-      val richTextPane = createTextPane(typingText, fontSizePt)
-      val textScrollPane = JBScrollPane(richTextPane)
-      textScrollPane.border =
-        JBUI.Borders.compound(
-          JBUI.Borders.empty(PADDING),
-          JBUI.Borders.customLine(JBColor.border(), 1)
-        )
-      return textScrollPane
-    }
-
-    /**
-     * Creates the typing input panel with document listener for real-time feedback. Public factory
-     * method for composing layouts at the ToolWindow level. Uses 12px standard padding for
-     * consistency with sample text panel.
-     */
-    fun createTypingInputPanel(
-      typingText: String,
-      errorCounter: ErrorCounter,
-      fontSizePt: Int = 12
-    ): JBScrollPane {
-      val richTextPane = createTextPane(typingText, fontSizePt)
-      val typingPane = createTypingPane(richTextPane, typingText, errorCounter, fontSizePt)
-      return typingPane
-    }
-
-    /**
-     * Creates the reference text pane showing the text to type. Uses 12px standard padding with
-     * subtle border styling.
-     */
-    private fun createTextPane(typingText: String, fontSizePt: Int = 12): JTextPane {
+    fun createTextPane(typingText: String, fontSizePt: Int = 12): JTextPane {
       val pane = JTextPane()
       pane.text = typingText
       pane.isEditable = false
@@ -85,10 +54,36 @@ class TouchTypingUIComponentsFactory {
           JBUI.Borders.empty(PADDING),
           JBUI.Borders.customLine(JBColor.border(), 1)
         )
-
       return pane
     }
-
+    /**
+     * Creates the sample text panel showing the text to type. Public factory method for composing
+     * layouts at the ToolWindow level. Uses the provided reference pane. Uses 12px standard padding
+     * with subtle border styling.
+     */
+    fun createSampleTextPanel(referenceTextPane: JTextPane): JBScrollPane {
+      val textScrollPane = JBScrollPane(referenceTextPane)
+      textScrollPane.border =
+        JBUI.Borders.compound(
+          JBUI.Borders.empty(PADDING),
+          JBUI.Borders.customLine(JBColor.border(), 1)
+        )
+      return textScrollPane
+    }
+    /**
+     * Creates the typing input panel with document listener for real-time feedback. Public factory
+     * method for composing layouts at the ToolWindow level. Uses 12px standard padding for
+     * consistency with sample text panel.
+     */
+    fun createTypingInputPanel(
+      referenceTextPane: JTextPane,
+      typingText: String,
+      errorCounter: ErrorCounter,
+      fontSizePt: Int = 12
+    ): JBScrollPane {
+      val typingPane = createTypingPane(referenceTextPane, typingText, errorCounter, fontSizePt)
+      return typingPane
+    }
     /**
      * Creates the input typing pane with document listener for real-time feedback. Uses 12px
      * standard padding for consistency with reference text pane.
@@ -103,11 +98,9 @@ class TouchTypingUIComponentsFactory {
       typingArea.lineWrap = true
       typingArea.wrapStyleWord = true
       typingArea.font = applyFontSize(UIUtil.getLabelFont(), fontSizePt)
-
       val listener =
         TouchTypingDocumentListener(typingArea, referenceTextPane, originalText, errorCounter)
       typingArea.document.addDocumentListener(listener)
-
       val scrollPane = JBScrollPane(typingArea)
       // IntelliJ standard: 12px padding with light border for visual consistency
       scrollPane.border =
