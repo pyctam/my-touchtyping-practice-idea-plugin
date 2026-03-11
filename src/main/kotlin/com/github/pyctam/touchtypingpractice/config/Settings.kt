@@ -6,7 +6,16 @@ import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
+import com.intellij.util.messages.Topic
 import com.intellij.util.xmlb.XmlSerializerUtil
+
+/**
+ * Listener interface for settings changes. Implementations will be notified when settings are
+ * modified and persisted.
+ */
+interface SettingsChangeListener {
+  fun onSettingsChanged()
+}
 
 /**
  * Touch Typing Practice settings persisted at application level using IntelliJ's
@@ -33,7 +42,10 @@ class Settings : PersistentStateComponent<Settings> {
   }
 
   companion object {
-    const val DEFAULT_TEXT_FONT_SIZE = 12
+    const val DEFAULT_TEXT_FONT_SIZE = 13 // IntelliJ IDEA standard editor font size
+
+    val SETTINGS_CHANGE_TOPIC: Topic<SettingsChangeListener> =
+      Topic.create("TouchTypingPractice.SettingsChange", SettingsChangeListener::class.java)
 
     @Suppress("unused")
     fun getInstance(): Settings =

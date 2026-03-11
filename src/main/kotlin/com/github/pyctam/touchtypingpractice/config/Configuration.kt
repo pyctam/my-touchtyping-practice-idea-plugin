@@ -16,6 +16,7 @@ import com.github.pyctam.touchtypingpractice.UIBundle.TEXT_FONT_SIZE_TITLE
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.BOTH_HANDS
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.LEFT_HAND
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.RIGHT_HAND
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
@@ -203,6 +204,13 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
     logger.info(
       "Before save: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers}"
     )
+
+    // Publish settings change event to notify listeners (e.g., ToolWindow)
+    ApplicationManager.getApplication()
+      .messageBus
+      .syncPublisher(Settings.SETTINGS_CHANGE_TOPIC)
+      .onSettingsChanged()
+
     logger.info("============ APPLY END ============")
   }
 

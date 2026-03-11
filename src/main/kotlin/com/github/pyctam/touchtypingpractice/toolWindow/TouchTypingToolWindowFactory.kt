@@ -1,6 +1,7 @@
 package com.github.pyctam.touchtypingpractice.toolWindow
 
 import com.github.pyctam.touchtypingpractice.config.Settings
+import com.github.pyctam.touchtypingpractice.config.SettingsChangeListener
 import com.github.pyctam.touchtypingpractice.services.PracticeTextGeneratorService
 import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.PADDING_SMALL
@@ -8,6 +9,8 @@ import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.C
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createSampleTextPanel
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTextPane
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTypingInputPanel
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
@@ -19,6 +22,7 @@ import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
+import javax.swing.SwingUtilities
 
 /**
  * ToolWindow factory for the Touch Typing Practice plugin. Creates the main UI for practicing
@@ -26,35 +30,84 @@ import com.intellij.util.ui.components.BorderLayoutPanel
  *
  * Implements DumbAware to allow the tool window to be available during IDE indexing operations.
  *
+ * Supports hot-reload: subscribes to settings changes via MessageBus and recreates the UI when
+ * settings are modified without requiring IDE restart.
+ *
  * UI Design:
  * - Uses IntelliJ's 8px base unit spacing system (12px standard padding)
- * - Follows IntelliJ Typography Hierarchy (body text = 12pt regular, status = medium weight)
+ * - Follows IntelliJ Typography Hierarchy (body text = 13pt regular, status = medium weight)
  * - Automatic dark/light theme support via JBColor
  */
 class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
+  private val logger: Logger = Logger.getInstance(TouchTypingToolWindowFactory::class.java)
+
   override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
+    logger.info("Creating Touch Typing Practice tool window content")
+    val errorCounter = ErrorCounter()
+    // Create and add initial content
+    val mainPanel = createInitialContent(errorCounter)
+    val contentFactory = ContentFactory.getInstance()
+    val content = contentFactory.createContent(mainPanel, null, false)
+    toolWindow.contentManager.addContent(content)
+
+    // Subscribe to settings changes to support hot-reload
+    val messageBus = ApplicationManager.getApplication().messageBus
+    messageBus
+      .connect()
+      .subscribe(
+        Settings.SETTINGS_CHANGE_TOPIC,
+        object : SettingsChangeListener {
+          override fun onSettingsChanged() {
+            logger.info("Settings changed - recreating tool window content")
+            SwingUtilities.invokeLater {
+              try {
+                // Remove all existing content
+                toolWindow.contentManager.removeAllContents(true)
+                // Recreate and add new content with updated settings
+                val updatedMainPanel = createInitialContent(errorCounter)
+                val updatedContent = contentFactory.createContent(updatedMainPanel, null, false)
+                toolWindow.contentManager.addContent(updatedContent)
+                logger.info("Tool window content recreated successfully")
+              } catch (e: Exception) {
+                logger.error("Failed to recreate tool window content: ${e.message}", e)
+              }
+            }
+          }
+        }
+      )
+  }
+
+  /**
+   * Creates the initial content panel with all UI components. Separated into a method so it can be
+   * called both on first creation and when settings change.
+   */
+  private fun createInitialContent(errorCounter: ErrorCounter): BorderLayoutPanel {
     val settings = Settings.getInstance()
     val textGenerator = PracticeTextGeneratorService()
     val typingText = textGenerator.generatePracticeText()
-    val errorCounter = ErrorCounter()
-    // Create reference text pane once - used by both sample text and typing input panels
+
+    // Create reference text pane with current font size - used by both sample text and typing
+    // input panels
     val referenceTextPane = createTextPane(typingText, settings.textFontSize)
+
     // Create individual panels: sample text and typing input, both using the same reference pane
     val sampleTextPanel = createSampleTextPanel(referenceTextPane)
     val typingInputPanel =
       createTypingInputPanel(referenceTextPane, typingText, errorCounter, settings.textFontSize)
+
     // Create status panel with fixed height
     val statusPanel = createStatusPanel(errorCounter)
+
     // Add all panels directly to main container: top (sample text 50%) + center (typing 50%) +
     // bottom (status fixed)
     val mainPanel = createMainPanel()
     mainPanel.addToTop(sampleTextPanel)
     mainPanel.addToCenter(typingInputPanel)
     mainPanel.addToBottom(statusPanel)
-    val contentFactory = ContentFactory.getInstance()
-    val content = contentFactory.createContent(mainPanel, null, false)
-    toolWindow.contentManager.addContent(content)
+
+    return mainPanel
   }
+
   /**
    * Creates the status panel with typing speed and error count. Uses IntelliJ's standard spacing
    * (12px padding) and typography (medium weight).
