@@ -46,7 +46,6 @@ dependencies {
     // plugin from JetBrains Marketplace.
     plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
 
-    instrumentationTools()
     pluginVerifier()
     zipSigner()
     testFramework(TestFrameworkType.Platform)

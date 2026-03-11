@@ -256,15 +256,18 @@ class PracticeTextGeneratorService {
    * Generates random text from the provided character set.
    *
    * Rules:
+   * - Text length is randomly between 1 and 24 characters
    * - First character is never a space
    * - Consecutive spaces are limited to 1 maximum (no repeated spaces)
+   * - Last character is never a space
    * - Space frequency is approximately 10% of the text
    *
    * @param chars Available characters for text generation
-   * @return A randomly generated text string of 100 characters
+   * @return A randomly generated text string with length between 1 and 24 characters
    */
   private fun generateRandomText(chars: String): String {
     val random = Random(System.currentTimeMillis())
+    val textLength = random.nextInt(1, 128) // Random length between 1 and 24
     val text = StringBuilder()
     val nonSpaceChars = chars.replace(" ", "")
     var lastWasSpace = false
@@ -272,10 +275,10 @@ class PracticeTextGeneratorService {
     // Ensure first character is not a space
     if (nonSpaceChars.isEmpty()) {
       logger.warn("No non-space characters available. Using space only.")
-      return " ".repeat(100)
+      return "a" // Return a single non-space character as fallback
     }
 
-    repeat(100) { index ->
+    repeat(textLength) { index ->
       val charToAdd =
         if (index == 0) {
           // First character must not be space
@@ -301,8 +304,11 @@ class PracticeTextGeneratorService {
       text.append(charToAdd)
     }
 
-    logger.info("generateRandomText: generated='${text.take(50)}...' (length=${text.length})")
+    // Ensure no trailing spaces
+    val result = text.toString().trimEnd()
 
-    return text.toString()
+    logger.info("generateRandomText: generated='$result' (length=${result.length})")
+
+    return result
   }
 }

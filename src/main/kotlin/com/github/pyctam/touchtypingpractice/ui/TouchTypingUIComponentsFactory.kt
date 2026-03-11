@@ -43,7 +43,7 @@ class TouchTypingUIComponentsFactory {
      * Creates the reference text pane showing the text to type. Public factory method. Uses 12px
      * standard padding with subtle border styling.
      */
-    fun createTextPane(typingText: String, fontSizePt: Int = 12): JTextPane {
+    fun createTextPane(typingText: String, fontSizePt: Int = 13): JTextPane {
       val pane = JTextPane()
       pane.text = typingText
       pane.isEditable = false
@@ -79,7 +79,7 @@ class TouchTypingUIComponentsFactory {
       referenceTextPane: JTextPane,
       typingText: String,
       errorCounter: ErrorCounter,
-      fontSizePt: Int = 12
+      fontSizePt: Int = 13
     ): JBScrollPane {
       val typingPane = createTypingPane(referenceTextPane, typingText, errorCounter, fontSizePt)
       return typingPane
@@ -92,7 +92,7 @@ class TouchTypingUIComponentsFactory {
       referenceTextPane: JTextPane,
       originalText: String,
       errorCounter: ErrorCounter,
-      fontSizePt: Int = 12
+      fontSizePt: Int = 13
     ): JBScrollPane {
       val typingArea = JTextArea()
       typingArea.lineWrap = true
