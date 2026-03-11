@@ -267,7 +267,7 @@ class PracticeTextGeneratorService {
    */
   private fun generateRandomText(chars: String): String {
     val random = Random(System.currentTimeMillis())
-    val textLength = random.nextInt(1, 25) // Random length between 1 and 24
+    val textLength = random.nextInt(1, 128) // Random length between 1 and 24
     val text = StringBuilder()
     val nonSpaceChars = chars.replace(" ", "")
     var lastWasSpace = false
