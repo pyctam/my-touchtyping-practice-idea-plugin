@@ -8,6 +8,7 @@ import com.intellij.util.ui.components.BorderLayoutPanel
 import java.awt.Font
 import javax.swing.JTextArea
 import javax.swing.JTextPane
+import javax.swing.event.DocumentListener
 
 /**
  * UI Components Factory for the Touch Typing Practice plugin. Follows IntelliJ IDEA Design System
@@ -116,9 +117,48 @@ class TouchTypingUIComponentsFactory {
         )
       return scrollPane
     }
+    /**
+     * Creates the typing input components with document listener for real-time feedback. Returns a
+     * data class with the scroll pane, typing area, and listener for reset functionality.
+     */
+    fun createTypingInputComponents(
+      referenceTextPane: JTextPane,
+      typingText: String,
+      errorCounter: ErrorCounter,
+      fontSizePt: Int = 13
+    ): TypingInputComponents {
+      val typingArea = JTextArea()
+      typingArea.lineWrap = true
+      typingArea.wrapStyleWord = true
+      typingArea.font = applyFontSize(UIUtil.getLabelFont(), fontSizePt)
+      typingArea.border =
+        JBUI.Borders.compound(
+          JBUI.Borders.empty(PADDING_SMALL),
+          // JBUI.Borders.customLine(JBColor.border(), 1)
+        )
+
+      val listener =
+        TouchTypingDocumentListener(typingArea, referenceTextPane, typingText, errorCounter)
+      typingArea.document.addDocumentListener(listener)
+      val scrollPane = JBScrollPane(typingArea)
+      // IntelliJ standard: 12px padding with light border for visual consistency
+      scrollPane.border =
+        JBUI.Borders.compound(
+          JBUI.Borders.empty(0, PADDING_SMALL, PADDING_SMALL, PADDING_SMALL),
+          JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0)
+        )
+      return TypingInputComponents(scrollPane, typingArea, listener)
+    }
 
     private fun applyFontSize(baseFont: Font, sizePt: Int): Font {
       return baseFont.deriveFont(sizePt.toFloat())
     }
   }
 }
+
+/** Data class to hold the typing input panel components for reset functionality. */
+data class TypingInputComponents(
+  val scrollPane: JBScrollPane,
+  val typingArea: JTextArea,
+  val listener: DocumentListener
+)

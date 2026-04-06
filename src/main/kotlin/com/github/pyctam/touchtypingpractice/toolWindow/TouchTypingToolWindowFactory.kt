@@ -4,15 +4,17 @@ import com.github.pyctam.touchtypingpractice.config.Settings
 import com.github.pyctam.touchtypingpractice.config.SettingsChangeListener
 import com.github.pyctam.touchtypingpractice.services.PracticeTextGeneratorService
 import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
+import com.github.pyctam.touchtypingpractice.ui.TouchTypingDocumentListener
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.PADDING_SMALL
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createMainPanel
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createSampleTextPanel
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTextPane
-import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTypingInputPanel
+import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.Companion.createTypingInputComponents
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.JBColor
@@ -22,7 +24,14 @@ import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
+import java.awt.Toolkit
+import java.awt.event.KeyEvent
+import javax.swing.AbstractAction
+import javax.swing.JTextArea
+import javax.swing.JTextPane
+import javax.swing.KeyStroke
 import javax.swing.SwingUtilities
+import javax.swing.event.DocumentListener
 
 /**
  * ToolWindow factory for the Touch Typing Practice plugin. Creates the main UI for practicing
@@ -41,11 +50,17 @@ import javax.swing.SwingUtilities
 class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
   private val logger: Logger = Logger.getInstance(TouchTypingToolWindowFactory::class.java)
 
+  // Fields to hold references for reset functionality
+  private var referenceTextPane: JTextPane? = null
+  private var typingArea: JTextArea? = null
+  private var currentListener: DocumentListener? = null
+  private var errorCounter: ErrorCounter? = null
+
   override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
     logger.info("Creating Touch Typing Practice tool window content")
-    val errorCounter = ErrorCounter()
+    errorCounter = ErrorCounter()
     // Create and add initial content
-    val mainPanel = createInitialContent(errorCounter)
+    val mainPanel = createInitialContent(errorCounter!!)
     val contentFactory = ContentFactory.getInstance()
     val content = contentFactory.createContent(mainPanel, null, false)
     toolWindow.contentManager.addContent(content)
@@ -64,7 +79,7 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
                 // Remove all existing content
                 toolWindow.contentManager.removeAllContents(true)
                 // Recreate and add new content with updated settings
-                val updatedMainPanel = createInitialContent(errorCounter)
+                val updatedMainPanel = createInitialContent(errorCounter!!)
                 val updatedContent = contentFactory.createContent(updatedMainPanel, null, false)
                 toolWindow.contentManager.addContent(updatedContent)
                 logger.info("Tool window content recreated successfully")
@@ -88,20 +103,37 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
 
     // Create reference text pane with current font size - used by both sample text and typing
     // input panels
-    val referenceTextPane = createTextPane(typingText, settings.textFontSize)
+    referenceTextPane = createTextPane(typingText, settings.textFontSize)
 
     // Create individual panels: sample text and typing input, both using the same reference pane
-    val sampleTextPanel = createSampleTextPanel(referenceTextPane)
-    val typingInputPanel =
-      createTypingInputPanel(referenceTextPane, typingText, errorCounter, settings.textFontSize)
+    val sampleTextPanel = createSampleTextPanel(referenceTextPane!!)
+    val resetPanel = createResetPanel()
+    val typingInputComponents =
+      createTypingInputComponents(
+        referenceTextPane!!,
+        typingText,
+        errorCounter,
+        settings.textFontSize
+      )
+    val typingInputPanel = typingInputComponents.scrollPane
+
+    // Store references for reset functionality
+    this.typingArea = typingInputComponents.typingArea
+    this.currentListener = typingInputComponents.listener
+    this.errorCounter = errorCounter
 
     // Create status panel with fixed height
     val statusPanel = createStatusPanel(errorCounter)
 
-    // Add all panels directly to main container: top (sample text 50%) + center (typing 50%) +
+    // Create north panel with sample text and reset hyperlink
+    val northPanel = BorderLayoutPanel()
+    northPanel.addToCenter(sampleTextPanel)
+    northPanel.addToBottom(resetPanel)
+
+    // Add all panels directly to main container: top (sample text + reset) + center (typing) +
     // bottom (status fixed)
     val mainPanel = createMainPanel()
-    mainPanel.addToTop(sampleTextPanel)
+    mainPanel.addToTop(northPanel)
     mainPanel.addToCenter(typingInputPanel)
     mainPanel.addToBottom(statusPanel)
 
@@ -149,5 +181,72 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
         JBUI.Borders.customLine(JBColor.border(), 1, 0, 0, 0)
       )
     return panel
+  }
+
+  /**
+   * Creates the reset panel with a hyperlink to reset the practice text and input. The hyperlink is
+   * right-aligned and includes a platform-independent shortcut (Ctrl/Cmd+R).
+   */
+  private fun createResetPanel(): BorderLayoutPanel {
+    val resetLabel = JBLabel("<html><a href=''>Reset</a></html>")
+    resetLabel.addMouseListener(
+      object : java.awt.event.MouseAdapter() {
+        override fun mouseClicked(e: java.awt.event.MouseEvent) {
+          resetPractice()
+        }
+      }
+    )
+    resetLabel.cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR)
+
+    // Platform-independent shortcut
+    val shortcutKey = if (SystemInfo.isMac) "Cmd+R" else "Ctrl+R"
+    resetLabel.toolTipText = "Reset practice text and clear input ($shortcutKey)"
+
+    // Add shortcut handling
+    val shortcut =
+      KeyStroke.getKeyStroke(KeyEvent.VK_R, Toolkit.getDefaultToolkit().menuShortcutKeyMask)
+    resetLabel.inputMap.put(shortcut, "reset")
+    resetLabel.actionMap.put(
+      "reset",
+      object : AbstractAction() {
+        override fun actionPerformed(e: java.awt.event.ActionEvent?) {
+          resetPractice()
+        }
+      }
+    )
+
+    val panel = BorderLayoutPanel()
+    panel.addToRight(resetLabel)
+    panel.border = JBUI.Borders.empty(PADDING_SMALL)
+    return panel
+  }
+
+  /**
+   * Resets the practice text and clears the typing input. Regenerates new text using current
+   * settings, updates the reference pane, clears the typing area, resets the error counter, and
+   * updates the document listener.
+   */
+  private fun resetPractice() {
+    val settings = Settings.getInstance()
+    val textGenerator = PracticeTextGeneratorService()
+    val newTypingText = textGenerator.generatePracticeText()
+
+    // Update reference text pane
+    referenceTextPane?.text = newTypingText
+
+    // Clear typing area
+    typingArea?.text = ""
+
+    // Reset error counter
+    errorCounter?.setCount(0)
+
+    // Remove old listener and add new one with updated text
+    typingArea?.document?.removeDocumentListener(currentListener)
+    val newListener =
+      TouchTypingDocumentListener(typingArea!!, referenceTextPane!!, newTypingText, errorCounter!!)
+    typingArea?.document?.addDocumentListener(newListener)
+    currentListener = newListener
+
+    logger.info("Practice reset: new text generated and UI updated")
   }
 }
