@@ -24,12 +24,10 @@ import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
-import java.awt.Toolkit
 import java.awt.event.KeyEvent
-import javax.swing.AbstractAction
+import java.awt.event.KeyListener
 import javax.swing.JTextArea
 import javax.swing.JTextPane
-import javax.swing.KeyStroke
 import javax.swing.SwingUtilities
 import javax.swing.event.DocumentListener
 
@@ -51,10 +49,14 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
   private val logger: Logger = Logger.getInstance(TouchTypingToolWindowFactory::class.java)
 
   // Fields to hold references for reset functionality
-  private var referenceTextPane: JTextPane? = null
-  private var typingArea: JTextArea? = null
-  private var currentListener: DocumentListener? = null
-  private var errorCounter: ErrorCounter? = null
+  private lateinit var referenceTextPane: JTextPane
+  private lateinit var typingArea: JTextArea
+  private lateinit var currentListener: DocumentListener
+  private lateinit var errorCounter: ErrorCounter
+
+  // Fields for R key press detection
+  private var rPressCount = 0
+  private var lastRPressTime = 0L
 
   override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
     logger.info("Creating Touch Typing Practice tool window content")
@@ -64,6 +66,9 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     val contentFactory = ContentFactory.getInstance()
     val content = contentFactory.createContent(mainPanel, null, false)
     toolWindow.contentManager.addContent(content)
+
+    // Request focus to the typing area after the tool window is shown
+    SwingUtilities.invokeLater { typingArea.requestFocusInWindow() }
 
     // Subscribe to settings changes to support hot-reload
     val messageBus = ApplicationManager.getApplication().messageBus
@@ -82,6 +87,8 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
                 val updatedMainPanel = createInitialContent(errorCounter!!)
                 val updatedContent = contentFactory.createContent(updatedMainPanel, null, false)
                 toolWindow.contentManager.addContent(updatedContent)
+                // Request focus after recreation
+                typingArea.requestFocusInWindow()
                 logger.info("Tool window content recreated successfully")
               } catch (e: Exception) {
                 logger.error("Failed to recreate tool window content: ${e.message}", e)
@@ -106,11 +113,11 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     referenceTextPane = createTextPane(typingText, settings.textFontSize)
 
     // Create individual panels: sample text and typing input, both using the same reference pane
-    val sampleTextPanel = createSampleTextPanel(referenceTextPane!!)
+    val sampleTextPanel = createSampleTextPanel(referenceTextPane)
     val resetPanel = createResetPanel()
     val typingInputComponents =
       createTypingInputComponents(
-        referenceTextPane!!,
+        referenceTextPane,
         typingText,
         errorCounter,
         settings.textFontSize
@@ -136,6 +143,30 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     mainPanel.addToTop(northPanel)
     mainPanel.addToCenter(typingInputPanel)
     mainPanel.addToBottom(statusPanel)
+
+    // Add R key press detection to typing area
+    typingArea.addKeyListener(
+      object : KeyListener {
+        override fun keyTyped(e: KeyEvent?) {}
+
+        override fun keyPressed(e: KeyEvent?) {
+          if (e?.keyChar == 'r' || e?.keyChar == 'R') {
+            val now = System.currentTimeMillis()
+            if (now - lastRPressTime > 3000) { // 3 second window
+              rPressCount = 0
+            }
+            rPressCount++
+            lastRPressTime = now
+            if (rPressCount >= 5) {
+              resetPractice()
+              rPressCount = 0
+            }
+          }
+        }
+
+        override fun keyReleased(e: KeyEvent?) {}
+      }
+    )
 
     return mainPanel
   }
@@ -200,20 +231,7 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
 
     // Platform-independent shortcut
     val shortcutKey = if (SystemInfo.isMac) "Cmd+R" else "Ctrl+R"
-    resetLabel.toolTipText = "Reset practice text and clear input ($shortcutKey)"
-
-    // Add shortcut handling
-    val shortcut =
-      KeyStroke.getKeyStroke(KeyEvent.VK_R, Toolkit.getDefaultToolkit().menuShortcutKeyMask)
-    resetLabel.inputMap.put(shortcut, "reset")
-    resetLabel.actionMap.put(
-      "reset",
-      object : AbstractAction() {
-        override fun actionPerformed(e: java.awt.event.ActionEvent?) {
-          resetPractice()
-        }
-      }
-    )
+    resetLabel.toolTipText = "Reset practice text and clear input (press R 5 times quickly)"
 
     val panel = BorderLayoutPanel()
     panel.addToRight(resetLabel)
@@ -232,20 +250,23 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     val newTypingText = textGenerator.generatePracticeText()
 
     // Update reference text pane
-    referenceTextPane?.text = newTypingText
+    referenceTextPane.text = newTypingText
 
     // Clear typing area
-    typingArea?.text = ""
+    typingArea.text = ""
 
     // Reset error counter
-    errorCounter?.setCount(0)
+    errorCounter.setCount(0)
 
     // Remove old listener and add new one with updated text
-    typingArea?.document?.removeDocumentListener(currentListener)
+    typingArea.document.removeDocumentListener(currentListener)
     val newListener =
-      TouchTypingDocumentListener(typingArea!!, referenceTextPane!!, newTypingText, errorCounter!!)
-    typingArea?.document?.addDocumentListener(newListener)
+      TouchTypingDocumentListener(typingArea, referenceTextPane, newTypingText, errorCounter)
+    typingArea.document.addDocumentListener(newListener)
     currentListener = newListener
+
+    // Request focus back to typing area after reset
+    typingArea.requestFocusInWindow()
 
     logger.info("Practice reset: new text generated and UI updated")
   }
