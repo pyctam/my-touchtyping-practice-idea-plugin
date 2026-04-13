@@ -80,6 +80,12 @@ class TouchTypingDocumentListener(
    */
   private inner class TextLengthLimiterFilter(private val maxLength: Int) : DocumentFilter() {
     override fun insertString(fb: FilterBypass, offset: Int, string: String, attr: AttributeSet?) {
+      val currentText = fb.document.getText(0, fb.document.length)
+      if (hasErrors(currentText)) {
+        logger.info("Rejected insertion - errors exist")
+        return
+      }
+
       val currentLength = fb.document.length
       val newLength = currentLength + string.length
 
@@ -103,6 +109,12 @@ class TouchTypingDocumentListener(
       text: String,
       attrs: AttributeSet?
     ) {
+      val currentText = fb.document.getText(0, fb.document.length)
+      if (hasErrors(currentText)) {
+        logger.info("Rejected replacement - errors exist")
+        return
+      }
+
       val currentLength = fb.document.length
       val newLength = currentLength - length + text.length
 
@@ -124,5 +136,13 @@ class TouchTypingDocumentListener(
       // Always allow removals (delete/backspace)
       super.remove(fb, offset, length)
     }
+  }
+
+  private fun hasErrors(typed: String): Boolean {
+    val compareLen = minOf(typed.length, originalText.length)
+    for (i in 0 until compareLen) {
+      if (typed[i] != originalText[i]) return true
+    }
+    return false
   }
 }
