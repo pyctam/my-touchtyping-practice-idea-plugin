@@ -21,6 +21,10 @@ class TouchTypingDocumentListener(
   private val logger: Logger = Logger.getInstance(TouchTypingDocumentListener::class.java)
   private val mismatchPainter =
     DefaultHighlighter.DefaultHighlightPainter(JBColor(0xFFCCCC, 0xFFCCCC))
+  // Light green background (theme-aware) shown on the sample text when typing is completed
+  // without errors
+  private val completionPainter =
+    DefaultHighlighter.DefaultHighlightPainter(JBColor(0xC8E6C9, 0x2E5233))
 
   init {
     // Install a DocumentFilter to prevent typing beyond the original text length
@@ -65,9 +69,12 @@ class TouchTypingDocumentListener(
         // Update error counter with the current mismatch count (cumulative, not decreasing)
         errorCounter.setCount(mismatchCount)
 
-        // If typed is longer than original, optionally highlight the remainder of the original text
-        // (no-op for now). If you want to show extra typed characters, you'd need to display them
-        // in the reference pane as well or handle them differently.
+        // Highlight the entire sample text with a light green background when the user has
+        // typed the full text without any errors, so they can see the text is completed
+        if (typed.length == originalText.length && mismatchCount == 0) {
+          highlighter.addHighlight(0, originalText.length, completionPainter)
+          logger.info("Sample text completed without errors - highlighted in green")
+        }
       } catch (t: Throwable) {
         logger.warn("Failed to update highlights", t)
       }

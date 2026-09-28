@@ -266,6 +266,9 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     // Update reference text pane
     referenceTextPane.text = newTypingText
 
+    // Ensure any completion highlight (light green background) is removed on reset
+    referenceTextPane.highlighter.removeAllHighlights()
+
     // Reset error counter
     errorCounter.setCount(0)
 
