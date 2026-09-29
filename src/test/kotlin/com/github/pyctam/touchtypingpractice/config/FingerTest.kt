@@ -75,6 +75,17 @@ class FingerTest {
   }
 
   @Test
+  fun clearFingerClearsOnlyTheGivenBit() {
+    val mask = Finger.clearFinger(Finger.ALL_MASK, Finger.MIDDLE)
+    assertFalse(Finger.isFingerSelected(mask, Finger.MIDDLE))
+    for (finger in Finger.entries) {
+      if (finger != Finger.MIDDLE) {
+        assertTrue("Expected $finger to remain selected", Finger.isFingerSelected(mask, finger))
+      }
+    }
+  }
+
+  @Test
   fun emptyMaskHasNoFingersSelected() {
     for (finger in Finger.entries) {
       assertFalse(Finger.isFingerSelected(0, finger))
