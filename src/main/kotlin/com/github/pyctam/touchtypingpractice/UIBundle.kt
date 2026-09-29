@@ -22,6 +22,8 @@ object UIBundle : DynamicBundle(BUNDLE) {
     "ui.config.finger-selection.checkbox.use-all-fingers"
   const val CONFIG_FINGER_SELECTION_CHECKBOX_SPECIFIC_FINGERS =
     "ui.config.finger-selection.checkbox.specific-fingers"
+  const val CONFIG_FINGER_SELECTION_ERROR_AT_LEAST_ONE =
+    "ui.config.finger-selection.error.at-least-one"
 
   @JvmStatic
   fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any) =

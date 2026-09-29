@@ -28,17 +28,17 @@ class Settings : PersistentStateComponent<Settings> {
   var textFontSize: Int = DEFAULT_TEXT_FONT_SIZE
   var practiceMode: PracticeMode = BOTH_HANDS
   var keyLimitPerFinger: Int = 1
-  var useAllFingers: Boolean = true
-  var selectedFingers: Int = 0
-
-  fun unSelectedAllFingers() {
-    this.selectedFingers = 0
-  }
+  var selectedFingers: Int = Finger.ALL_MASK
 
   override fun getState(): Settings = this
 
   override fun loadState(state: Settings) {
     XmlSerializerUtil.copyBean(state, this)
+    // Normalize legacy/invalid states: an empty selection is not allowed, so fall back to all
+    // fingers. The legacy <useAllFingers> tag is ignored by the serializer.
+    if (selectedFingers == 0) {
+      selectedFingers = Finger.ALL_MASK
+    }
   }
 
   companion object {
