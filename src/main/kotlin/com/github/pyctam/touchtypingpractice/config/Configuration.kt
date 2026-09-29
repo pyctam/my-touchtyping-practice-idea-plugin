@@ -3,6 +3,7 @@ package com.github.pyctam.touchtypingpractice.config
 import com.github.pyctam.touchtypingpractice.UIBundle
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_CHECKBOX_SPECIFIC_FINGERS
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_ERROR_AT_LEAST_ONE
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_HINT
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_TITLE
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_HINT
@@ -19,22 +20,33 @@ import com.github.pyctam.touchtypingpractice.config.PracticeMode.RIGHT_HAND
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.BoundConfigurable
+import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.ui.DialogPanel
-import com.intellij.ui.dsl.builder.Cell
+import com.intellij.ui.components.JBLabel
 import com.intellij.ui.dsl.builder.bind
 import com.intellij.ui.dsl.builder.bindIntValue
-import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
+import com.intellij.util.ui.UIUtil
 import javax.swing.JCheckBox
-import javax.swing.SwingUtilities
 
 class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   private val logger: Logger = Logger.getInstance(Configuration::class.java)
   private val settings: Settings = Settings.getInstance()
   private var dialogPanel: DialogPanel? = null
-  private val fingerCheckboxes: MutableMap<Finger, Cell<JCheckBox>> = mutableMapOf()
+  private val fingerCheckboxes: MutableMap<Finger, JCheckBox> = mutableMapOf()
+  private var useAllFingersCheckbox: JCheckBox? = null
+  private var fingerSelectionErrorLabel: JBLabel? = null
+
+  // Working copy of the finger selection while the dialog is open. The checkboxes edit this value
+  // and the UI is kept in sync with it; it is only committed to [Settings] on Apply. This keeps
+  // Cancel safe and lets isModified() detect finger changes.
+  private var workingSelectedFingers: Int = Finger.ALL_MASK
+
+  // Guards against re-entrancy while the UI is being synced programmatically from the model.
+  private var isSyncingUI = false
 
   override fun createPanel(): DialogPanel {
+    workingSelectedFingers = settings.selectedFingers
     dialogPanel = panel {
       val titleTextFontSize = UIBundle.message(TEXT_FONT_SIZE_TITLE)
 
@@ -87,16 +99,13 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
 
         val textUseAllFingers = UIBundle.message(CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS)
         row {
-          checkBox(textUseAllFingers)
-            .bindSelected(
-              { settings.useAllFingers },
-              { value ->
-                logger.info("User toggled 'Use All Fingers' to: $value")
-                settings.useAllFingers = value
-                updateFingerSelectionBasedOnUseAll()
-                updateFingerCheckboxesUI()
-              }
-            )
+          // "Use All Fingers" is a shortcut: checked iff all fingers are selected. Checking it
+          // selects all fingers in one click; unchecking it clears the selection so the user can
+          // pick specific fingers.
+          val useAll = checkBox(textUseAllFingers).component
+          useAll.isSelected = workingSelectedFingers == Finger.ALL_MASK
+          useAll.addActionListener { onUseAllFingersToggled() }
+          useAllFingersCheckbox = useAll
         }
 
         val titleSpecificFingers =
@@ -105,28 +114,22 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
         buttonsGroup(titleSpecificFingers) {
           for (finger in Finger.entries) {
             row {
-              val checkBoxCell =
-                checkBox(finger.label)
-                  .bindSelected(
-                    { isFingerSelected(finger) },
-                    { value ->
-                      logger.info("User toggled $finger to: $value")
-                      if (value) {
-                        // Add finger
-                        settings.selectedFingers =
-                          Finger.encodeSelectedFingers(settings.selectedFingers, finger)
-                      } else {
-                        // Remove finger
-                        settings.selectedFingers =
-                          settings.selectedFingers xor (1 shl finger.ordinal)
-                      }
-                      updateUseAllFingersBasedOnSelection()
-                      updateFingerCheckboxesUI()
-                    }
-                  )
-              fingerCheckboxes[finger] = checkBoxCell
+              val box = checkBox(finger.label).component
+              box.isSelected = Finger.isFingerSelected(workingSelectedFingers, finger)
+              box.addActionListener { onFingerToggled(finger) }
+              fingerCheckboxes[finger] = box
             }
           }
+        }
+
+        row {
+          val errorLabel =
+            JBLabel("").apply {
+              foreground = UIUtil.getErrorForeground()
+              isVisible = false
+            }
+          cell(errorLabel)
+          fingerSelectionErrorLabel = errorLabel
         }
       }
     }
@@ -134,167 +137,101 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   }
 
   /**
-   * Updates the UI state of individual finger checkboxes based on current model state. This
-   * directly updates the checkbox components without calling apply().
+   * Handles a user click on the "Use All Fingers" checkbox: selects all fingers when checked,
+   * clears the selection when unchecked, then syncs the individual finger checkboxes.
    */
-  private fun updateFingerCheckboxesUI() {
-    logger.info("updateFingerCheckboxesUI called")
-    SwingUtilities.invokeLater {
+  private fun onUseAllFingersToggled() {
+    if (isSyncingUI) return
+    val value = useAllFingersCheckbox?.isSelected ?: return
+    logger.info("User toggled 'Use All Fingers' to: $value")
+    workingSelectedFingers = if (value) Finger.ALL_MASK else 0
+    syncFingerSelectionUI()
+  }
+
+  /**
+   * Handles a user click on an individual finger checkbox: sets or clears that finger's bit in the
+   * working selection, then syncs the "Use All Fingers" checkbox and the other finger checkboxes.
+   */
+  private fun onFingerToggled(finger: Finger) {
+    if (isSyncingUI) return
+    val value = fingerCheckboxes[finger]?.isSelected ?: return
+    logger.info("User toggled $finger to: $value")
+    if (value) {
+      workingSelectedFingers = Finger.encodeSelectedFingers(workingSelectedFingers, finger)
+    } else {
+      workingSelectedFingers = workingSelectedFingers and (1 shl finger.ordinal).inv()
+    }
+    syncFingerSelectionUI()
+  }
+
+  /**
+   * Syncs the "Use All Fingers" checkbox, all finger checkboxes, and the validation error label
+   * from [workingSelectedFingers]. The [isSyncingUI] guard prevents the programmatic checkbox
+   * updates from being treated as user actions.
+   */
+  private fun syncFingerSelectionUI() {
+    isSyncingUI = true
+    try {
       logger.info(
-        "Updating finger checkboxes UI: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers} (binary: ${settings.selectedFingers.toString(2).padStart(5, '0')})"
+        "syncFingerSelectionUI: workingSelectedFingers=${workingSelectedFingers} (binary: ${workingSelectedFingers.toString(2).padStart(5, '0')})"
       )
-      for ((finger, checkBoxCell) in fingerCheckboxes) {
-        val isSelected = Finger.isFingerSelected(settings.selectedFingers, finger)
-        logger.info("Setting $finger checkbox to isSelected=$isSelected")
-        checkBoxCell.component.isSelected = isSelected
+      useAllFingersCheckbox?.isSelected = workingSelectedFingers == Finger.ALL_MASK
+      for ((finger, box) in fingerCheckboxes) {
+        box.isSelected = Finger.isFingerSelected(workingSelectedFingers, finger)
       }
+      updateFingerSelectionError()
+    } finally {
+      isSyncingUI = false
     }
   }
 
+  /**
+   * Shows the "At least one finger should be selected" warning under the Finger Selection group
+   * when no fingers are selected, and hides it otherwise.
+   */
+  private fun updateFingerSelectionError() {
+    val errorLabel = fingerSelectionErrorLabel ?: return
+    val noFingersSelected = workingSelectedFingers == 0
+    errorLabel.text =
+      if (noFingersSelected) UIBundle.message(CONFIG_FINGER_SELECTION_ERROR_AT_LEAST_ONE) else ""
+    errorLabel.isVisible = noFingersSelected
+  }
+
+  override fun isModified(): Boolean {
+    // The finger checkboxes are not DSL-bound, so the DSL's own isModified() does not see them.
+    // Compare the working value against the saved value to detect finger-selection changes.
+    return super.isModified() || workingSelectedFingers != settings.selectedFingers
+  }
+
   override fun apply() {
-    logger.info("============ APPLY START ============")
     logger.info(
-      "Before apply: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers} (binary: ${settings.selectedFingers.toString(2).padStart(5, '0')})"
+      "apply: workingSelectedFingers=${workingSelectedFingers} (binary: ${workingSelectedFingers.toString(2).padStart(5, '0')})"
     )
 
-    settings.unSelectedAllFingers()
-    logger.info("After unSelectedAllFingers: selectedFingers=${settings.selectedFingers}")
-
+    // Commits the non-finger fields (font size, practice mode, key limit) to [Settings].
     super.apply()
-    logger.info(
-      "After super.apply: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers} (binary: ${settings.selectedFingers.toString(2).padStart(5, '0')})"
-    )
 
-    // Log current state
-    val selectedFingersList =
-      Finger.entries
-        .filter { Finger.isFingerSelected(settings.selectedFingers, it) }
-        .map { it.label }
-    logger.info("apply: Selected fingers after super.apply: $selectedFingersList")
-
-    // Check if all fingers are selected
-    val allFingersSelected =
-      Finger.entries.all { finger -> Finger.isFingerSelected(settings.selectedFingers, finger) }
-
-    logger.info("apply: allFingersSelected=$allFingersSelected")
-    logger.info(
-      "apply: selectedFingers=${settings.selectedFingers}, Finger.entries.size=${Finger.entries.size}"
-    )
-
-    // If all fingers are selected, enable "Use All Fingers"
-    if (allFingersSelected) {
-      logger.info("apply: All fingers selected, enabling useAllFingers")
-      settings.useAllFingers = true
-    } else if (settings.selectedFingers == 0) {
-      // If no fingers are selected, enable "Use All Fingers" and select all
-      logger.info("apply: No fingers selected (invalid state), auto-correcting...")
-      settings.useAllFingers = true
-      for (finger in Finger.entries) {
-        settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
-      }
-      logger.info(
-        "apply: After auto-correction: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers}"
-      )
-    } else {
-      // If some (but not all) fingers are selected, disable "Use All Fingers"
-      logger.info("apply: Some (but not all) fingers selected, disabling useAllFingers")
-      settings.useAllFingers = false
+    if (workingSelectedFingers == 0) {
+      // Block saving an invalid state: show the warning under the Finger Selection group and keep
+      // the dialog open.
+      updateFingerSelectionError()
+      throw ConfigurationException(UIBundle.message(CONFIG_FINGER_SELECTION_ERROR_AT_LEAST_ONE))
     }
 
-    logger.info(
-      "Before save: useAllFingers=${settings.useAllFingers}, selectedFingers=${settings.selectedFingers}"
-    )
+    settings.selectedFingers = workingSelectedFingers
+    logger.info("apply: committed selectedFingers=${settings.selectedFingers}")
 
     // Publish settings change event to notify listeners (e.g., ToolWindow)
     ApplicationManager.getApplication()
       .messageBus
       .syncPublisher(Settings.SETTINGS_CHANGE_TOPIC)
       .onSettingsChanged()
-
-    logger.info("============ APPLY END ============")
   }
 
   override fun reset() {
+    // Reloads the non-finger fields (font size, practice mode, key limit) from [Settings].
     super.reset()
-  }
-
-  private fun isFingerSelected(finger: Finger): Boolean {
-    return Finger.isFingerSelected(settings.selectedFingers, finger)
-  }
-
-  /**
-   * Updates finger selections when "Use All Fingers" is toggled.
-   *
-   * When "Use All Fingers" is checked: Select all fingers. When "Use All Fingers" is unchecked:
-   * Clear all selections (let user select specific fingers).
-   */
-  private fun updateFingerSelectionBasedOnUseAll() {
-    logger.info("updateFingerSelectionBasedOnUseAll: useAllFingers=${settings.useAllFingers}")
-
-    if (settings.useAllFingers) {
-      // Select all fingers
-      logger.info("Selecting all fingers because useAllFingers=true")
-      settings.selectedFingers = 0
-      for (finger in Finger.entries) {
-        settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
-      }
-      logger.info(
-        "After selecting all: selectedFingers=${settings.selectedFingers} (binary: ${settings.selectedFingers.toString(2).padStart(5, '0')})"
-      )
-    } else {
-      // Uncheck all fingers (let user select specific ones)
-      logger.info("Clearing all fingers because useAllFingers=false")
-      settings.selectedFingers = 0
-      logger.info("After clearing: selectedFingers=${settings.selectedFingers}")
-    }
-  }
-
-  /**
-   * Updates "Use All Fingers" checkbox based on individual finger selections.
-   *
-   * Rules:
-   * - If all 5 fingers are selected: Check "Use All Fingers"
-   * - If some (but not all) fingers are selected: Uncheck "Use All Fingers"
-   * - If no fingers are selected: Check "Use All Fingers" (invalid state prevention)
-   */
-  private fun updateUseAllFingersBasedOnSelection() {
-    logger.info(
-      "updateUseAllFingersBasedOnSelection: selectedFingers=${settings.selectedFingers} (binary: ${settings.selectedFingers.toString(2).padStart(5, '0')})"
-    )
-
-    val allFingersSelected =
-      Finger.entries.all { finger -> Finger.isFingerSelected(settings.selectedFingers, finger) }
-    val noFingersSelected = settings.selectedFingers == 0
-
-    logger.info("allFingersSelected=$allFingersSelected, noFingersSelected=$noFingersSelected")
-
-    when {
-      allFingersSelected -> {
-        logger.info("All fingers selected, enabling 'Use All Fingers'")
-        settings.useAllFingers = true
-      }
-      noFingersSelected -> {
-        logger.info(
-          "No fingers selected (invalid state), auto-enabling 'Use All Fingers' and selecting all"
-        )
-        settings.useAllFingers = true
-        for (finger in Finger.entries) {
-          settings.selectedFingers = Finger.encodeSelectedFingers(settings.selectedFingers, finger)
-        }
-        logger.info("After auto-correction: selectedFingers=${settings.selectedFingers}")
-      }
-      else -> {
-        logger.info("Some (but not all) fingers selected, disabling 'Use All Fingers'")
-        settings.useAllFingers = false
-      }
-    }
-
-    val selectedFingersList =
-      Finger.entries
-        .filter { Finger.isFingerSelected(settings.selectedFingers, it) }
-        .map { it.label }
-    logger.info(
-      "Final state: useAllFingers=${settings.useAllFingers}, selectedFingers=$selectedFingersList"
-    )
+    workingSelectedFingers = settings.selectedFingers
+    syncFingerSelectionUI()
   }
 }

@@ -119,7 +119,7 @@ class PracticeTextGeneratorService {
 
     logger.info(
       "Practice text generated with settings: practiceMode=${settings.practiceMode}, " +
-        "keyLimitPerFinger=${settings.keyLimitPerFinger}, useAllFingers=${settings.useAllFingers}, " +
+        "keyLimitPerFinger=${settings.keyLimitPerFinger}, " +
         "selectedFingers=${settings.selectedFingers}, availableChars='${availableChars.take(20)}...'"
     )
 
@@ -169,57 +169,30 @@ class PracticeTextGeneratorService {
   private fun getAvailableKeysForFingers(settings: Settings): String {
     val keys = StringBuilder()
 
-    if (settings.useAllFingers) {
-      // Use all available fingers for the selected practice mode
-      when (settings.practiceMode) {
-        LEFT_HAND -> {
-          LEFT_HAND_KEYS.forEach { (_, keyList) ->
+    // Use only selected fingers. When all fingers are selected (the "Use All Fingers" shortcut),
+    // this produces the same result as iterating every finger of the hand map(s).
+    Finger.entries.forEach { finger ->
+      if (Finger.isFingerSelected(settings.selectedFingers, finger)) {
+        // For BOTH_HANDS mode, check both hand maps
+        when (settings.practiceMode) {
+          LEFT_HAND -> {
+            val keyList = LEFT_HAND_KEYS[finger] ?: emptyList()
             val limitedKeys = keyList.take(settings.keyLimitPerFinger)
             keys.append(limitedKeys.joinToString(""))
           }
-        }
-        RIGHT_HAND -> {
-          RIGHT_HAND_KEYS.forEach { (_, keyList) ->
+          RIGHT_HAND -> {
+            val keyList = RIGHT_HAND_KEYS[finger] ?: emptyList()
             val limitedKeys = keyList.take(settings.keyLimitPerFinger)
             keys.append(limitedKeys.joinToString(""))
           }
-        }
-        BOTH_HANDS -> {
-          LEFT_HAND_KEYS.forEach { (_, keyList) ->
-            val limitedKeys = keyList.take(settings.keyLimitPerFinger)
-            keys.append(limitedKeys.joinToString(""))
-          }
-          RIGHT_HAND_KEYS.forEach { (_, keyList) ->
-            val limitedKeys = keyList.take(settings.keyLimitPerFinger)
-            keys.append(limitedKeys.joinToString(""))
-          }
-        }
-      }
-    } else {
-      // Use only selected fingers
-      Finger.entries.forEach { finger ->
-        if (Finger.isFingerSelected(settings.selectedFingers, finger)) {
-          // For BOTH_HANDS mode, check both hand maps
-          when (settings.practiceMode) {
-            LEFT_HAND -> {
-              val keyList = LEFT_HAND_KEYS[finger] ?: emptyList()
-              val limitedKeys = keyList.take(settings.keyLimitPerFinger)
-              keys.append(limitedKeys.joinToString(""))
-            }
-            RIGHT_HAND -> {
-              val keyList = RIGHT_HAND_KEYS[finger] ?: emptyList()
-              val limitedKeys = keyList.take(settings.keyLimitPerFinger)
-              keys.append(limitedKeys.joinToString(""))
-            }
-            BOTH_HANDS -> {
-              // Include keys from both hands for this finger
-              val leftKeyList = LEFT_HAND_KEYS[finger] ?: emptyList()
-              val rightKeyList = RIGHT_HAND_KEYS[finger] ?: emptyList()
-              val leftLimited = leftKeyList.take(settings.keyLimitPerFinger)
-              val rightLimited = rightKeyList.take(settings.keyLimitPerFinger)
-              keys.append(leftLimited.joinToString(""))
-              keys.append(rightLimited.joinToString(""))
-            }
+          BOTH_HANDS -> {
+            // Include keys from both hands for this finger
+            val leftKeyList = LEFT_HAND_KEYS[finger] ?: emptyList()
+            val rightKeyList = RIGHT_HAND_KEYS[finger] ?: emptyList()
+            val leftLimited = leftKeyList.take(settings.keyLimitPerFinger)
+            val rightLimited = rightKeyList.take(settings.keyLimitPerFinger)
+            keys.append(leftLimited.joinToString(""))
+            keys.append(rightLimited.joinToString(""))
           }
         }
       }
@@ -227,7 +200,7 @@ class PracticeTextGeneratorService {
 
     logger.info(
       "getAvailableKeysForFingers: practiceMode=${settings.practiceMode}, " +
-        "useAllFingers=${settings.useAllFingers}, keyLimitPerFinger=${settings.keyLimitPerFinger}, " +
+        "selectedFingers=${settings.selectedFingers}, keyLimitPerFinger=${settings.keyLimitPerFinger}, " +
         "availableKeys='$keys'"
     )
 
