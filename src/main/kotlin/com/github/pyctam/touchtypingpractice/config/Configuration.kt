@@ -23,10 +23,8 @@ import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.components.JBLabel
-import com.intellij.ui.dsl.builder.Cell
 import com.intellij.ui.dsl.builder.bind
 import com.intellij.ui.dsl.builder.bindIntValue
-import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.ui.UIUtil
 import javax.swing.JCheckBox
@@ -35,23 +33,17 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   private val logger: Logger = Logger.getInstance(Configuration::class.java)
   private val settings: Settings = Settings.getInstance()
   private var dialogPanel: DialogPanel? = null
-  private val fingerCheckboxes: MutableMap<Finger, Cell<JCheckBox>> = mutableMapOf()
-  private var useAllFingersCheckbox: Cell<JCheckBox>? = null
+  private val fingerCheckboxes: MutableMap<Finger, JCheckBox> = mutableMapOf()
+  private var useAllFingersCheckbox: JCheckBox? = null
   private var fingerSelectionErrorLabel: JBLabel? = null
 
   // Working copy of the finger selection while the dialog is open. The checkboxes edit this value
   // and the UI is kept in sync with it; it is only committed to [Settings] on Apply. This keeps
-  // Cancel safe and lets isModified() detect finger changes (the DSL's own isModified compares the
-  // checkbox against the bound value, which would always match once the UI is synced).
+  // Cancel safe and lets isModified() detect finger changes.
   private var workingSelectedFingers: Int = Finger.ALL_MASK
 
-  // Guards against re-entrancy: programmatic checkbox updates fire the bindSelected setters,
-  // which must not be treated as user actions while the UI is being synced from the model.
+  // Guards against re-entrancy while the UI is being synced programmatically from the model.
   private var isSyncingUI = false
-  // True while super.apply()/super.reset() re-run the bound setters. The "Use All Fingers" setter
-  // is destructive (it would zero the mask when the checkbox is unchecked), so the finger setters
-  // must be skipped while the DSL re-applies the bindings.
-  private var isApplying = false
 
   override fun createPanel(): DialogPanel {
     workingSelectedFingers = settings.selectedFingers
@@ -110,18 +102,10 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
           // "Use All Fingers" is a shortcut: checked iff all fingers are selected. Checking it
           // selects all fingers in one click; unchecking it clears the selection so the user can
           // pick specific fingers.
-          val useAllFingersCell =
-            checkBox(textUseAllFingers)
-              .bindSelected(
-                { workingSelectedFingers == Finger.ALL_MASK },
-                { value ->
-                  if (isSyncingUI || isApplying) return@bindSelected
-                  logger.info("User toggled 'Use All Fingers' to: $value")
-                  workingSelectedFingers = if (value) Finger.ALL_MASK else 0
-                  syncFingerSelectionUI()
-                }
-              )
-          useAllFingersCheckbox = useAllFingersCell
+          val useAll = checkBox(textUseAllFingers).component
+          useAll.isSelected = workingSelectedFingers == Finger.ALL_MASK
+          useAll.addActionListener { onUseAllFingersToggled() }
+          useAllFingersCheckbox = useAll
         }
 
         val titleSpecificFingers =
@@ -130,25 +114,10 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
         buttonsGroup(titleSpecificFingers) {
           for (finger in Finger.entries) {
             row {
-              val checkBoxCell =
-                checkBox(finger.label)
-                  .bindSelected(
-                    { isFingerSelected(finger) },
-                    { value ->
-                      if (isSyncingUI || isApplying) return@bindSelected
-                      logger.info("User toggled $finger to: $value")
-                      // Idempotent: set or clear the finger's bit to match the checkbox state.
-                      if (value) {
-                        workingSelectedFingers =
-                          Finger.encodeSelectedFingers(workingSelectedFingers, finger)
-                      } else {
-                        workingSelectedFingers =
-                          workingSelectedFingers and (1 shl finger.ordinal).inv()
-                      }
-                      syncFingerSelectionUI()
-                    }
-                  )
-              fingerCheckboxes[finger] = checkBoxCell
+              val box = checkBox(finger.label).component
+              box.isSelected = Finger.isFingerSelected(workingSelectedFingers, finger)
+              box.addActionListener { onFingerToggled(finger) }
+              fingerCheckboxes[finger] = box
             }
           }
         }
@@ -168,9 +137,37 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   }
 
   /**
+   * Handles a user click on the "Use All Fingers" checkbox: selects all fingers when checked,
+   * clears the selection when unchecked, then syncs the individual finger checkboxes.
+   */
+  private fun onUseAllFingersToggled() {
+    if (isSyncingUI) return
+    val value = useAllFingersCheckbox?.isSelected ?: return
+    logger.info("User toggled 'Use All Fingers' to: $value")
+    workingSelectedFingers = if (value) Finger.ALL_MASK else 0
+    syncFingerSelectionUI()
+  }
+
+  /**
+   * Handles a user click on an individual finger checkbox: sets or clears that finger's bit in the
+   * working selection, then syncs the "Use All Fingers" checkbox and the other finger checkboxes.
+   */
+  private fun onFingerToggled(finger: Finger) {
+    if (isSyncingUI) return
+    val value = fingerCheckboxes[finger]?.isSelected ?: return
+    logger.info("User toggled $finger to: $value")
+    if (value) {
+      workingSelectedFingers = Finger.encodeSelectedFingers(workingSelectedFingers, finger)
+    } else {
+      workingSelectedFingers = workingSelectedFingers and (1 shl finger.ordinal).inv()
+    }
+    syncFingerSelectionUI()
+  }
+
+  /**
    * Syncs the "Use All Fingers" checkbox, all finger checkboxes, and the validation error label
    * from [workingSelectedFingers]. The [isSyncingUI] guard prevents the programmatic checkbox
-   * updates from being treated as user actions by the bindSelected setters.
+   * updates from being treated as user actions.
    */
   private fun syncFingerSelectionUI() {
     isSyncingUI = true
@@ -178,9 +175,9 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
       logger.info(
         "syncFingerSelectionUI: workingSelectedFingers=${workingSelectedFingers} (binary: ${workingSelectedFingers.toString(2).padStart(5, '0')})"
       )
-      useAllFingersCheckbox?.component?.isSelected = workingSelectedFingers == Finger.ALL_MASK
-      for ((finger, checkBoxCell) in fingerCheckboxes) {
-        checkBoxCell.component.isSelected = Finger.isFingerSelected(workingSelectedFingers, finger)
+      useAllFingersCheckbox?.isSelected = workingSelectedFingers == Finger.ALL_MASK
+      for ((finger, box) in fingerCheckboxes) {
+        box.isSelected = Finger.isFingerSelected(workingSelectedFingers, finger)
       }
       updateFingerSelectionError()
     } finally {
@@ -201,9 +198,8 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   }
 
   override fun isModified(): Boolean {
-    // The finger checkboxes are bound to [workingSelectedFingers] and the UI is kept in sync with
-    // it, so the DSL's own isModified() always reports them as unchanged. Compare the working
-    // value against the saved value to detect finger-selection changes.
+    // The finger checkboxes are not DSL-bound, so the DSL's own isModified() does not see them.
+    // Compare the working value against the saved value to detect finger-selection changes.
     return super.isModified() || workingSelectedFingers != settings.selectedFingers
   }
 
@@ -212,15 +208,8 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
       "apply: workingSelectedFingers=${workingSelectedFingers} (binary: ${workingSelectedFingers.toString(2).padStart(5, '0')})"
     )
 
-    // super.apply() re-runs every bound setter (UI -> model) for the non-finger fields. The finger
-    // setters are skipped (guarded) because the "Use All Fingers" setter is destructive; the finger
-    // selection is committed from [workingSelectedFingers] below.
-    isApplying = true
-    try {
-      super.apply()
-    } finally {
-      isApplying = false
-    }
+    // Commits the non-finger fields (font size, practice mode, key limit) to [Settings].
+    super.apply()
 
     if (workingSelectedFingers == 0) {
       // Block saving an invalid state: show the warning under the Finger Selection group and keep
@@ -240,19 +229,9 @@ class Configuration : BoundConfigurable("Touch Typing Practice (2)") {
   }
 
   override fun reset() {
+    // Reloads the non-finger fields (font size, practice mode, key limit) from [Settings].
+    super.reset()
     workingSelectedFingers = settings.selectedFingers
-    // super.reset() re-runs every bound getter (model -> UI). Guard the finger setters so the
-    // programmatic checkbox updates are not treated as user actions.
-    isApplying = true
-    try {
-      super.reset()
-    } finally {
-      isApplying = false
-    }
     syncFingerSelectionUI()
-  }
-
-  private fun isFingerSelected(finger: Finger): Boolean {
-    return Finger.isFingerSelected(workingSelectedFingers, finger)
   }
 }
