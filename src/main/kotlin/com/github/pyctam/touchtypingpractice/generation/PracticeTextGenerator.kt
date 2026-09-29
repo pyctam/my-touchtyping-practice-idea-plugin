@@ -22,15 +22,10 @@ class PracticeTextGenerator(private val random: Random = Random.Default) {
   /**
    * Generates a practice string for [config].
    *
-   * @return a random practice string using only the characters eligible under [config], or a
-   *   curated fallback sentence when no eligible characters exist.
+   * @return a random practice string using only the characters eligible under [config].
    */
   fun generate(config: PracticeTextConfig): String {
-    val availableChars = buildAvailableCharacters(config)
-    if (availableChars.isEmpty()) {
-      return FALLBACK_TEXTS.random(random)
-    }
-    return generateRandomText(availableChars)
+    return generateRandomText(buildAvailableCharacters(config))
   }
 
   /**
@@ -99,23 +94,5 @@ class PracticeTextGenerator(private val random: Random = Random.Default) {
     const val SPACE_PROBABILITY = 0.1
     const val LOWERCASE_LETTERS = "abcdefghijklmnopqrstuvwxyz"
     const val FALLBACK_CHARACTER = "a"
-
-    /** Curated pangrams used only when the configured character set is empty. */
-    val FALLBACK_TEXTS =
-      listOf(
-        "the quick brown fox jumps over the lazy dog",
-        "pack my box with five dozen liquor jugs",
-        "how vexingly quick daft zebras jump",
-        "the five boxing wizards jump quickly",
-        "sphinx of black quartz judge my vow",
-        "waltz bad nymph for quick jigs",
-        "all we know about grammar is that it's not that simple",
-        "a journey of a thousand miles begins with a single step",
-        "the early bird catches the worm",
-        "practice makes perfect",
-        "fingers dancing on keyboard in perfect rhythm",
-        "typing faster with proper finger placement",
-        "accuracy comes before speed in touch typing",
-      )
   }
 }

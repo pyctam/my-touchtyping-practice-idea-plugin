@@ -51,7 +51,6 @@ class Settings : PersistentStateComponent<Settings> {
     val SETTINGS_CHANGE_TOPIC: Topic<SettingsChangeListener> =
       Topic.create("TouchTypingPractice.SettingsChange", SettingsChangeListener::class.java)
 
-    @Suppress("unused")
     fun getInstance(): Settings =
       ApplicationManager.getApplication().getService(Settings::class.java)
   }

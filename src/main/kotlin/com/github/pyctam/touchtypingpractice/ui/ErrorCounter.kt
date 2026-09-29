@@ -14,19 +14,7 @@ class ErrorCounter {
   private var count = 0
   private val changeListeners = mutableListOf<ChangeListener>()
 
-  @Suppress("unused")
-  fun increment() {
-    count++
-    notifyListeners()
-  }
-
   fun getCount(): Int = count
-
-  @Suppress("unused")
-  fun reset() {
-    count = 0
-    notifyListeners()
-  }
 
   fun setCount(newCount: Int) {
     count = newCount
@@ -35,11 +23,6 @@ class ErrorCounter {
 
   fun addChangeListener(listener: ChangeListener) {
     changeListeners.add(listener)
-  }
-
-  @Suppress("unused")
-  fun removeChangeListener(listener: ChangeListener) {
-    changeListeners.remove(listener)
   }
 
   private fun notifyListeners() {
