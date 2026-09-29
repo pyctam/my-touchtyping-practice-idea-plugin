@@ -3,7 +3,6 @@
     <id>com.github.pyctam.touchtypingpractice</id>
     <name>Touch Typing Practice</name>
     <vendor email="my-touchtyping-practice-idea-plugin@4-4.org">pyctam</vendor>
-    <license>MIT</license>
     <description>A tool window for practicing touch typing directly in IntelliJ IDEA with configurable practice modes, finger selection, and real-time error tracking.</description>
     <depends>com.intellij.modules.platform</depends>
     <resource-bundle>messages.UI</resource-bundle>

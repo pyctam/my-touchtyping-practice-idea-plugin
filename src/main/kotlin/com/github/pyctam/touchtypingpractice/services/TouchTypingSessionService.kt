@@ -7,10 +7,11 @@ import com.intellij.openapi.project.Project
 /**
  * Project-level service for managing Touch Typing Practice session state and statistics.
  *
- * This service is created once per project and can be used to track typing sessions, store
- * statistics, and manage project-specific typing practice data.
+ * Created once per project. Intended as the home for tracking typing sessions (duration, WPM,
+ * accuracy), persisting session history, and exposing analytics.
+ *
+ * Currently a scaffold: the session-tracking features are not yet implemented.
  */
-@Suppress("unused")
 @Service(Service.Level.PROJECT)
 class TouchTypingSessionService(project: Project) {
 
@@ -19,7 +20,7 @@ class TouchTypingSessionService(project: Project) {
       .info("Touch Typing Practice session service initialized for project: ${project.name}")
   }
 
-  // TODO: Add session state management, statistics tracking, and persistence
+  // TODO: Add session state management, statistics tracking, and persistence.
   // Examples:
   // - Track current typing session duration
   // - Store session statistics (WPM, accuracy, etc.)

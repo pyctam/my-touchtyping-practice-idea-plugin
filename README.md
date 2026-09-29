@@ -25,12 +25,13 @@
   about releases containing new features and fixes.
 
 <!-- Plugin description -->
-This Fancy IntelliJ Platform Plugin is going to be your implementation of the brilliant ideas that you have.
+Practice touch typing right inside your IDE. Touch Typing Practice adds a dedicated tool window to
+IntelliJ IDEA where a practice string is generated for you and you type it out with real-time,
+character-by-character feedback.
 
-This specific section is a source for the [plugin.xml](/src/main/resources/META-INF/plugin.xml) file which will be
-extracted by the [Gradle](/build.gradle.kts) during the build process.
-
-To keep everything working, do not remove `<!-- ... -->` sections.
+Configure the practice to your hand, the specific fingers you want to train, and how many keys each
+finger may use — then watch mismatches get highlighted instantly and your error count update as you
+go.
 <!-- Plugin description end -->
 
 ## Installation

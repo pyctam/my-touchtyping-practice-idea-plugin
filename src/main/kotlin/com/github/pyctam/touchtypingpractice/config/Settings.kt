@@ -10,24 +10,26 @@ import com.intellij.util.messages.Topic
 import com.intellij.util.xmlb.XmlSerializerUtil
 
 /**
- * Listener interface for settings changes. Implementations will be notified when settings are
- * modified and persisted.
- */
-interface SettingsChangeListener {
-  fun onSettingsChanged()
-}
-
-/**
- * Touch Typing Practice settings persisted at application level using IntelliJ's
- * PersistentStateComponent framework. This replaces the legacy PropertiesComponent approach with
- * proper versioned XML serialization.
+ * Touch Typing Practice settings, persisted at application level via IntelliJ's
+ * [PersistentStateComponent] framework (stored in `touchTypingPractice.xml`).
+ *
+ * After settings are applied, a [SettingsChangeListener] notification is published on
+ * [SETTINGS_CHANGE_TOPIC] so dependent UI (the tool window) can hot-reload.
  */
 @Service
 @State(name = "TouchTypingPracticeSettings", storages = [Storage("touchTypingPractice.xml")])
 class Settings : PersistentStateComponent<Settings> {
+
+  /** Font size (pt) for the sample text and typing area. */
   var textFontSize: Int = DEFAULT_TEXT_FONT_SIZE
+
+  /** Which hand(s) to practice. */
   var practiceMode: PracticeMode = BOTH_HANDS
+
+  /** Maximum number of keys each finger may be assigned. */
   var keyLimitPerFinger: Int = 1
+
+  /** Bitmask of enabled fingers, see [Finger]. */
   var selectedFingers: Int = Finger.ALL_MASK
 
   override fun getState(): Settings = this
@@ -42,12 +44,13 @@ class Settings : PersistentStateComponent<Settings> {
   }
 
   companion object {
-    const val DEFAULT_TEXT_FONT_SIZE = 13 // IntelliJ IDEA standard editor font size
+    /** IntelliJ IDEA standard editor font size. */
+    const val DEFAULT_TEXT_FONT_SIZE = 13
 
+    /** Topic published after settings are applied and persisted. */
     val SETTINGS_CHANGE_TOPIC: Topic<SettingsChangeListener> =
       Topic.create("TouchTypingPractice.SettingsChange", SettingsChangeListener::class.java)
 
-    @Suppress("unused")
     fun getInstance(): Settings =
       ApplicationManager.getApplication().getService(Settings::class.java)
   }
