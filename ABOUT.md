@@ -121,9 +121,8 @@ The plugin is written in **Kotlin**, targets **IntelliJ IDEA 2023.3 – 2025.3**
 |-------------|----------------------------------------------------------|
 | Plugin name | Touch Typing Practice                                    |
 | Plugin ID   | `com.github.pyctam.touchtypingpractice`                  |
-| Version     | 0.0.1                                                    |
+| Version     | 0.1.0                                                    |
 | Language    | Kotlin (JVM 17)                                          |
 | Target IDE  | IntelliJ IDEA 2023.3 – 2025.3 (`233` – `253.*`)          |
 | Build       | Gradle 8.10.2 + IntelliJ Platform Gradle Plugin          |
 | Source      | `src/main/kotlin/com/github/pyctam/touchtypingpractice/` |
-
