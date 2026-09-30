@@ -1,5 +1,6 @@
 package com.github.pyctam.touchtypingpractice.ui
 
+import com.github.pyctam.touchtypingpractice.config.TextFont
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
@@ -30,13 +31,14 @@ object TouchTypingUIComponentsFactory {
    * Creates the reference text pane showing the text to type.
    *
    * @param typingText the text to display.
+   * @param fontFamily the font family to render with.
    * @param fontSizePt font size in points.
    */
-  fun createTextPane(typingText: String, fontSizePt: Int = 13): JTextPane {
+  fun createTextPane(typingText: String, fontFamily: String, fontSizePt: Int = 13): JTextPane {
     val pane = JTextPane()
     pane.text = typingText
     pane.isEditable = false
-    pane.font = applyFontSize(pane.font, fontSizePt)
+    pane.font = applyFont(pane.font, fontFamily, fontSizePt)
     pane.border = JBUI.Borders.compound(JBUI.Borders.empty(PADDING_SMALL))
     return pane
   }
@@ -62,6 +64,7 @@ object TouchTypingUIComponentsFactory {
    * @param referenceTextPane the reference pane to highlight mismatches against.
    * @param typingText the original text being typed.
    * @param errorCounter the counter updated with the current mismatch count.
+   * @param fontFamily the font family to render with.
    * @param fontSizePt font size in points.
    * @return the scroll pane and typing area needed to reset the input later.
    */
@@ -69,9 +72,10 @@ object TouchTypingUIComponentsFactory {
     referenceTextPane: JTextPane,
     typingText: String,
     errorCounter: ErrorCounter,
+    fontFamily: String,
     fontSizePt: Int = 13
   ): TypingInputComponents {
-    val typingArea = createTypingArea(fontSizePt)
+    val typingArea = createTypingArea(fontFamily, fontSizePt)
     val listener =
       TouchTypingDocumentListener(typingArea, referenceTextPane, typingText, errorCounter)
     typingArea.document.addDocumentListener(listener)
@@ -86,17 +90,24 @@ object TouchTypingUIComponentsFactory {
   }
 
   /** Creates a word-wrapping, non-editable-styled [JTextArea] for typing input. */
-  private fun createTypingArea(fontSizePt: Int): JTextArea {
+  private fun createTypingArea(fontFamily: String, fontSizePt: Int): JTextArea {
     val typingArea = JTextArea()
     typingArea.lineWrap = true
     typingArea.wrapStyleWord = true
-    typingArea.font = applyFontSize(UIUtil.getLabelFont(), fontSizePt)
+    typingArea.font = applyFont(UIUtil.getLabelFont(), fontFamily, fontSizePt)
     typingArea.border = JBUI.Borders.compound(JBUI.Borders.empty(PADDING_SMALL))
     return typingArea
   }
 
-  private fun applyFontSize(baseFont: Font, sizePt: Int): Font =
-    baseFont.deriveFont(sizePt.toFloat())
+  /**
+   * Derives a font with the given family and size from [baseFont]. If [fontFamily] is not installed
+   * on the system, the base font's family is kept (the JVM would otherwise fall back to a logical
+   * font, which looks inconsistent across platforms).
+   */
+  private fun applyFont(baseFont: Font, fontFamily: String, fontSizePt: Int): Font {
+    val family = if (TextFont.isAvailable(fontFamily)) fontFamily else baseFont.family
+    return Font(family, baseFont.style, 0).deriveFont(fontSizePt.toFloat())
+  }
 }
 
 /** Holds the typing input components needed to reset the input later. */

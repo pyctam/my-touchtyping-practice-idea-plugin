@@ -31,7 +31,9 @@ character-by-character feedback.
 
 Configure the practice to your hand, the specific fingers you want to train, and how many keys each
 finger may use — then watch mismatches get highlighted instantly and your error count update as you
-go.
+go. Pick the font and size for the practice text from a selector that features fonts with true
+small caps (Georgia, Palatino Linotype, Garamond, Calibri, Verdana, Copperplate Gothic) ahead of
+your other installed fonts.
 <!-- Plugin description end -->
 
 ## Installation

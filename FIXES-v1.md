@@ -9,8 +9,10 @@
 
 A right-side tool window where a random practice string is generated, the user types it into a
 `JTextArea`, mismatches get highlighted in the reference pane, and an error counter updates a
-status bar. Settings (font size, hand mode, key limit per finger, finger bitmask) live in
-`Settings.kt` and hot-reload the UI via a MessageBus topic.
+status bar. Settings (font family + size, hand mode, key limit per finger, finger bitmask) live in
+`Settings.kt` and hot-reload the UI via a MessageBus topic. The font selector lists fonts with true
+small caps (Georgia, Palatino Linotype, Garamond, Calibri, Verdana, Copperplate Gothic) first, then
+all other installed fonts, and preselects the first available featured font on first open.
 
 ---
 
@@ -79,4 +81,3 @@ status bar. Settings (font size, hand mode, key limit per finger, finger bitmask
 
 These three turn the plugin from a demo into a genuinely useful practice tool with the least new
 surface area.
-

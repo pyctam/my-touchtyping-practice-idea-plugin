@@ -20,6 +20,9 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 @State(name = "TouchTypingPracticeSettings", storages = [Storage("touchTypingPractice.xml")])
 class Settings : PersistentStateComponent<Settings> {
 
+  /** Font family for the sample text and typing area. */
+  var textFontFamily: String = TextFont.DEFAULT.family
+
   /** Font size (pt) for the sample text and typing area. */
   var textFontSize: Int = DEFAULT_TEXT_FONT_SIZE
 

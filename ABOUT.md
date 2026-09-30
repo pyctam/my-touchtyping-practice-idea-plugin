@@ -43,7 +43,11 @@ The plugin is written in **Kotlin**, targets **IntelliJ IDEA 2023.3 – 2025.3**
 ### Settings & configuration
 
 - A **project-level settings page** ("Touch Typing Practice") with:
-    - **Text font size** (8–24 pt) for both the sample text and the typing area.
+    - **Text font/size**: a font selector for the sample text and typing area, plus a font size
+      spinner (8–24 pt). Fonts with true (OpenType) small caps — Georgia, Palatino Linotype,
+      Garamond, Calibri, Verdana, and Copperplate Gothic — are listed first as featured fonts,
+      followed by every other font installed on the system. On first open, the first available
+      featured font is preselected automatically.
     - **Practice mode**: Left Hand, Right Hand, or Both Hands.
     - **Key limit per finger** (1–6), controlling how many keys each finger may be assigned.
     - **Finger selection**: pick specific fingers (Thumb, Index, Middle, Ring, Little) or use the
@@ -121,7 +125,7 @@ The plugin is written in **Kotlin**, targets **IntelliJ IDEA 2023.3 – 2025.3**
 |-------------|----------------------------------------------------------|
 | Plugin name | Touch Typing Practice                                    |
 | Plugin ID   | `com.github.pyctam.touchtypingpractice`                  |
-| Version     | 0.1.0                                                    |
+| Version     | 0.1.1                                                    |
 | Language    | Kotlin (JVM 17)                                          |
 | Target IDE  | IntelliJ IDEA 2023.3 – 2025.3 (`233` – `253.*`)          |
 | Build       | Gradle 8.10.2 + IntelliJ Platform Gradle Plugin          |

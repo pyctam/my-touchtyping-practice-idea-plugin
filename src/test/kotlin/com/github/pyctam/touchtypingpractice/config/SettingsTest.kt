@@ -43,6 +43,7 @@ class SettingsTest {
   fun loadStateCopiesOtherFields() {
     val loaded =
       Settings().apply {
+        textFontFamily = "Georgia"
         textFontSize = 20
         keyLimitPerFinger = 4
         practiceMode = PracticeMode.LEFT_HAND
@@ -50,6 +51,7 @@ class SettingsTest {
       }
     val settings = Settings()
     settings.loadState(loaded)
+    assertEquals("Georgia", settings.textFontFamily)
     assertEquals(20, settings.textFontSize)
     assertEquals(4, settings.keyLimitPerFinger)
     assertEquals(PracticeMode.LEFT_HAND, settings.practiceMode)
