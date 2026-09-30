@@ -13,7 +13,8 @@ import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_LEFTHAND
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_RIGHTHAND
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_TITLE
-import com.github.pyctam.touchtypingpractice.UIBundle.TEXT_FONT_SIZE_TITLE
+import com.github.pyctam.touchtypingpractice.UIBundle.TEXT_FONT_HINT
+import com.github.pyctam.touchtypingpractice.UIBundle.TEXT_FONT_TITLE
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.BOTH_HANDS
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.LEFT_HAND
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.RIGHT_HAND
@@ -24,6 +25,7 @@ import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.dsl.builder.bind
 import com.intellij.ui.dsl.builder.bindIntValue
+import com.intellij.ui.dsl.builder.bindItem
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.ui.UIUtil
 import javax.swing.JCheckBox
@@ -53,9 +55,18 @@ class Configuration : BoundConfigurable("Touch Typing Practice") {
   override fun createPanel(): DialogPanel {
     fingerSelection = FingerSelection(settings.selectedFingers)
     return panel {
-      group(UIBundle.message(TEXT_FONT_SIZE_TITLE)) {
-        row { comment(UIBundle.message(UIBundle.TEXT_FONT_SIZE_HINT)) }
-        row { spinner(8..24, 1).bindIntValue(settings::textFontSize) }
+      group(UIBundle.message(TEXT_FONT_TITLE)) {
+        row { comment(UIBundle.message(TEXT_FONT_HINT)) }
+        row {
+          // Font selector: featured true-small-caps fonts first, then all other system fonts.
+          // The size spinner stays on the right side of the font selector.
+          comboBox(TextFont.allAvailableFamilies())
+            .bindItem(
+              { settings.textFontFamily },
+              { settings.textFontFamily = it ?: settings.textFontFamily }
+            )
+          spinner(8..24, 1).bindIntValue(settings::textFontSize)
+        }
       }
 
       group(UIBundle.message(CONFIG_PRACTICE_MODE_TITLE)) {

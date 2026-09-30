@@ -47,7 +47,11 @@ class TouchTypingToolWindow {
     val typingText = textGenerator.generatePracticeText()
 
     referenceTextPane =
-      TouchTypingUIComponentsFactory.createTextPane(typingText, settings.textFontSize)
+      TouchTypingUIComponentsFactory.createTextPane(
+        typingText,
+        settings.textFontFamily,
+        settings.textFontSize
+      )
     val sampleTextPanel = TouchTypingUIComponentsFactory.createSampleTextPanel(referenceTextPane)
     val resetPanel = createResetPanel()
     val typingInput =
@@ -55,6 +59,7 @@ class TouchTypingToolWindow {
         referenceTextPane,
         typingText,
         errorCounter,
+        settings.textFontFamily,
         settings.textFontSize
       )
     typingInputPanel = typingInput.scrollPane
@@ -90,6 +95,7 @@ class TouchTypingToolWindow {
         referenceTextPane,
         newTypingText,
         errorCounter,
+        settings.textFontFamily,
         settings.textFontSize
       )
     val newTypingInputPanel = newInput.scrollPane
