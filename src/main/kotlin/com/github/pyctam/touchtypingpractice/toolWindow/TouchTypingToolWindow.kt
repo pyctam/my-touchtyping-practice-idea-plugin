@@ -1,6 +1,7 @@
 package com.github.pyctam.touchtypingpractice.toolWindow
 
 import com.github.pyctam.touchtypingpractice.config.Settings
+import com.github.pyctam.touchtypingpractice.config.TextFont
 import com.github.pyctam.touchtypingpractice.services.PracticeTextGeneratorService
 import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
 import com.github.pyctam.touchtypingpractice.ui.ResetKeyDetector
@@ -44,14 +45,11 @@ class TouchTypingToolWindow {
   /** Builds the full tool window panel with a freshly generated practice text. */
   fun buildContent(): BorderLayoutPanel {
     val settings = Settings.getInstance()
+    val fontFamily = TextFont.effectiveFamily(settings.textFontFamily)
     val typingText = textGenerator.generatePracticeText()
 
     referenceTextPane =
-      TouchTypingUIComponentsFactory.createTextPane(
-        typingText,
-        settings.textFontFamily,
-        settings.textFontSize
-      )
+      TouchTypingUIComponentsFactory.createTextPane(typingText, fontFamily, settings.textFontSize)
     val sampleTextPanel = TouchTypingUIComponentsFactory.createSampleTextPanel(referenceTextPane)
     val resetPanel = createResetPanel()
     val typingInput =
@@ -59,7 +57,7 @@ class TouchTypingToolWindow {
         referenceTextPane,
         typingText,
         errorCounter,
-        settings.textFontFamily,
+        fontFamily,
         settings.textFontSize
       )
     typingInputPanel = typingInput.scrollPane
@@ -95,7 +93,7 @@ class TouchTypingToolWindow {
         referenceTextPane,
         newTypingText,
         errorCounter,
-        settings.textFontFamily,
+        TextFont.effectiveFamily(settings.textFontFamily),
         settings.textFontSize
       )
     val newTypingInputPanel = newInput.scrollPane

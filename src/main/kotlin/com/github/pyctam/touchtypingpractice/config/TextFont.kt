@@ -42,6 +42,17 @@ data class TextFont(val family: String) {
     /** True if the font family is installed on this system. */
     fun isAvailable(family: String): Boolean = family in availableSystemFamilies()
 
+    /**
+     * Returns [stored] if it is an installed font family, otherwise the first available featured
+     * font (falling back to the first available font, then the stored value). This keeps the
+     * selected/rendered font valid even when the stored value is stale — e.g., on first run before
+     * the font environment is fully populated, or after a font has been uninstalled.
+     */
+    fun effectiveFamily(stored: String): String {
+      if (isAvailable(stored)) return stored
+      return allAvailableFamilies().firstOrNull() ?: stored
+    }
+
     /** All font family names installed on the system. */
     private fun availableSystemFamilies(): Set<String> =
       try {

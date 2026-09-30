@@ -54,6 +54,9 @@ class Configuration : BoundConfigurable("Touch Typing Practice") {
 
   override fun createPanel(): DialogPanel {
     fingerSelection = FingerSelection(settings.selectedFingers)
+    // On first open (or after a font was uninstalled) the stored family may not be installed, so
+    // preselect the first available featured font to keep the combo box showing a valid value.
+    settings.textFontFamily = TextFont.effectiveFamily(settings.textFontFamily)
     return panel {
       group(UIBundle.message(TEXT_FONT_TITLE)) {
         row { comment(UIBundle.message(TEXT_FONT_HINT)) }
