@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.2
+
+### Changed
+
+- **Enter-to-reset** — replaced the "press R three times" reset gesture with a single **Enter** key
+  press. Enter resets the practice text (generates a fresh sample and clears the input) only after
+  the text has been completed and highlighted in green; while the text is incomplete, Enter is
+  ignored. The mouse **Reset** hyperlink is unchanged.
+
+### Added
+
+- Unit tests for the new Enter-to-reset key detector.
+
 ## 0.1.1
 
 ### Added

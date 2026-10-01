@@ -16,8 +16,8 @@ window that generates practice text tailored to your settings, lets you type it 
 you immediate visual feedback on every keystroke. It is built to help you build and reinforce proper
 finger placement and home-row habits while you work.
 
-The plugin is written in **Kotlin**, targets **IntelliJ IDEA 2023.3 – 2025.3** (builds `233` –
-`253.*`), and is built with the IntelliJ Platform Gradle Plugin on **JVM 17**.
+The plugin is written in **Kotlin**, targets **IntelliJ IDEA 2023.3 and later** (build `233` and up,
+with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on **JVM 17**.
 
 ---
 
@@ -33,8 +33,9 @@ The plugin is written in **Kotlin**, targets **IntelliJ IDEA 2023.3 – 2025.3**
   highlighted in the reference pane, and the whole text is highlighted in green when you complete it
   with zero errors.
 - A **status bar** showing typing speed (WPM) and the current error count.
-- A **Reset** hyperlink, plus a keyboard shortcut (press **R three times** within 3 seconds) that
-  regenerates a fresh practice text and clears the input.
+- A **Reset** hyperlink, plus an **Enter** key shortcut that regenerates a fresh practice text and
+  clears the input once the text has been completed (highlighted in green). While the text is
+  incomplete, Enter is ignored.
 - **Hot-reload**: settings changes are published over a `MessageBus` topic and the tool window
   rebuilds itself without an IDE restart.
 - A `DocumentFilter` that prevents typing beyond the length of the reference text and blocks new
@@ -57,12 +58,14 @@ The plugin is written in **Kotlin**, targets **IntelliJ IDEA 2023.3 – 2025.3**
 
 ### Practice text generation
 
-- An **application-level `PracticeTextGeneratorService`** that builds a character set from the
-  configured hand, fingers, and per-finger key limit, then generates a random practice string.
+- An **application-level `PracticeTextGeneratorService`** — a thin adapter over a pure,
+  IDE-independent `PracticeTextGenerator` — that builds a character set from the configured hand,
+  fingers, and per-finger key limit, then generates a random practice string.
 - A per-hand, per-finger **keyboard layout map** (home row first, then extensions) drives which keys
   are eligible.
-- Generation rules: random length, no leading/trailing spaces, no consecutive spaces, and roughly a
-  10% space frequency. A set of curated pangrams is kept as a fallback.
+- Generation rules: random length (1–127 chars), lowercase letters only (plus a space), no
+  leading/trailing spaces, no consecutive spaces, and roughly a 10% space frequency. The generator
+  takes an injectable `Random`, so its output is deterministic and unit-testable.
 
 ### UI & architecture
 
@@ -71,8 +74,9 @@ The plugin is written in **Kotlin**, targets **IntelliJ IDEA 2023.3 – 2025.3**
 - An **`ErrorCounter`** using the listener pattern to decouple error tracking from the UI.
 - A **`TouchTypingSessionService`** project-level service scaffolded as the home for future session
   state and statistics.
-- **Unit tests** covering the finger bitmask logic, settings state normalization, and the interactive
-  finger-selection behavior of the settings dialog.
+- **Unit tests** covering the finger bitmask logic, settings state normalization, the interactive
+  finger-selection behavior of the settings dialog, the pure text generator and keyboard layout, and
+  the Enter-to-reset key detector.
 - Build tooling: **Spotless** (ktfmt, Google style), **Kover** (coverage), and **Qodana** (code
   quality).
 
@@ -87,13 +91,13 @@ The plugin is written in **Kotlin**, targets **IntelliJ IDEA 2023.3 – 2025.3**
 2. **Session statistics** — `TouchTypingSessionService` is still an empty stub. Implement session
    history (WPM, accuracy, duration per session), persist it via `PersistentStateComponent`, and
    surface it in a small stats tab or popup.
-3. **Numbers & punctuation** — `shouldIncludeNumbers()` / `shouldIncludePunctuation()` always return
-   `false`, so the `NUMBERS` / `PUNCTUATION` sets are dead code. Add settings checkboxes and wire
-   them into the generator.
+3. **Numbers & punctuation** — the generator currently draws only lowercase letters (plus a space);
+   numbers and punctuation are not supported. Add settings checkboxes and extend the character set
+   to include them.
 4. **Text length setting** — text length is currently a random value; add a setting (e.g. 20 / 50 /
    100 / 200 characters).
-5. **Difficulty levels / curated text** — the curated `SAMPLE_TEXTS` are only used as a fallback.
-   Add a mode selector (Random / Words / Sentences) so real text can be practiced.
+5. **Difficulty levels / curated text** — practice text is always random characters. Add a mode
+   selector (Random / Words / Sentences) so real text can be practiced.
 6. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
    produce the most errors and show a "weak fingers" summary.
 7. **Completion notification** — show an IDE `Notification` when a text is completed (the green
@@ -105,28 +109,29 @@ The plugin is written in **Kotlin**, targets **IntelliJ IDEA 2023.3 – 2025.3**
 
 ### Cleanup & quality
 
-- **Reduce logging** — there is verbose `logger.info` output on every keystroke and in the settings
-  `apply()` path; move to `debug` or remove.
-- **Remove duplication** — the R-key reset `KeyListener` is copy-pasted in two places, and
-  `createTypingPane()` / `createTypingInputComponents()` are near-identical.
-- **Fix stale comments** — e.g. a comment says text length is "1–24" while the code uses
-  `nextInt(1, 128)`.
-- **Remove template leftovers** — the README still contains the template ToDo list, an unused
-  `projectService` message, a `"(2)"` suffix in the configurable name, and a few unused constants
-  and methods.
-- **More tests** — add unit tests for `PracticeTextGeneratorService` (character-set building, key
-  limits) to complement the existing config tests.
+- **Reduce logging** — the per-keystroke `logger.info` output has been removed; a few remaining
+  `logger.info` calls (reset, completion, tool-window lifecycle) could be moved to `debug`.
+- **Remove duplication** — the reset key handling is now a single reusable `EnterKeyDetector`
+  (previously a copy-pasted R-key `KeyListener`); it is still instantiated in two places
+  (`buildContent()` and `reset()`).
+- **Fix stale comments** — the text-length comment now matches the code
+  (`[MIN_TEXT_LENGTH, MAX_TEXT_LENGTH]` = 1–127); keep comments in sync as the generator evolves.
+- **Remove template leftovers** — the `projectService` message, the `"(2)"` configurable-name
+  suffix, and unused constants/methods have been removed; the README still contains the template
+  ToDo list.
+- **More tests** — unit tests now cover config, the pure text generator, the keyboard layout, and
+  the Enter-to-reset detector; add more as new features land.
 
 ---
 
 ## Quick reference
 
-| Item        | Value                                                    |
-|-------------|----------------------------------------------------------|
-| Plugin name | Touch Typing Practice                                    |
-| Plugin ID   | `com.github.pyctam.touchtypingpractice`                  |
-| Version     | 0.1.1                                                    |
-| Language    | Kotlin (JVM 17)                                          |
-| Target IDE  | IntelliJ IDEA 2023.3 – 2025.3 (`233` – `253.*`)          |
-| Build       | Gradle 8.10.2 + IntelliJ Platform Gradle Plugin          |
-| Source      | `src/main/kotlin/com/github/pyctam/touchtypingpractice/` |
+| Item        | Value                                                         |
+|-------------|---------------------------------------------------------------|
+| Plugin name | Touch Typing Practice                                         |
+| Plugin ID   | `com.github.pyctam.touchtypingpractice`                       |
+| Version     | 0.1.2                                                         |
+| Language    | Kotlin (JVM 17)                                               |
+| Target IDE  | IntelliJ IDEA 2023.3 and later (`233` and up, no upper bound) |
+| Build       | Gradle 8.10.2 + IntelliJ Platform Gradle Plugin               |
+| Source      | `src/main/kotlin/com/github/pyctam/touchtypingpractice/`      |

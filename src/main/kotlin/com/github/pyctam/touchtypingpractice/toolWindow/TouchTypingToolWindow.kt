@@ -3,8 +3,8 @@ package com.github.pyctam.touchtypingpractice.toolWindow
 import com.github.pyctam.touchtypingpractice.config.Settings
 import com.github.pyctam.touchtypingpractice.config.TextFont
 import com.github.pyctam.touchtypingpractice.services.PracticeTextGeneratorService
+import com.github.pyctam.touchtypingpractice.ui.EnterKeyDetector
 import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
-import com.github.pyctam.touchtypingpractice.ui.ResetKeyDetector
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.PADDING_SMALL
 import com.intellij.openapi.diagnostic.Logger
@@ -74,7 +74,9 @@ class TouchTypingToolWindow {
     mainPanel.addToCenter(typingInputPanel)
     mainPanel.addToBottom(statusPanel)
 
-    typingArea.addKeyListener(ResetKeyDetector(::reset))
+    typingArea.addKeyListener(
+      EnterKeyDetector(::reset) { typingArea.text == referenceTextPane.text }
+    )
     return mainPanel
   }
 
@@ -105,7 +107,9 @@ class TouchTypingToolWindow {
 
     typingInputPanel = newTypingInputPanel
     typingArea = newInput.typingArea
-    typingArea.addKeyListener(ResetKeyDetector(::reset))
+    typingArea.addKeyListener(
+      EnterKeyDetector(::reset) { typingArea.text == referenceTextPane.text }
+    )
     typingArea.requestFocusInWindow()
 
     logger.info("Practice reset: new text generated and UI updated")
@@ -157,7 +161,8 @@ class TouchTypingToolWindow {
       }
     )
     resetLabel.cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-    resetLabel.toolTipText = "Reset practice text and clear input (press R 3 times quickly)"
+    resetLabel.toolTipText =
+      "Reset practice text and clear input (press Enter after completing the text)"
 
     val panel = BorderLayoutPanel()
     panel.addToRight(resetLabel)

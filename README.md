@@ -27,7 +27,8 @@
 <!-- Plugin description -->
 Practice touch typing right inside your IDE. Touch Typing Practice adds a dedicated tool window to
 IntelliJ IDEA where a practice string is generated for you and you type it out with real-time,
-character-by-character feedback.
+character-by-character feedback. When you complete the text with no errors it is highlighted in
+green, and pressing **Enter** loads a fresh sample.
 
 Configure the practice to your hand, the specific fingers you want to train, and how many keys each
 finger may use — then watch mismatches get highlighted instantly and your error count update as you

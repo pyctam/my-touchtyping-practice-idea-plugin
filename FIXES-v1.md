@@ -5,6 +5,23 @@
 
 ---
 
+> **Status update (2026-09-30):** Several findings below have since been resolved on this branch:
+> - **#5 Zero tests** — unit tests now exist under `src/test/kotlin` (config, generation, and UI packages).
+> - **#7 Duplicated R-key listener** — replaced by a single reusable `EnterKeyDetector`; the reset gesture is now "press
+    Enter after completing the text."
+> - **#8 Stale length comment** — the generator KDoc now matches the code (`[MIN_TEXT_LENGTH, MAX_TEXT_LENGTH]` =
+    1–127).
+> - **#9 Template leftovers** — the `projectService` message, the `"(2)"` configurable-name suffix, and unused
+    constants/methods are removed (the README template ToDo list remains).
+> - **#2 / #3 Numbers, punctuation & `SAMPLE_TEXTS`** — the dead `shouldIncludeNumbers/Punctuation` methods and the
+    `SAMPLE_TEXTS`/`NUMBERS`/`PUNCTUATION` constants no longer exist; the generator draws only lowercase letters plus a
+    space.
+> - **#6 Excessive logging** — per-keystroke `logger.info` output is gone; only lifecycle/completion events are logged.
+>
+> Still open: **#1** (WPM hardcoded to 0) and **#4** (`TouchTypingSessionService` stub).
+
+---
+
 ## 1. What the plugin does today
 
 A right-side tool window where a random practice string is generated, the user types it into a
