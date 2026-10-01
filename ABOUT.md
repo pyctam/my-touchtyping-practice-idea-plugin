@@ -33,8 +33,9 @@ The plugin is written in **Kotlin**, targets **IntelliJ IDEA 2023.3 – 2025.3**
   highlighted in the reference pane, and the whole text is highlighted in green when you complete it
   with zero errors.
 - A **status bar** showing typing speed (WPM) and the current error count.
-- A **Reset** hyperlink, plus a keyboard shortcut (press **R three times** within 3 seconds) that
-  regenerates a fresh practice text and clears the input.
+- A **Reset** hyperlink, plus an **Enter** key shortcut that regenerates a fresh practice text and
+  clears the input once the text has been completed (highlighted in green). While the text is
+  incomplete, Enter is ignored.
 - **Hot-reload**: settings changes are published over a `MessageBus` topic and the tool window
   rebuilds itself without an IDE restart.
 - A `DocumentFilter` that prevents typing beyond the length of the reference text and blocks new
