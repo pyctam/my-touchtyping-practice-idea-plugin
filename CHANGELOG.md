@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+## 0.1.3
+
+### Changed
+
+- **Word-based text generation** — the practice text is now built word by word instead of as a
+  random character stream. Each word is a random run of letters with a length of at most
+  `MAX_WORD_LENGTH` (7, approximating the average English word length; kept as a constant for now,
+  to be turned into a settings input later). Words are separated by a single space, and the maximum
+  text length was reduced from 127 to 64 characters.
+
+### Added
+
+- Unit tests for the new generation rules: no word exceeds the max word length, the total text
+  length stays within the limit, and words are separated by exactly one space.
+
 ## 0.1.2
 
 ### Changed

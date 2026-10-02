@@ -12,7 +12,7 @@ import com.intellij.openapi.project.Project
  *
  * Currently a scaffold: the session-tracking features are not yet implemented.
  */
-// Intentional scaffold for future session tracking (see ABOUT.md / FIXES-v1.md); not yet
+// Intentional scaffold for future session tracking (see ABOUT.md / TODO.md); not yet
 // referenced.
 @Suppress("unused")
 @Service(Service.Level.PROJECT)
