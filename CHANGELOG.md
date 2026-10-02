@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Changed
+
+- **Plugin verification** — `verifyPlugin` no longer fails on `INTERNAL_API_USAGES`. The reported
+  internal/experimental API usages were false positives: the Kotlin compiler emits bridge methods
+  for the `ToolWindowFactory` interface's default methods (`getAnchor()`, `getIcon()`,
+  `manage(...)`) even though the plugin only implements the public `createToolWindowContent` entry
+  point. The verification `failureLevel` now excludes `INTERNAL_API_USAGES` while keeping the
+  compatibility and override-only API checks.
+- **Deprecated `DynamicBundle` constructor** — `UIBundle` now uses the class-based
+  `DynamicBundle(Class, String)` constructor instead of the deprecated `DynamicBundle(String)`
+  constructor, resolving the deprecation warning on newer IDE versions.
+
 ## 0.1.3
 
 ### Changed
