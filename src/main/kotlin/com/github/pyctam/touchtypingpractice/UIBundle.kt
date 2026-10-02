@@ -6,7 +6,7 @@ import org.jetbrains.annotations.PropertyKey
 
 @NonNls private const val BUNDLE = "messages.UI"
 
-object UIBundle : DynamicBundle(BUNDLE) {
+object UIBundle : DynamicBundle(UIBundle::class.java, BUNDLE) {
   const val TEXT_FONT_TITLE = "ui.config.text-font.title"
   const val TEXT_FONT_HINT = "ui.config.text-font.hint"
   const val CONFIG_PRACTICE_MODE_TITLE = "ui.config.practice-mode.title"
