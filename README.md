@@ -1,8 +1,8 @@
 # Touch Typing Practice
 
 ![Build](https://github.com/pyctam/my-touchtyping-practice-idea-plugin/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
+[![Version](https://img.shields.io/jetbrains/plugin/v/34632-touch-typing-practice.svg)](https://plugins.jetbrains.com/plugin/34632-touch-typing-practice)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/34632-touch-typing-practice.svg)](https://plugins.jetbrains.com/plugin/34632-touch-typing-practice)
 
 ## Template ToDo list
 
@@ -47,10 +47,12 @@ your other installed fonts.
 
 - Using JetBrains Marketplace:
 
-  Go to [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID) and install it by clicking
+  Go to [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/34632-touch-typing-practice) and install it by
+  clicking
   the <kbd>Install to ...</kbd> button in case your IDE is running.
 
-  You can also download the [latest release](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID/versions) from
+  You can also download the [latest release](https://plugins.jetbrains.com/plugin/34632-touch-typing-practice/versions)
+  from
   JetBrains Marketplace and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
