@@ -10,12 +10,12 @@ import kotlin.random.Random
  * and produces a random practice string. All randomness is injected via [random] so the output is
  * deterministic under a seeded [Random], which makes the generation rules unit-testable.
  *
- * Generation rules (preserved from the original implementation):
- * - Length is a random value in `[MIN_TEXT_LENGTH, MAX_TEXT_LENGTH]`.
- * - The first character is never a space.
- * - Two spaces are never consecutive.
- * - A trailing space is trimmed.
- * - Spaces occur with roughly [SPACE_PROBABILITY] frequency.
+ * Generation rules:
+ * - The target length is a random value in `[MIN_TEXT_LENGTH, MAX_TEXT_LENGTH]`; the final text is
+ *   at most that long (a trailing space, if any, is trimmed).
+ * - The text is built word by word: each word is a random run of letters with a length in `[1,
+ *   MAX_WORD_LENGTH]`, where [MAX_WORD_LENGTH] approximates the average English word length.
+ * - Words are separated by a single space; the first character is never a space.
  */
 class PracticeTextGenerator(private val random: Random = Random.Default) {
 
@@ -44,6 +44,10 @@ class PracticeTextGenerator(private val random: Random = Random.Default) {
   /**
    * Generates a random string from [chars] following the generation rules documented on the class.
    *
+   * The text is built word by word: a random target length is drawn first, then words of length
+   * `[1, MAX_WORD_LENGTH]` are appended (clamped to the remaining space) with a single space
+   * between them, until the target length is reached.
+   *
    * @param chars the eligible characters; may include a space.
    * @return a random practice string, or a single fallback character if only spaces are available.
    */
@@ -52,24 +56,15 @@ class PracticeTextGenerator(private val random: Random = Random.Default) {
     if (nonSpaceChars.isEmpty()) {
       return FALLBACK_CHARACTER
     }
-    val textLength = random.nextInt(MIN_TEXT_LENGTH, MAX_TEXT_LENGTH + 1)
-    val sb = StringBuilder(textLength)
-    var lastWasSpace = false
-    repeat(textLength) { index ->
-      val charToAdd =
-        when {
-          index == 0 -> nonSpaceChars[random.nextInt(nonSpaceChars.length)]
-          lastWasSpace -> nonSpaceChars[random.nextInt(nonSpaceChars.length)]
-          random.nextDouble() < SPACE_PROBABILITY && chars.contains(' ') -> {
-            lastWasSpace = true
-            ' '
-          }
-          else -> nonSpaceChars[random.nextInt(nonSpaceChars.length)]
-        }
-      if (charToAdd != ' ') {
-        lastWasSpace = false
+    val targetLength = random.nextInt(MIN_TEXT_LENGTH, MAX_TEXT_LENGTH + 1)
+    val sb = StringBuilder(targetLength)
+    while (sb.length < targetLength) {
+      val remaining = targetLength - sb.length
+      val wordLength = random.nextInt(1, minOf(MAX_WORD_LENGTH, remaining) + 1)
+      repeat(wordLength) { sb.append(nonSpaceChars[random.nextInt(nonSpaceChars.length)]) }
+      if (sb.length < targetLength) {
+        sb.append(' ')
       }
-      sb.append(charToAdd)
     }
     return sb.toString().trimEnd()
   }
@@ -90,8 +85,8 @@ class PracticeTextGenerator(private val random: Random = Random.Default) {
 
   private companion object {
     const val MIN_TEXT_LENGTH = 1
-    const val MAX_TEXT_LENGTH = 127
-    const val SPACE_PROBABILITY = 0.1
+    const val MAX_TEXT_LENGTH = 64
+    const val MAX_WORD_LENGTH = 7
     const val LOWERCASE_LETTERS = "abcdefghijklmnopqrstuvwxyz"
     const val FALLBACK_CHARACTER = "a"
   }

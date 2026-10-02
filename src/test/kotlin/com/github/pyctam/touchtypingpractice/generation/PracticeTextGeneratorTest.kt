@@ -110,6 +110,42 @@ class PracticeTextGeneratorTest {
   }
 
   @Test
+  fun generateNeverExceedsMaxWordLength() {
+    repeat(200) {
+      val text = generator.generate(config())
+      for (word in text.split(" ")) {
+        assertTrue(
+          "Word '$word' exceeds the max word length of 7 in text: '$text'",
+          word.length <= 7,
+        )
+      }
+    }
+  }
+
+  @Test
+  fun generateNeverExceedsMaxTextLength() {
+    repeat(200) {
+      val text = generator.generate(config())
+      assertTrue(
+        "Text exceeds the max text length of 64: '$text'",
+        text.length <= 64,
+      )
+    }
+  }
+
+  @Test
+  fun generateSeparatesWordsWithASingleSpace() {
+    repeat(200) {
+      val text = generator.generate(config())
+      // No leading/trailing space and no consecutive spaces means every space separates exactly
+      // two words.
+      assertTrue("Text should not start with a space: '$text'", text.first() != ' ')
+      assertTrue("Text should not end with a space: '$text'", text.last() != ' ')
+      assertFalse("Text has consecutive spaces: '$text'", "  " in text)
+    }
+  }
+
+  @Test
   fun generateReturnsFallbackCharacterWhenOnlySpaceIsAvailable() {
     // No fingers selected -> no letters, only a space -> the non-space set is empty, so the
     // generator returns the single fallback character (matches the original behavior).
