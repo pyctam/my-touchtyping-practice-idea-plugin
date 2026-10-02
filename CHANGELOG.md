@@ -4,6 +4,12 @@
 
 ### Changed
 
+- **Sentence-length practice text** — the generated practice text now contains a random number of
+  words in `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]` (5–20), approximating the length of a modern
+  English sentence. Each word is a random run of letters with a length in `[1, MAX_WORD_LENGTH]`
+  (1–7). The previous `MAX_TEXT_LENGTH` character cap has been replaced by `MAX_WORDS_COUNT` (20);
+  the total text length is now 9–159 characters. `MIN_WORDS_COUNT`, `MAX_WORDS_COUNT`, and
+  `MAX_WORD_LENGTH` are documented as candidates for future UI settings.
 - **Plugin verification** — `verifyPlugin` no longer fails on `INTERNAL_API_USAGES`. The reported
   internal/experimental API usages were false positives: the Kotlin compiler emits bridge methods
   for the `ToolWindowFactory` interface's default methods (`getAnchor()`, `getIcon()`,
@@ -13,6 +19,12 @@
 - **Deprecated `DynamicBundle` constructor** — `UIBundle` now uses the class-based
   `DynamicBundle(Class, String)` constructor instead of the deprecated `DynamicBundle(String)`
   constructor, resolving the deprecation warning on newer IDE versions.
+
+### Added
+
+- Unit tests for the new generation rules: the word count is within `[MIN_WORDS_COUNT,
+  MAX_WORDS_COUNT]`, each word length is within `[1, MAX_WORD_LENGTH]`, and the total length stays
+  within the practical range.
 
 ## 0.1.3
 

@@ -115,20 +115,51 @@ class PracticeTextGeneratorTest {
       val text = generator.generate(config())
       for (word in text.split(" ")) {
         assertTrue(
-          "Word '$word' exceeds the max word length of 7 in text: '$text'",
-          word.length <= 7,
+          "Word '$word' exceeds the max word length of ${PracticeTextGenerator.MAX_WORD_LENGTH} in text: '$text'",
+          word.length <= PracticeTextGenerator.MAX_WORD_LENGTH,
         )
       }
     }
   }
 
   @Test
-  fun generateNeverExceedsMaxTextLength() {
+  fun generateAlwaysHasAtLeastMinWordsCount() {
+    repeat(200) {
+      val text = generator.generate(config())
+      val wordCount = text.split(" ").size
+      assertTrue(
+        "Text has fewer than ${PracticeTextGenerator.MIN_WORDS_COUNT} words: '$text'",
+        wordCount >= PracticeTextGenerator.MIN_WORDS_COUNT,
+      )
+    }
+  }
+
+  @Test
+  fun generateNeverExceedsMaxWordsCount() {
+    repeat(200) {
+      val text = generator.generate(config())
+      val wordCount = text.split(" ").size
+      assertTrue(
+        "Text has more than ${PracticeTextGenerator.MAX_WORDS_COUNT} words: '$text'",
+        wordCount <= PracticeTextGenerator.MAX_WORDS_COUNT,
+      )
+    }
+  }
+
+  @Test
+  fun generateTotalLengthStaysWithinPracticalRange() {
+    // Minimum: MIN_WORDS_COUNT words of length 1 plus the separating spaces.
+    // Maximum: MAX_WORDS_COUNT words of length MAX_WORD_LENGTH plus the separating spaces.
+    val minWords = PracticeTextGenerator.MIN_WORDS_COUNT
+    val maxWords = PracticeTextGenerator.MAX_WORDS_COUNT
+    val maxWordLength = PracticeTextGenerator.MAX_WORD_LENGTH
+    val minLength = minWords + (minWords - 1)
+    val maxLength = maxWords * maxWordLength + (maxWords - 1)
     repeat(200) {
       val text = generator.generate(config())
       assertTrue(
-        "Text exceeds the max text length of 64: '$text'",
-        text.length <= 64,
+        "Text length ${text.length} is outside [$minLength, $maxLength]: '$text'",
+        text.length in minLength..maxLength,
       )
     }
   }

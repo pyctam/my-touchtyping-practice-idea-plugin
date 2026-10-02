@@ -9,8 +9,10 @@
    `TouchTypingSessionService` is an empty scaffold — see Bugs.)
 3. **Numbers & punctuation** — the generator currently draws only lowercase letters plus a space.
    Add settings checkboxes and extend the character set.
-4. **Text length setting** — text length is currently random (1–64 chars). Add a setting
-   (e.g., 20 / 50 / 100 / 200 characters).
+4. **Text length setting** — the text is now sentence-length: word count in `[MIN_WORDS_COUNT,
+   MAX_WORDS_COUNT]` (5–20), each word ≤ `MAX_WORD_LENGTH` (7), total 9–159 characters. Add a
+   setting to control the length, e.g. by exposing `MIN_WORDS_COUNT`, `MAX_WORDS_COUNT`, and
+   `MAX_WORD_LENGTH` as UI inputs.
 5. **Difficulty levels / curated text** — add a mode selector (Random / Words / Sentences) so real
    text can be practiced.
 6. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
@@ -22,6 +24,9 @@
 9. **Custom text input** — let users paste or type their own practice text instead of only
    generated ones.
 10. **Count errors during the text typing** — reset the counter only when the text resets.
+11. Use different colors for letters for left and right hands when generating the text.
+12. Show "Hit to Enter to [reset]" when text typing is completed, and it is highlighted with the green color. Keep the "
+    Hit to Enter to " hidden in all other use cases.
 
 ## Bugs
 
