@@ -63,9 +63,11 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   fingers, and per-finger key limit, then generates a random practice string.
 - A per-hand, per-finger **keyboard layout map** (home row first, then extensions) drives which keys
   are eligible.
-- Generation rules: random length (1–127 chars), lowercase letters only (plus a space), no
-  leading/trailing spaces, no consecutive spaces, and roughly a 10% space frequency. The generator
-  takes an injectable `Random`, so its output is deterministic and unit-testable.
+- Generation rules: the text is built word by word — each word is a random run of lowercase
+  letters with a length of at most 7 characters (approximating the average English word length,
+  kept as a constant for now), words are separated by a single space, and the total length is at
+  most 64 characters. The generator takes an injectable `Random`, so its output is deterministic
+  and unit-testable.
 
 ### UI & architecture
 
@@ -115,7 +117,7 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   (previously a copy-pasted R-key `KeyListener`); it is still instantiated in two places
   (`buildContent()` and `reset()`).
 - **Fix stale comments** — the text-length comment now matches the code
-  (`[MIN_TEXT_LENGTH, MAX_TEXT_LENGTH]` = 1–127); keep comments in sync as the generator evolves.
+  (`[MIN_TEXT_LENGTH, MAX_TEXT_LENGTH]` = 1–64); keep comments in sync as the generator evolves.
 - **Remove template leftovers** — the `projectService` message, the `"(2)"` configurable-name
   suffix, and unused constants/methods have been removed; the README still contains the template
   ToDo list.
@@ -130,7 +132,7 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 |-------------|---------------------------------------------------------------|
 | Plugin name | Touch Typing Practice                                         |
 | Plugin ID   | `com.github.pyctam.touchtypingpractice`                       |
-| Version     | 0.1.2                                                         |
+| Version     | 0.1.3                                                         |
 | Language    | Kotlin (JVM 17)                                               |
 | Target IDE  | IntelliJ IDEA 2023.3 and later (`233` and up, no upper bound) |
 | Build       | Gradle 8.10.2 + IntelliJ Platform Gradle Plugin               |

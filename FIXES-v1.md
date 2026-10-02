@@ -11,6 +11,9 @@
     Enter after completing the text."
 > - **#8 Stale length comment** — the generator KDoc now matches the code (`[MIN_TEXT_LENGTH, MAX_TEXT_LENGTH]` =
     1–127).
+> - **Word-based generation (0.1.3)** — the generator now builds the text word by word: each word is at most
+    `MAX_WORD_LENGTH` (7, approximating the average English word length) characters long, words are separated by a
+    single space, and the max text length was reduced from 127 to 64 characters.
 > - **#9 Template leftovers** — the `projectService` message, the `"(2)"` configurable-name suffix, and unused
     constants/methods are removed (the README template ToDo list remains).
 > - **#2 / #3 Numbers, punctuation & `SAMPLE_TEXTS`** — the dead `shouldIncludeNumbers/Punctuation` methods and the
