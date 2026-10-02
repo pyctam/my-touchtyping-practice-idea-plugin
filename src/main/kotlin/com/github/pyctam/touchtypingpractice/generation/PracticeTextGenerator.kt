@@ -11,10 +11,10 @@ import kotlin.random.Random
  * deterministic under a seeded [Random], which makes the generation rules unit-testable.
  *
  * Generation rules:
- * - The target length is a random value in `[MIN_TEXT_LENGTH, MAX_TEXT_LENGTH]`; the final text is
- *   at most that long (a trailing space, if any, is trimmed).
- * - The text is built word by word: each word is a random run of letters with a length in `[1,
- *   MAX_WORD_LENGTH]`, where [MAX_WORD_LENGTH] approximates the average English word length.
+ * - The word count is a random value in `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]` (5–20), approximating
+ *   the length of a modern English sentence.
+ * - Each word is a random run of letters with a length in `[1, MAX_WORD_LENGTH]`, where
+ *   [MAX_WORD_LENGTH] approximates the average English word length.
  * - Words are separated by a single space; the first character is never a space.
  */
 class PracticeTextGenerator(private val random: Random = Random.Default) {
@@ -44,9 +44,9 @@ class PracticeTextGenerator(private val random: Random = Random.Default) {
   /**
    * Generates a random string from [chars] following the generation rules documented on the class.
    *
-   * The text is built word by word: a random target length is drawn first, then words of length
-   * `[1, MAX_WORD_LENGTH]` are appended (clamped to the remaining space) with a single space
-   * between them, until the target length is reached.
+   * The word count is drawn from `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]`, then each word is a random
+   * run of letters with a length in `[1, MAX_WORD_LENGTH]`, and the words are joined with a single
+   * space.
    *
    * @param chars the eligible characters; may include a space.
    * @return a random practice string, or a single fallback character if only spaces are available.
@@ -56,17 +56,15 @@ class PracticeTextGenerator(private val random: Random = Random.Default) {
     if (nonSpaceChars.isEmpty()) {
       return FALLBACK_CHARACTER
     }
-    val targetLength = random.nextInt(MIN_TEXT_LENGTH, MAX_TEXT_LENGTH + 1)
-    val sb = StringBuilder(targetLength)
-    while (sb.length < targetLength) {
-      val remaining = targetLength - sb.length
-      val wordLength = random.nextInt(1, minOf(MAX_WORD_LENGTH, remaining) + 1)
-      repeat(wordLength) { sb.append(nonSpaceChars[random.nextInt(nonSpaceChars.length)]) }
-      if (sb.length < targetLength) {
-        sb.append(' ')
+    val wordCount = random.nextInt(MIN_WORDS_COUNT, MAX_WORDS_COUNT + 1)
+    val words =
+      List(wordCount) {
+        val length = random.nextInt(1, MAX_WORD_LENGTH + 1)
+        buildString {
+          repeat(length) { append(nonSpaceChars[random.nextInt(nonSpaceChars.length)]) }
+        }
       }
-    }
-    return sb.toString().trimEnd()
+    return words.joinToString(" ")
   }
 
   /** Concatenates the eligible keys for every selected finger, in [Finger] declaration order. */
@@ -83,10 +81,30 @@ class PracticeTextGenerator(private val random: Random = Random.Default) {
     return sb.toString()
   }
 
-  private companion object {
-    const val MIN_TEXT_LENGTH = 1
-    const val MAX_TEXT_LENGTH = 64
+  companion object {
+    /**
+     * The maximum length of the word/term in the generated sample text. This is used to approximate
+     * the average English word length.
+     *
+     * Could be offered as a configurable parameter from the UI.
+     */
     const val MAX_WORD_LENGTH = 7
+
+    /**
+     * The minimum count of the words/terms in the generated sample text.
+     *
+     * Could be offered as a configurable parameter from the UI, similar to [MAX_WORD_LENGTH].
+     */
+    const val MIN_WORDS_COUNT = 5
+
+    /**
+     * The maximum count of the words/terms in the generated sample text. This approximates the
+     * length of a modern English sentence (15–20 words).
+     *
+     * Could be offered as a configurable parameter from the UI, similar to [MIN_WORDS_COUNT].
+     */
+    const val MAX_WORDS_COUNT = 20
+
     const val LOWERCASE_LETTERS = "abcdefghijklmnopqrstuvwxyz"
     const val FALLBACK_CHARACTER = "a"
   }

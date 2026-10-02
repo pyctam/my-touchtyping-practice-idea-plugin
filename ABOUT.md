@@ -63,11 +63,13 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   fingers, and per-finger key limit, then generates a random practice string.
 - A per-hand, per-finger **keyboard layout map** (home row first, then extensions) drives which keys
   are eligible.
-- Generation rules: the text is built word by word — each word is a random run of lowercase
-  letters with a length of at most 7 characters (approximating the average English word length,
-  kept as a constant for now), words are separated by a single space, and the total length is at
-  most 64 characters. The generator takes an injectable `Random`, so its output is deterministic
-  and unit-testable.
+- Generation rules: the text contains a random number of words in `[MIN_WORDS_COUNT,
+  MAX_WORDS_COUNT]` (5–20), approximating the length of a modern English sentence. Each word is a
+  random run of lowercase letters with a length in `[1, MAX_WORD_LENGTH]` (1–7, approximating the
+  average English word length, kept as a constant for now). Words are separated by a single space,
+  and the total length is 9–159 characters. `MIN_WORDS_COUNT`, `MAX_WORDS_COUNT`, and
+  `MAX_WORD_LENGTH` are documented as candidates for future UI settings. The generator takes an
+  injectable `Random`, so its output is deterministic and unit-testable.
 
 ### UI & architecture
 
@@ -96,8 +98,10 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 3. **Numbers & punctuation** — the generator currently draws only lowercase letters (plus a space);
    numbers and punctuation are not supported. Add settings checkboxes and extend the character set
    to include them.
-4. **Text length setting** — text length is currently a random value; add a setting (e.g. 20 / 50 /
-   100 / 200 characters).
+4. **Text length setting** — the text is now sentence-length (word count in `[MIN_WORDS_COUNT,
+   MAX_WORDS_COUNT]` = 5–20, each word ≤ `MAX_WORD_LENGTH` = 7, total 9–159 characters). Add a
+   setting to control the length, e.g. by exposing `MIN_WORDS_COUNT`, `MAX_WORDS_COUNT`, and
+   `MAX_WORD_LENGTH` as UI inputs.
 5. **Difficulty levels / curated text** — practice text is always random characters. Add a mode
    selector (Random / Words / Sentences) so real text can be practiced.
 6. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
@@ -116,8 +120,9 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 - **Remove duplication** — the reset key handling is now a single reusable `EnterKeyDetector`
   (previously a copy-pasted R-key `KeyListener`); it is still instantiated in two places
   (`buildContent()` and `reset()`).
-- **Fix stale comments** — the text-length comment now matches the code
-  (`[MIN_TEXT_LENGTH, MAX_TEXT_LENGTH]` = 1–64); keep comments in sync as the generator evolves.
+- **Fix stale comments** — the generation rules are now sentence-length (word count in
+  `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]` = 5–20, each word ≤ `MAX_WORD_LENGTH` = 7, total 9–159
+  characters); keep comments in sync as the generator evolves.
 - **Remove template leftovers** — the `projectService` message, the `"(2)"` configurable-name
   suffix, and unused constants/methods have been removed; the README still contains the template
   ToDo list.
