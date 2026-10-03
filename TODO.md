@@ -25,8 +25,6 @@
    generated ones.
 10. **Count errors during the text typing** — reset the counter only when the text resets.
 11. Use different colors for letters for left and right hands when generating the text.
-12. Show "Hit to Enter to [reset]" when text typing is completed, and it is highlighted with the green color. Keep the "
-    Hit to Enter to " hidden in all other use cases.
 
 ## Bugs
 

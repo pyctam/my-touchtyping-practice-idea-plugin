@@ -24,15 +24,20 @@ import javax.swing.text.DefaultHighlighter
  * @param referenceTextPane the non-editable pane showing the text to type.
  * @param originalText the reference text being typed.
  * @param errorCounter the counter updated with the current mismatch count.
+ * @param onCompletionChanged callback that fires when completion state changes.
  */
 class TouchTypingDocumentListener(
   private val typingArea: JTextArea,
   private val referenceTextPane: JTextPane,
   private val originalText: String,
   private val errorCounter: ErrorCounter,
+  private val onCompletionChanged: (Boolean) -> Unit = {},
 ) : DocumentListener {
 
   private val logger = Logger.getInstance(TouchTypingDocumentListener::class.java)
+
+  /** Last reported completion state, so [onCompletionChanged] fires only on transitions. */
+  private var lastCompletionState = false
 
   /** Red background (theme-aware) for a single mismatched character. */
   private val mismatchPainter =
@@ -82,9 +87,14 @@ class TouchTypingDocumentListener(
         errorCounter.setCount(mismatchCount)
 
         // Highlight the whole sample text green when it is completed without errors.
-        if (typed.length == originalText.length && mismatchCount == 0) {
+        val completed = typed.length == originalText.length && mismatchCount == 0
+        if (completed) {
           highlighter.addHighlight(0, originalText.length, completionPainter)
           logger.info("Sample text completed without errors - highlighted in green")
+        }
+        if (completed != lastCompletionState) {
+          lastCompletionState = completed
+          onCompletionChanged(completed)
         }
       } catch (t: Throwable) {
         logger.warn("Failed to update highlights", t)
