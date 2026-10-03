@@ -66,6 +66,7 @@ object TouchTypingUIComponentsFactory {
    * @param errorCounter the counter updated with the current mismatch count.
    * @param fontFamily the font family to render with.
    * @param fontSizePt font size in points.
+   * @param onCompletionChanged a callback to be called when the typing input is completed.
    * @return the scroll pane and typing area needed to reset the input later.
    */
   fun createTypingInputComponents(
@@ -73,11 +74,18 @@ object TouchTypingUIComponentsFactory {
     typingText: String,
     errorCounter: ErrorCounter,
     fontFamily: String,
-    fontSizePt: Int = 13
+    fontSizePt: Int = 13,
+    onCompletionChanged: (Boolean) -> Unit = {}
   ): TypingInputComponents {
     val typingArea = createTypingArea(fontFamily, fontSizePt)
     val listener =
-      TouchTypingDocumentListener(typingArea, referenceTextPane, typingText, errorCounter)
+      TouchTypingDocumentListener(
+        typingArea,
+        referenceTextPane,
+        typingText,
+        errorCounter,
+        onCompletionChanged
+      )
     typingArea.document.addDocumentListener(listener)
 
     val scrollPane = JBScrollPane(typingArea)

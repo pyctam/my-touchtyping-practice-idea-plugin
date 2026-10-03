@@ -1,5 +1,6 @@
 package com.github.pyctam.touchtypingpractice.toolWindow
 
+import com.github.pyctam.touchtypingpractice.UIBundle
 import com.github.pyctam.touchtypingpractice.config.Settings
 import com.github.pyctam.touchtypingpractice.config.TextFont
 import com.github.pyctam.touchtypingpractice.services.PracticeTextGeneratorService
@@ -16,8 +17,10 @@ import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
 import java.awt.Cursor
+import java.awt.FlowLayout
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import javax.swing.JPanel
 import javax.swing.JTextArea
 import javax.swing.JTextPane
 
@@ -41,6 +44,7 @@ class TouchTypingToolWindow {
   private lateinit var typingArea: JTextArea
   private lateinit var typingInputPanel: JBScrollPane
   private lateinit var mainPanel: BorderLayoutPanel
+  private lateinit var hitEnterLabel: JBLabel
 
   /** Builds the full tool window panel with a freshly generated practice text. */
   fun buildContent(): BorderLayoutPanel {
@@ -58,7 +62,8 @@ class TouchTypingToolWindow {
         typingText,
         errorCounter,
         fontFamily,
-        settings.textFontSize
+        settings.textFontSize,
+        onCompletionChanged = { setHitEnterHintVisible(it) }
       )
     typingInputPanel = typingInput.scrollPane
     typingArea = typingInput.typingArea
@@ -89,6 +94,7 @@ class TouchTypingToolWindow {
     // Ensure any completion highlight (light green background) is removed on reset.
     referenceTextPane.highlighter.removeAllHighlights()
     errorCounter.setCount(0)
+    setHitEnterHintVisible(false)
 
     val newInput =
       TouchTypingUIComponentsFactory.createTypingInputComponents(
@@ -96,7 +102,8 @@ class TouchTypingToolWindow {
         newTypingText,
         errorCounter,
         TextFont.effectiveFamily(settings.textFontFamily),
-        settings.textFontSize
+        settings.textFontSize,
+        onCompletionChanged = { setHitEnterHintVisible(it) }
       )
     val newTypingInputPanel = newInput.scrollPane
 
@@ -118,6 +125,19 @@ class TouchTypingToolWindow {
   /** Requests focus on the typing area (called after the window is shown). */
   fun requestFocus() {
     typingArea.requestFocusInWindow()
+  }
+
+  /**
+   * Shows or hides the "Hit Enter to " hint next to the reset link.
+   *
+   * @param visible true when the practice text is completed (highlighted in green).
+   */
+  private fun setHitEnterHintVisible(visible: Boolean) {
+    if (!::hitEnterLabel.isInitialized) return
+    if (hitEnterLabel.isVisible == visible) return
+    hitEnterLabel.isVisible = visible
+    hitEnterLabel.parent?.revalidate()
+    hitEnterLabel.parent?.repaint()
   }
 
   /**
@@ -150,9 +170,14 @@ class TouchTypingToolWindow {
 
   /**
    * Creates the reset panel with a right-aligned hyperlink that resets the practice text and input.
+   *
+   * A hidden "Hit Enter to " hint label sits to the left of the "reset" link. It is revealed only
+   * when the practice text is completed (highlighted in green), so the user learns they can press
+   * Enter to reset. In all other states the hint stays hidden.
    */
   private fun createResetPanel(): BorderLayoutPanel {
-    val resetLabel = JBLabel("<html><a href=''>Reset</a></html>")
+    val resetLabel =
+      JBLabel("<html><a href=''>${UIBundle.message(UIBundle.TOOL_WINDOW_RESET_LINK)}</a></html>")
     resetLabel.addMouseListener(
       object : MouseAdapter() {
         override fun mouseClicked(e: MouseEvent) {
@@ -161,11 +186,22 @@ class TouchTypingToolWindow {
       }
     )
     resetLabel.cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-    resetLabel.toolTipText =
-      "Reset practice text and clear input (press Enter after completing the text)"
+    resetLabel.toolTipText = UIBundle.message(UIBundle.TOOL_WINDOW_RESET_TOOLTIP)
+
+    // Hidden hint shown only on completion; same font as the reset link, but in a muted
+    // (disabled-foreground) color since it is a secondary hint, not a primary element.
+    hitEnterLabel = JBLabel(UIBundle.message(UIBundle.TOOL_WINDOW_RESET_HINT) + " ")
+    hitEnterLabel.font = resetLabel.font
+    hitEnterLabel.foreground = UIUtil.getLabelDisabledForeground()
+    hitEnterLabel.isVisible = false
+
+    // Right-aligned group: "Hit Enter to " (hidden by default) immediately left of "reset".
+    val linkPanel = JPanel(FlowLayout(FlowLayout.RIGHT, 0, 0))
+    linkPanel.add(hitEnterLabel)
+    linkPanel.add(resetLabel)
 
     val panel = BorderLayoutPanel()
-    panel.addToRight(resetLabel)
+    panel.addToRight(linkPanel)
     panel.border = JBUI.Borders.empty(PADDING_SMALL)
     return panel
   }

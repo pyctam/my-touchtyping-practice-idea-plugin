@@ -24,6 +24,9 @@ object UIBundle : DynamicBundle(UIBundle::class.java, BUNDLE) {
     "ui.config.finger-selection.checkbox.specific-fingers"
   const val CONFIG_FINGER_SELECTION_ERROR_AT_LEAST_ONE =
     "ui.config.finger-selection.error.at-least-one"
+  const val TOOL_WINDOW_RESET_LINK = "ui.tool-window.reset-link"
+  const val TOOL_WINDOW_RESET_HINT = "ui.tool-window.reset-hint"
+  const val TOOL_WINDOW_RESET_TOOLTIP = "ui.tool-window.reset-tooltip"
 
   @JvmStatic
   fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any) =

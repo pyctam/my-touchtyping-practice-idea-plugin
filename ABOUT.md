@@ -33,9 +33,12 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   highlighted in the reference pane, and the whole text is highlighted in green when you complete it
   with zero errors.
 - A **status bar** showing typing speed (WPM) and the current error count.
-- A **Reset** hyperlink, plus an **Enter** key shortcut that regenerates a fresh practice text and
-  clears the input once the text has been completed (highlighted in green). While the text is
-  incomplete, Enter is ignored.
+- A **Reset** hyperlink (lowercase "reset"), plus an **Enter** key shortcut that regenerates a fresh
+  practice text and clears the input once the text has been completed (highlighted in green). While
+  the text is incomplete, Enter is ignored. When the text is completed and highlighted in green, a
+  hidden **"Hit Enter to "** hint appears to the left of the reset link (muted grayish color, same
+  font as the link) so the user knows they can press Enter to reset; it stays hidden in all other
+  states.
 - **Hot-reload**: settings changes are published over a `MessageBus` topic and the tool window
   rebuilds itself without an IDE restart.
 - A `DocumentFilter` that prevents typing beyond the length of the reference text and blocks new
@@ -79,8 +82,9 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 - A **`TouchTypingSessionService`** project-level service scaffolded as the home for future session
   state and statistics.
 - **Unit tests** covering the finger bitmask logic, settings state normalization, the interactive
-  finger-selection behavior of the settings dialog, the pure text generator and keyboard layout, and
-  the Enter-to-reset key detector.
+  finger-selection behavior of the settings dialog, the pure text generator and keyboard layout, the
+  Enter-to-reset key detector, and the completion callback that drives the "Hit Enter to reset"
+  hint.
 - Build tooling: **Spotless** (ktfmt, Google style), **Kover** (coverage), and **Qodana** (code
   quality).
 
