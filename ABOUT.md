@@ -36,7 +36,7 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 - A **Reset** hyperlink (lowercase "reset"), plus an **Enter** key shortcut that regenerates a fresh
   practice text and clears the input once the text has been completed (highlighted in green). While
   the text is incomplete, Enter is ignored. When the text is completed and highlighted in green, a
-  hidden **"Hit Enter to "** hint appears to the left of the reset link (default font color, same
+  hidden **"Hit Enter to "** hint appears to the left of the reset link (muted grayish color, same
   font as the link) so the user knows they can press Enter to reset; it stays hidden in all other
   states.
 - **Hot-reload**: settings changes are published over a `MessageBus` topic and the tool window

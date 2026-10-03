@@ -86,10 +86,11 @@
 
 9. **Typo in public API** — `CONFIG_KEY_LIMIT_PER_FINDER_*` in `UIBundle.kt`: "FINDER" should be
    "FINGER" (the `UI.properties` keys say `key-limit-per-finder` too — fix both).
-10. **Inconsistent i18n** — the settings page is fully bundled, but the tool window hardcodes
-    `"Typing speed: 0 WPM | Typing errors: 0"`, `"Reset"`, and the tooltip. Move them to
-    `UIBundle`; the status format string is also duplicated between the initial text and the
-    listener — extract a `formatStatus(wpm, errors)` function.
+10. **Inconsistent i18n** — the settings page is fully bundled, and the tool window's reset link,
+    "Hit Enter to " hint, and reset tooltip are now bundled too; the remaining hardcoded string is
+    `"Typing speed: 0 WPM | Typing errors: 0"`. Move it to `UIBundle`; the status format string is
+    also duplicated between the initial text and the listener — extract a `formatStatus(wpm, errors)`
+    function.
 11. **Redundant EDT hops** — `TouchTypingDocumentListener.updateHighlights()` wraps work in
     `SwingUtilities.invokeLater`, but `DocumentListener` callbacks already fire on the EDT. Same in
     `ErrorCounter.notifyListeners()` (double `invokeLater`). Also `catch (t: Throwable)` around the

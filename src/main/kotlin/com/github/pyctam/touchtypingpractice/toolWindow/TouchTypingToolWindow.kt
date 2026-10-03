@@ -1,5 +1,6 @@
 package com.github.pyctam.touchtypingpractice.toolWindow
 
+import com.github.pyctam.touchtypingpractice.UIBundle
 import com.github.pyctam.touchtypingpractice.config.Settings
 import com.github.pyctam.touchtypingpractice.config.TextFont
 import com.github.pyctam.touchtypingpractice.services.PracticeTextGeneratorService
@@ -175,7 +176,8 @@ class TouchTypingToolWindow {
    * Enter to reset. In all other states the hint stays hidden.
    */
   private fun createResetPanel(): BorderLayoutPanel {
-    val resetLabel = JBLabel("<html><a href=''>reset</a></html>")
+    val resetLabel =
+      JBLabel("<html><a href=''>${UIBundle.message(UIBundle.TOOL_WINDOW_RESET_LINK)}</a></html>")
     resetLabel.addMouseListener(
       object : MouseAdapter() {
         override fun mouseClicked(e: MouseEvent) {
@@ -184,12 +186,13 @@ class TouchTypingToolWindow {
       }
     )
     resetLabel.cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-    resetLabel.toolTipText =
-      "Reset practice text and clear input (press Enter after completing the text)"
+    resetLabel.toolTipText = UIBundle.message(UIBundle.TOOL_WINDOW_RESET_TOOLTIP)
 
-    // Hidden hint shown only on completion; same font as the reset link, default color.
-    hitEnterLabel = JBLabel("Hit Enter to ")
+    // Hidden hint shown only on completion; same font as the reset link, but in a muted
+    // (disabled-foreground) color since it is a secondary hint, not a primary element.
+    hitEnterLabel = JBLabel(UIBundle.message(UIBundle.TOOL_WINDOW_RESET_HINT) + " ")
     hitEnterLabel.font = resetLabel.font
+    hitEnterLabel.foreground = UIUtil.getLabelDisabledForeground()
     hitEnterLabel.isVisible = false
 
     // Right-aligned group: "Hit Enter to " (hidden by default) immediately left of "reset".

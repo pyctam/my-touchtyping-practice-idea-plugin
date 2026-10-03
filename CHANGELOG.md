@@ -7,8 +7,8 @@
 - **"Hit Enter to reset" completion hint** — a hidden "Hit Enter to " label now sits to the left of
   the (lowercased) **reset** link under the sample text panel. It is revealed only when the practice
   text is completed and highlighted in green, hinting that the user can press **Enter** to reset; in
-  all other states it stays hidden. The hint uses the default font color and the same font as the
-  reset link.
+  all other states it stays hidden. The hint uses the same font as the reset link but a muted
+  (disabled-foreground) color, since it is a secondary hint rather than a primary element.
 - Unit tests for the completion callback that drives the hint: it fires only on completion-state
   transitions (true on completion, false after a correction) and not for repeated incomplete states.
 - Unit tests for the new generation rules: the word count is within `[MIN_WORDS_COUNT,
@@ -19,6 +19,9 @@
 
 - **Lowercased reset link** — the reset hyperlink under the sample text panel is now lowercase
   ("reset") so it reads as a single sentence with the "Hit Enter to " hint.
+- **Tool-window i18n** — the reset link text, the "Hit Enter to " hint, and the reset tooltip are
+  now sourced from the `UIBundle` resource bundle (`messages/UI.properties`) instead of being
+  hardcoded in the tool window.
 - **Sentence-length practice text** — the generated practice text now contains a random number of
   words in `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]` (5–20), approximating the length of a modern
   English sentence. Each word is a random run of letters with a length in `[1, MAX_WORD_LENGTH]`
