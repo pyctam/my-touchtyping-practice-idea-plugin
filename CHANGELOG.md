@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.4
+
 ### Added
 
 - **"Hit Enter to reset" completion hint** — a hidden "Hit Enter to " label now sits to the left of
