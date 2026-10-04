@@ -18,13 +18,10 @@
    text can be practiced.
 6. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
    produce the most errors and show a "weak fingers" summary.
-7. **Completion notification** — show an IDE `Notification` when a text is completed (the green
-   highlight is easy to miss).
-8. **Action + shortcut** — register an `AnAction` (e.g., `Ctrl+Alt+T`) to toggle the tool window;
+7. **Action + shortcut** — register an `AnAction` (e.g., `Ctrl+Alt+T`) to toggle the tool window;
    today there is no way to open it without finding it in the tool window bar.
-9. **Custom text input** — let users paste or type their own practice text instead of only
+8. **Custom text input** — let users paste or type their own practice text instead of only
    generated ones.
-10. Use different colors for letters for left and right hands when generating the text.
 
 ## Bugs
 
@@ -49,6 +46,17 @@
    exposes the live object as serializable state. Return a copy (a small data class) so the
    serializer never holds the live instance.
    *`config/Settings.kt`.*
+4. **No word wrap on the typing `JTextPane`** — the KDoc in `createTypingArea()` claims
+   "word-wrapping `JTextPane`" but no wrapping is configured. Unlike the old `JTextArea` with
+   `setLineWrap(true)`, a `JTextPane` does not wrap by default. Long lines will show a horizontal
+   scrollbar. Fix: set `wrapStyleWord = true` and `wrapStyleLength` on the pane, or configure the
+   view factory.
+   *`ui/TouchTypingUIComponentsFactory.kt`.*
+5. **Rich-text paste in the typing area** — `JTextPane` accepts rich-text paste (fonts, colors,
+   HTML from browser/Word), unlike the old `JTextArea` which pasted plain text only. Pasted
+   attributes persist until the next keystroke re-runs `applyTo`. Fix: set
+   `typingArea.editorKit = PlainTextEditorKit()` to restore plain-text-only paste semantics.
+   *`ui/TouchTypingUIComponentsFactory.kt`.*
 
 ### Duplication / dead code
 
@@ -108,3 +116,34 @@
     window's content) would auto-dispose it.
 17. **Logging** — remaining `logger.info` calls (reset, completion, tool-window lifecycle) →
     `debug`.
+18. **O(N) re-color per keystroke** — `HandColors.applyTo` re-colors the entire text on every
+    keystroke. The `DocumentEvent` carries the changed offset/length, which is discarded. Not a
+    bottleneck at 5–20 words, but won't scale. Fix: drive re-coloring from the `DocumentEvent`
+    range (only re-color the inserted/changed characters).
+    *`ui/HandColors.kt`, `ui/TouchTypingDocumentListener.kt`.*
+19. **Uppercase letters are never colored** — the `KeyboardLayout` only defines lowercase keys, so
+    a pasted or shifted uppercase letter stays uncolored. Consider normalizing to lowercase before
+    lookup in `colorFor()`.
+    *`ui/HandColors.kt`.*
+20. **`ALL_KEYS_LIMIT = 100` magic number** — silently breaks if a finger ever gains >100 keys.
+    Prefer `Int.MAX_VALUE` or add a `KeyboardLayout.allKeys(mode, finger)` accessor that returns
+    the full list without a limit parameter.
+    *`ui/HandColors.kt`, `generation/KeyboardLayout.kt`.*
+21. **Redundant `text` parameter in `applyTo`** — every call site passes a value equal to
+    `pane.text`. Drop the parameter and read `pane.text` internally.
+    *`ui/HandColors.kt`.*
+22. **Per-character `SimpleAttributeSet` allocation** — a new `SimpleAttributeSet` is allocated per
+    character per keystroke. Two static sets (one for LEFT, one for RIGHT) could be reused.
+    *`ui/HandColors.kt`.*
+23. **Layering: `HandColors` (in `ui`) reaches into `generation` + `config`** — the
+    character-to-hand mapping is a domain concept, not a UI concern. Consider moving the mapping
+    logic to the `generation` or `config` package.
+    *`ui/HandColors.kt`.*
+24. **Completion side-effects re-run on every keystroke** — `logger.info` + `addHighlight` for the
+    completion state fire on every keystroke while the text is complete, not just on the
+    transition into completion. Guard with a state-change check.
+    *`ui/TouchTypingDocumentListener.kt`.*
+25. **Tests don't verify actual coloring** — `HandColorsTest.applyTo` tests only assert text is
+    preserved, never that the foreground attribute was set on the document. Add assertions that
+    read back the character attributes and verify the expected color.
+    *`test/.../ui/HandColorsTest.kt`.*

@@ -32,6 +32,10 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 - **Real-time feedback**: as you type, each character that does not match the reference is
   highlighted in the reference pane, and the whole text is highlighted in green when you complete it
   with zero errors.
+- **Per-hand letter coloring**: each character in both the reference text pane and the typing area
+  is colored by hand — left-hand keys in blue, right-hand keys in purple. The colors are
+  theme-aware and distinct from the semantic colors (red for mismatches, green for completion).
+  The character-to-hand mapping is derived from the `KeyboardLayout`.
 - A **status bar** showing the cumulative error count (the WPM area and its `" | "` separator are
   hidden until WPM is implemented).
 - A **Reset** hyperlink (lowercase "reset"), plus an **Enter** key shortcut that regenerates a fresh
@@ -114,11 +118,9 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
    selector (Random / Words / Sentences) so real text can be practiced.
 6. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
    produce the most errors and show a "weak fingers" summary.
-7. **Completion notification** — show an IDE `Notification` when a text is completed (the green
-   highlight is easy to miss).
-8. **Action + shortcut** — register an `AnAction` (e.g. `Ctrl+Alt+T`) to toggle the tool window;
+7. **Action + shortcut** — register an `AnAction` (e.g. `Ctrl+Alt+T`) to toggle the tool window;
    today there is no way to open it without finding it in the tool window bar.
-9. **Custom text input** — let users paste or type their own practice text instead of only generated
+8. **Custom text input** — let users paste or type their own practice text instead of only generated
    ones.
 
 ### Cleanup & quality

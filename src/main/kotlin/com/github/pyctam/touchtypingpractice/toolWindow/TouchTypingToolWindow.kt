@@ -6,6 +6,7 @@ import com.github.pyctam.touchtypingpractice.config.TextFont
 import com.github.pyctam.touchtypingpractice.services.PracticeTextGeneratorService
 import com.github.pyctam.touchtypingpractice.ui.EnterKeyDetector
 import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
+import com.github.pyctam.touchtypingpractice.ui.HandColors
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.PADDING_SMALL
 import com.intellij.openapi.diagnostic.Logger
@@ -21,7 +22,6 @@ import java.awt.FlowLayout
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.JPanel
-import javax.swing.JTextArea
 import javax.swing.JTextPane
 
 /**
@@ -41,7 +41,7 @@ class TouchTypingToolWindow {
   private val textGenerator = PracticeTextGeneratorService()
 
   private lateinit var referenceTextPane: JTextPane
-  private lateinit var typingArea: JTextArea
+  private lateinit var typingArea: JTextPane
   private lateinit var typingInputPanel: JBScrollPane
   private lateinit var mainPanel: BorderLayoutPanel
   private lateinit var hitEnterLabel: JBLabel
@@ -91,6 +91,8 @@ class TouchTypingToolWindow {
     val newTypingText = textGenerator.generatePracticeText()
 
     referenceTextPane.text = newTypingText
+    // Re-apply per-hand colors to the new reference text.
+    HandColors.applyTo(referenceTextPane, newTypingText)
     // Ensure any completion highlight (light green background) is removed on reset.
     referenceTextPane.highlighter.removeAllHighlights()
     errorCounter.setCount(0)

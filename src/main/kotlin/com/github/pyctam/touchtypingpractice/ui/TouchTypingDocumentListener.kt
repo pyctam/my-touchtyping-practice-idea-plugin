@@ -2,7 +2,6 @@ package com.github.pyctam.touchtypingpractice.ui
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.ui.JBColor
-import javax.swing.JTextArea
 import javax.swing.JTextPane
 import javax.swing.SwingUtilities
 import javax.swing.event.DocumentEvent
@@ -18,6 +17,9 @@ import javax.swing.text.DefaultHighlighter
  * count is cumulative and never decreases on corrections), and highlights the whole reference text
  * in green when it is completed with zero errors.
  *
+ * Each character in the typing area is colored by hand (blue for left-hand keys, purple for
+ * right-hand keys) via [HandColors.applyTo], matching the reference pane.
+ *
  * A [TextLengthLimiterFilter] is installed on the typing area to prevent typing beyond the
  * reference length and to block new input while errors are unresolved.
  *
@@ -28,7 +30,7 @@ import javax.swing.text.DefaultHighlighter
  * @param onCompletionChanged callback that fires when completion state changes.
  */
 class TouchTypingDocumentListener(
-  private val typingArea: JTextArea,
+  private val typingArea: JTextPane,
   private val referenceTextPane: JTextPane,
   private val originalText: String,
   private val errorCounter: ErrorCounter,
@@ -71,7 +73,7 @@ class TouchTypingDocumentListener(
     // Not needed for plain text.
   }
 
-  /** Recomputes the mismatch highlights and error count on the EDT. */
+  /** Recomputes the mismatch highlights, hand colors, and error count on the EDT. */
   private fun updateHighlights() {
     SwingUtilities.invokeLater {
       try {
@@ -105,6 +107,9 @@ class TouchTypingDocumentListener(
           lastCompletionState = completed
           onCompletionChanged(completed)
         }
+
+        // Apply per-hand colors to the typed text (blue for left-hand, purple for right-hand).
+        HandColors.applyTo(typingArea, typed)
       } catch (t: Throwable) {
         logger.warn("Failed to update highlights", t)
       }
