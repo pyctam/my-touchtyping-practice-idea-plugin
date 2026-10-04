@@ -23,8 +23,14 @@ class TouchTypingDocumentListenerTest {
     SwingUtilities.invokeAndWait {}
   }
 
-  /** Builds a typing area wired to a listener that records completion states via [callback]. */
-  private fun createTypingArea(callback: (Boolean) -> Unit): JTextArea {
+  /**
+   * Builds a typing area wired to a listener that records completion states via [callback] and
+   * updates [errorCounter].
+   */
+  private fun createTypingArea(
+    errorCounter: ErrorCounter = ErrorCounter(),
+    callback: (Boolean) -> Unit = {}
+  ): JTextArea {
     val typingArea = JTextArea()
     val referenceTextPane = JTextPane()
     referenceTextPane.text = originalText
@@ -33,7 +39,7 @@ class TouchTypingDocumentListenerTest {
         typingArea,
         referenceTextPane,
         originalText,
-        ErrorCounter(),
+        errorCounter,
         callback
       )
     typingArea.document.addDocumentListener(listener)
@@ -109,7 +115,7 @@ class TouchTypingDocumentListenerTest {
     // Same length as the original but a wrong character -> not completed. From the initial (false)
     // state this is not a transition, so the callback must not fire.
     val states = mutableListOf<Boolean>()
-    val typingArea = createTypingArea { states.add(it) }
+    val typingArea = createTypingArea(ErrorCounter()) { states.add(it) }
 
     typingArea.text = originalText.replace("hello", "hxllo")
     flushEdt()
@@ -119,5 +125,74 @@ class TouchTypingDocumentListenerTest {
       emptyList<Boolean>(),
       states
     )
+  }
+
+  // --- Cumulative error counter tests ---
+  //
+  // Note: the TextLengthLimiterFilter blocks insertions/replacements while the document has
+  // errors (the user must correct before continuing), so the tests simulate realistic
+  // character-by-character input: insertions via replaceRange, backspaces via document.remove
+  // (the filter always allows removals, mirroring the real BackSpace action).
+
+  @Test
+  fun counterIncrementsOnWrongCharacter() {
+    val errorCounter = ErrorCounter()
+    val typingArea = createTypingArea(errorCounter)
+
+    // Type "h" then a wrong "x" (expected "e"): one mismatch appears.
+    typingArea.replaceRange("hx", 0, 0)
+    flushEdt()
+
+    assertEquals("Expected one error after a wrong character", 1, errorCounter.getCount())
+  }
+
+  @Test
+  fun counterStaysUnchangedAfterCorrection() {
+    val errorCounter = ErrorCounter()
+    val typingArea = createTypingArea(errorCounter)
+
+    // Introduce one error: type "hx" instead of "he".
+    typingArea.replaceRange("hx", 0, 0)
+    flushEdt()
+    // Correct it: backspace the "x" (delete the char at index 1), then type "e".
+    typingArea.document.remove(1, 1)
+    flushEdt()
+    typingArea.replaceRange("e", 1, 1)
+    flushEdt()
+
+    assertEquals(
+      "Expected the error to stay counted after the correction",
+      1,
+      errorCounter.getCount()
+    )
+  }
+
+  @Test
+  fun counterAccumulatesAcrossMultipleErrors() {
+    val errorCounter = ErrorCounter()
+    val typingArea = createTypingArea(errorCounter)
+
+    // First error: type "hx" instead of "he", then correct it.
+    typingArea.replaceRange("hx", 0, 0)
+    flushEdt()
+    typingArea.document.remove(1, 1)
+    flushEdt()
+    typingArea.replaceRange("e", 1, 1)
+    flushEdt()
+    assertEquals("Expected one error after the first mistake", 1, errorCounter.getCount())
+
+    // Continue correctly up to "hello wor".
+    typingArea.replaceRange("llo wor", 2, 2)
+    flushEdt()
+
+    // Second error: type "k" instead of "l", then correct it and finish the text.
+    typingArea.replaceRange("k", 9, 9)
+    flushEdt()
+    typingArea.document.remove(9, 1)
+    flushEdt()
+    typingArea.replaceRange("ld", 9, 9)
+    flushEdt()
+
+    assertEquals("Expected the count to accumulate across corrections", 2, errorCounter.getCount())
   }
 }

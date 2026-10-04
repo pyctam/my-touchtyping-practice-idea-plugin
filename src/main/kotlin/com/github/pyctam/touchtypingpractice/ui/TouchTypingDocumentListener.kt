@@ -14,8 +14,9 @@ import javax.swing.text.DefaultHighlighter
  * Provides real-time feedback while the user types the reference text.
  *
  * On every document change it highlights, in the reference pane, each character that does not match
- * the typed text, updates the [errorCounter] with the current mismatch count, and highlights the
- * whole reference text in green when it is completed with zero errors.
+ * the typed text, increments the [errorCounter] by the number of newly introduced mismatches (the
+ * count is cumulative and never decreases on corrections), and highlights the whole reference text
+ * in green when it is completed with zero errors.
  *
  * A [TextLengthLimiterFilter] is installed on the typing area to prevent typing beyond the
  * reference length and to block new input while errors are unresolved.
@@ -23,7 +24,7 @@ import javax.swing.text.DefaultHighlighter
  * @param typingArea the editable area the user types into.
  * @param referenceTextPane the non-editable pane showing the text to type.
  * @param originalText the reference text being typed.
- * @param errorCounter the counter updated with the current mismatch count.
+ * @param errorCounter the cumulative counter incremented by newly introduced mismatches.
  * @param onCompletionChanged callback that fires when completion state changes.
  */
 class TouchTypingDocumentListener(
@@ -38,6 +39,9 @@ class TouchTypingDocumentListener(
 
   /** Last reported completion state, so [onCompletionChanged] fires only on transitions. */
   private var lastCompletionState = false
+
+  /** Last observed mismatch count, so only newly introduced errors increment the counter. */
+  private var lastMismatchCount = 0
 
   /** Red background (theme-aware) for a single mismatched character. */
   private val mismatchPainter =
@@ -84,7 +88,12 @@ class TouchTypingDocumentListener(
           }
         }
 
-        errorCounter.setCount(mismatchCount)
+        // Cumulative counting: only newly introduced mismatches are added; corrections (the
+        // mismatch count dropping) never decrease the counter.
+        if (mismatchCount > lastMismatchCount) {
+          errorCounter.increment(mismatchCount - lastMismatchCount)
+        }
+        lastMismatchCount = mismatchCount
 
         // Highlight the whole sample text green when it is completed without errors.
         val completed = typed.length == originalText.length && mismatchCount == 0

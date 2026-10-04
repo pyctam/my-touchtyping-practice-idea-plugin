@@ -32,10 +32,11 @@ green, a "Hit Enter to reset" hint appears next to the reset link, and pressing 
 fresh sample.
 
 Configure the practice to your hand, the specific fingers you want to train, and how many keys each
-finger may use — then watch mismatches get highlighted instantly and your error count update as you
-go. Pick the font and size for the practice text from a selector that features fonts with true
-small caps (Georgia, Palatino Linotype, Garamond, Calibri, Verdana, Copperplate Gothic) ahead of
-your other installed fonts.
+finger may use — then watch mismatches get highlighted instantly and your error count grow as you
+go. The error total is cumulative: correcting a mistake never decreases it, and it only resets
+when you load a fresh sample. Pick the font and size for the practice text from a selector that
+features fonts with true small caps (Georgia, Palatino Linotype, Garamond, Calibri, Verdana,
+Copperplate Gothic) ahead of your other installed fonts.
 <!-- Plugin description end -->
 
 ## Installation

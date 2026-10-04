@@ -141,23 +141,46 @@ class TouchTypingToolWindow {
   }
 
   /**
-   * Creates the status panel showing typing speed and error count. Uses IntelliJ's standard spacing
-   * (8px padding) and medium-weight typography.
+   * Creates the status panel showing the error count and (later) typing speed.
+   *
+   * The error count is shown first. The WPM label and the `" | "` separator between them are hidden
+   * until WPM is actually implemented; they are revealed together once the feature lands. All
+   * strings are sourced from [UIBundle]. Uses IntelliJ's standard spacing (8px padding) and
+   * medium-weight typography.
    */
   private fun createStatusPanel(): BorderLayoutPanel {
-    val statusLabel = JBLabel("Typing speed: 0 WPM | Typing errors: 0")
-    statusLabel.font = JBFont.medium()
+    val errorsLabel = JBLabel(UIBundle.message(UIBundle.TOOL_WINDOW_STATUS_ERRORS, 0))
+    errorsLabel.font = JBFont.medium()
+
+    // Hidden until WPM is implemented: the separator (spaces are layout, added here) and the WPM
+    // label are revealed together once the feature lands.
+    val separatorLabel =
+      JBLabel(" " + UIBundle.message(UIBundle.TOOL_WINDOW_STATUS_SEPARATOR) + " ")
+    separatorLabel.font = JBFont.medium()
+    separatorLabel.isVisible = false
+
+    val wpmLabel = JBLabel(UIBundle.message(UIBundle.TOOL_WINDOW_STATUS_WPM, 0))
+    wpmLabel.font = JBFont.medium()
+    wpmLabel.isVisible = false
+
     errorCounter.addChangeListener {
-      statusLabel.text = "Typing speed: 0 WPM | Typing errors: ${errorCounter.getCount()}"
+      errorsLabel.text =
+        UIBundle.message(UIBundle.TOOL_WINDOW_STATUS_ERRORS, errorCounter.getCount())
     }
-    statusLabel.border = JBUI.Borders.compound(JBUI.Borders.empty(PADDING_SMALL))
+
+    // Left-aligned row: errors (visible) | separator (hidden) | WPM (hidden).
+    val statusRow = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0))
+    statusRow.add(errorsLabel)
+    statusRow.add(separatorLabel)
+    statusRow.add(wpmLabel)
+    statusRow.border = JBUI.Borders.empty(PADDING_SMALL)
 
     val panel = BorderLayoutPanel()
     panel.background = UIUtil.getPanelBackground()
-    panel.addToLeft(statusLabel)
+    panel.addToLeft(statusRow)
     // Fixed height derived from the label plus vertical padding, so the panel keeps a stable
     // visual weight without being cramped.
-    val totalHeight = statusLabel.preferredSize.height + JBUI.scale(PADDING_SMALL) * 2
+    val totalHeight = errorsLabel.preferredSize.height + JBUI.scale(PADDING_SMALL) * 2
     panel.minimumSize = JBUI.size(0, totalHeight)
     panel.preferredSize = JBUI.size(0, totalHeight)
     panel.border =

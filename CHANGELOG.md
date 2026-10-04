@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+## 0.1.5
+
+### Added
+
+- Unit tests for the cumulative error counter: the counter increments on a wrong character, stays
+  unchanged after a correction, and accumulates across multiple errors.
+
+### Changed
+
+- **Status panel: errors first, WPM hidden** — the status panel now shows the error count first;
+  the WPM area and its `" | "` separator are hidden until WPM is actually implemented (they are
+  revealed together once the feature lands).
+- **Status panel i18n** — the status panel strings ("Typing errors: N", "Typing speed: N WPM", and
+  the separator) are now sourced from the `UIBundle` resource bundle (`messages/UI.properties`)
+  instead of being hardcoded in the tool window.
+- **Cumulative error counter** — the error counter now keeps counting errors even if the user
+  corrects the typing: it increments on every newly introduced error and only resets to zero when
+  the sample text is reset (via the reset link or Enter). Previously the counter showed the current
+  mismatch count and dropped as soon as the user fixed the errors.
+
 ## 0.1.4
 
 ### Added

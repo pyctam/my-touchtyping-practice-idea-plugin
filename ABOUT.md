@@ -32,7 +32,8 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 - **Real-time feedback**: as you type, each character that does not match the reference is
   highlighted in the reference pane, and the whole text is highlighted in green when you complete it
   with zero errors.
-- A **status bar** showing typing speed (WPM) and the current error count.
+- A **status bar** showing the cumulative error count (the WPM area and its `" | "` separator are
+  hidden until WPM is implemented).
 - A **Reset** hyperlink (lowercase "reset"), plus an **Enter** key shortcut that regenerates a fresh
   practice text and clears the input once the text has been completed (highlighted in green). While
   the text is incomplete, Enter is ignored. When the text is completed and highlighted in green, a
@@ -78,7 +79,9 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 
 - A small **UI components factory** following the IntelliJ Design System (8px base-unit spacing,
   `JBColor` for automatic light/dark theme support, `JBUI` for DPI scaling).
-- An **`ErrorCounter`** using the listener pattern to decouple error tracking from the UI.
+- An **`ErrorCounter`** using the listener pattern to decouple error tracking from the UI. The
+  count is cumulative: it increments on every newly introduced error, never decreases on
+  corrections, and resets only with the sample text.
 - A **`TouchTypingSessionService`** project-level service scaffolded as the home for future session
   state and statistics.
 - **Unit tests** covering the finger bitmask logic, settings state normalization, the interactive
@@ -94,8 +97,9 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 
 ### Core features (highest value first)
 
-1. **Real WPM and accuracy** — the status bar currently shows a hardcoded `0 WPM`; there is no
-   timing code. Track session start time and compute words-per-minute and accuracy percentage.
+1. **Real WPM and accuracy** — the status bar's WPM area (and its `" | "` separator) is hidden
+   until implemented; there is no timing code. Track session start time, compute words-per-minute
+   and accuracy percentage, and reveal the WPM label in the status bar.
 2. **Session statistics** — `TouchTypingSessionService` is still an empty stub. Implement session
    history (WPM, accuracy, duration per session), persist it via `PersistentStateComponent`, and
    surface it in a small stats tab or popup.
@@ -141,7 +145,7 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 |-------------|---------------------------------------------------------------|
 | Plugin name | Touch Typing Practice                                         |
 | Plugin ID   | `com.github.pyctam.touchtypingpractice`                       |
-| Version     | 0.1.3                                                         |
+| Version     | 0.1.5                                                         |
 | Language    | Kotlin (JVM 17)                                               |
 | Target IDE  | IntelliJ IDEA 2023.3 and later (`233` and up, no upper bound) |
 | Build       | Gradle 8.10.2 + IntelliJ Platform Gradle Plugin               |
