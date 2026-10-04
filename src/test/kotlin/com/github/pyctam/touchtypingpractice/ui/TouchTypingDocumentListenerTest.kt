@@ -130,8 +130,8 @@ class TouchTypingDocumentListenerTest {
   //
   // Note: the TextLengthLimiterFilter blocks insertions/replacements while the document has
   // errors (the user must correct before continuing), so the tests simulate realistic
-  // character-by-character input: insertions via replaceRange, backspaces via document.remove
-  // (the filter always allows removals, mirroring the real BackSpace action).
+  // character-by-character input: insertions via document.insertString, backspaces via
+  // document.remove (the filter always allows removals, mirroring the real BackSpace action).
 
   @Test
   fun counterIncrementsOnWrongCharacter() {
@@ -139,7 +139,7 @@ class TouchTypingDocumentListenerTest {
     val typingArea = createTypingArea(errorCounter)
 
     // Type "h" then a wrong "x" (expected "e"): one mismatch appears.
-    typingArea.replaceRange("hx", 0, 0)
+    typingArea.document.insertString(0, "hx", null)
     flushEdt()
 
     assertEquals("Expected one error after a wrong character", 1, errorCounter.getCount())
@@ -151,12 +151,12 @@ class TouchTypingDocumentListenerTest {
     val typingArea = createTypingArea(errorCounter)
 
     // Introduce one error: type "hx" instead of "he".
-    typingArea.replaceRange("hx", 0, 0)
+    typingArea.document.insertString(0, "hx", null)
     flushEdt()
     // Correct it: backspace the "x" (delete the char at index 1), then type "e".
     typingArea.document.remove(1, 1)
     flushEdt()
-    typingArea.replaceRange("e", 1, 1)
+    typingArea.document.insertString(1, "e", null)
     flushEdt()
 
     assertEquals(
@@ -172,26 +172,26 @@ class TouchTypingDocumentListenerTest {
     val typingArea = createTypingArea(errorCounter)
 
     // First error: type "hx" instead of "he", then correct it.
-    typingArea.replaceRange("hx", 0, 0)
+    typingArea.document.insertString(0, "hx", null)
     flushEdt()
     typingArea.document.remove(1, 1)
     flushEdt()
-    typingArea.replaceRange("e", 1, 1)
+    typingArea.document.insertString(1, "e", null)
     flushEdt()
     assertEquals("Expected one error after the first mistake", 1, errorCounter.getCount())
 
     // Continue correctly up to "hello wor".
-    typingArea.replaceRange("llo wor", 2, 2)
+    typingArea.document.insertString(2, "llo wor", null)
     flushEdt()
 
     // Second error: type "k" instead of "l", then correct it and finish the text.
-    typingArea.replaceRange("k", 9, 9)
+    typingArea.document.insertString(9, "k", null)
     flushEdt()
     typingArea.document.remove(9, 1)
     flushEdt()
-    typingArea.replaceRange("ld", 9, 9)
+    typingArea.document.insertString(9, "ld", null)
     flushEdt()
 
-    assertEquals("Expected the count to accumulate across corrections", 2, errorCounter.getCount())
+    assertEquals("The count to accumulate across corrections", 2, errorCounter.getCount())
   }
 }
