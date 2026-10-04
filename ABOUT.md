@@ -114,11 +114,9 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
    selector (Random / Words / Sentences) so real text can be practiced.
 6. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
    produce the most errors and show a "weak fingers" summary.
-7. **Completion notification** — show an IDE `Notification` when a text is completed (the green
-   highlight is easy to miss).
-8. **Action + shortcut** — register an `AnAction` (e.g. `Ctrl+Alt+T`) to toggle the tool window;
+7. **Action + shortcut** — register an `AnAction` (e.g. `Ctrl+Alt+T`) to toggle the tool window;
    today there is no way to open it without finding it in the tool window bar.
-9. **Custom text input** — let users paste or type their own practice text instead of only generated
+8. **Custom text input** — let users paste or type their own practice text instead of only generated
    ones.
 
 ### Cleanup & quality
