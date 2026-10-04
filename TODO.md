@@ -2,8 +2,9 @@
 
 ## Features
 
-1. **Real WPM + accuracy** — the status bar currently shows a hardcoded `0 WPM`. Track session
-   start time, compute words-per-minute and accuracy %, and show them in the status bar.
+1. **Real WPM + accuracy** — the status bar's WPM area (and its `" | "` separator) is hidden until
+   implemented. Track session start time, compute words-per-minute and accuracy %, and reveal the
+   WPM label in the status bar.
 2. **Session statistics** — session history (WPM, accuracy, duration per session), persisted via
    `PersistentStateComponent`, surfaced in a small stats tab or popup. (The current
    `TouchTypingSessionService` is an empty scaffold — see Bugs.)
@@ -23,8 +24,7 @@
    today there is no way to open it without finding it in the tool window bar.
 9. **Custom text input** — let users paste or type their own practice text instead of only
    generated ones.
-10. **Count errors during the text typing** — reset the counter only when the text resets.
-11. Use different colors for letters for left and right hands when generating the text.
+10. Use different colors for letters for left and right hands when generating the text.
 
 ## Bugs
 
@@ -86,30 +86,25 @@
 
 9. **Typo in public API** — `CONFIG_KEY_LIMIT_PER_FINDER_*` in `UIBundle.kt`: "FINDER" should be
    "FINGER" (the `UI.properties` keys say `key-limit-per-finder` too — fix both).
-10. **Inconsistent i18n** — the settings page is fully bundled, and the tool window's reset link,
-    "Hit Enter to " hint, and reset tooltip are now bundled too; the remaining hardcoded string is
-    `"Typing speed: 0 WPM | Typing errors: 0"`. Move it to `UIBundle`; the status format string is
-    also duplicated between the initial text and the listener — extract a `formatStatus(wpm, errors)`
-    function.
-11. **Redundant EDT hops** — `TouchTypingDocumentListener.updateHighlights()` wraps work in
+10. **Redundant EDT hops** — `TouchTypingDocumentListener.updateHighlights()` wraps work in
     `SwingUtilities.invokeLater`, but `DocumentListener` callbacks already fire on the EDT. Same in
     `ErrorCounter.notifyListeners()` (double `invokeLater`). Also `catch (t: Throwable)` around the
     highlight logic is broader than needed.
-12. **Java-style accessors** — `ErrorCounter.getCount()/setCount()` → a Kotlin `var count: Int`
+11. **Java-style accessors** — `ErrorCounter.getCount()/setCount()` → a Kotlin `var count: Int`
     with the notification in the setter.
-13. **Manual service lookup** — `Settings.getInstance()` → `application.service<Settings>()`
+12. **Manual service lookup** — `Settings.getInstance()` → `application.service<Settings>()`
     (3 call sites).
-14. **`TextFont` is a data class in name only** — it wraps a `String`, but every API
+13. **`TextFont` is a data class in name only** — it wraps a `String`, but every API
     (`allAvailableFamilies()`, `effectiveFamily()`, `Settings.textFontFamily`) uses raw `String`;
     only `DEFAULT` is a `TextFont`. Either use the type consistently or collapse it to an `object`
     of functions.
-15. **Unnecessary defensiveness** — `KeyboardLayout.keysFor` uses `.orEmpty()` on maps that are
+14. **Unnecessary defensiveness** — `KeyboardLayout.keysFor` uses `.orEmpty()` on maps that are
     total over `Finger.entries` — plain indexing is clearer.
-16. **Side effect in `createPanel()`** — `Configuration.createPanel()` mutates
+15. **Side effect in `createPanel()`** — `Configuration.createPanel()` mutates
     `settings.textFontFamily` when the panel is created (normalization that persists without
     Apply). Consider normalizing in `Settings.loadState`/getter instead.
-17. **MessageBus connection not scoped** — the factory subscribes with `connect()` (no scope) — it
+16. **MessageBus connection not scoped** — the factory subscribes with `connect()` (no scope) — it
     lives for the application lifetime per tool-window creation. `connect(project)` (or the tool
     window's content) would auto-dispose it.
-18. **Logging** — remaining `logger.info` calls (reset, completion, tool-window lifecycle) →
+17. **Logging** — remaining `logger.info` calls (reset, completion, tool-window lifecycle) →
     `debug`.

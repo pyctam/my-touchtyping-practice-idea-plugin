@@ -27,6 +27,9 @@ object UIBundle : DynamicBundle(UIBundle::class.java, BUNDLE) {
   const val TOOL_WINDOW_RESET_LINK = "ui.tool-window.reset-link"
   const val TOOL_WINDOW_RESET_HINT = "ui.tool-window.reset-hint"
   const val TOOL_WINDOW_RESET_TOOLTIP = "ui.tool-window.reset-tooltip"
+  const val TOOL_WINDOW_STATUS_ERRORS = "ui.tool-window.status-errors"
+  const val TOOL_WINDOW_STATUS_WPM = "ui.tool-window.status-wpm"
+  const val TOOL_WINDOW_STATUS_SEPARATOR = "ui.tool-window.status-separator"
 
   @JvmStatic
   fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any) =
