@@ -7,7 +7,6 @@ import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
 import java.awt.Font
-import javax.swing.JTextArea
 import javax.swing.JTextPane
 
 /**
@@ -30,6 +29,9 @@ object TouchTypingUIComponentsFactory {
   /**
    * Creates the reference text pane showing the text to type.
    *
+   * Each character is colored by hand (blue for left-hand keys, purple for right-hand keys) via
+   * [HandColors.applyTo].
+   *
    * @param typingText the text to display.
    * @param fontFamily the font family to render with.
    * @param fontSizePt font size in points.
@@ -40,6 +42,7 @@ object TouchTypingUIComponentsFactory {
     pane.isEditable = false
     pane.font = applyFont(pane.font, fontFamily, fontSizePt)
     pane.border = JBUI.Borders.compound(JBUI.Borders.empty(PADDING_SMALL))
+    HandColors.applyTo(pane, typingText)
     return pane
   }
 
@@ -60,6 +63,9 @@ object TouchTypingUIComponentsFactory {
 
   /**
    * Creates the typing input area with a [TouchTypingDocumentListener] for real-time feedback.
+   *
+   * The typing area is a [JTextPane] so each character can be colored by hand (blue for left-hand
+   * keys, purple for right-hand keys), matching the reference pane.
    *
    * @param referenceTextPane the reference pane to highlight mismatches against.
    * @param typingText the original text being typed.
@@ -97,11 +103,9 @@ object TouchTypingUIComponentsFactory {
     return TypingInputComponents(scrollPane, typingArea)
   }
 
-  /** Creates a word-wrapping, non-editable-styled [JTextArea] for typing input. */
-  private fun createTypingArea(fontFamily: String, fontSizePt: Int): JTextArea {
-    val typingArea = JTextArea()
-    typingArea.lineWrap = true
-    typingArea.wrapStyleWord = true
+  /** Creates a word-wrapping [JTextPane] for typing input with per-hand character colors. */
+  private fun createTypingArea(fontFamily: String, fontSizePt: Int): JTextPane {
+    val typingArea = JTextPane()
     typingArea.font = applyFont(UIUtil.getLabelFont(), fontFamily, fontSizePt)
     typingArea.border = JBUI.Borders.compound(JBUI.Borders.empty(PADDING_SMALL))
     return typingArea
@@ -119,4 +123,4 @@ object TouchTypingUIComponentsFactory {
 }
 
 /** Holds the typing input components needed to reset the input later. */
-data class TypingInputComponents(val scrollPane: JBScrollPane, val typingArea: JTextArea)
+data class TypingInputComponents(val scrollPane: JBScrollPane, val typingArea: JTextPane)

@@ -1,6 +1,5 @@
 package com.github.pyctam.touchtypingpractice.ui
 
-import javax.swing.JTextArea
 import javax.swing.JTextPane
 import javax.swing.SwingUtilities
 import org.junit.Assert.assertEquals
@@ -11,7 +10,7 @@ import org.junit.Test
  * drives the "Hit Enter to reset" hint visibility.
  *
  * The listener is a pure Swing component (no IDE services), so it can be exercised directly: type
- * into the [JTextArea], flush the EDT (the listener posts its work via
+ * into the [JTextPane], flush the EDT (the listener posts its work via
  * [SwingUtilities.invokeLater]), and assert the callback fired with the expected completion state.
  */
 class TouchTypingDocumentListenerTest {
@@ -30,8 +29,8 @@ class TouchTypingDocumentListenerTest {
   private fun createTypingArea(
     errorCounter: ErrorCounter = ErrorCounter(),
     callback: (Boolean) -> Unit = {}
-  ): JTextArea {
-    val typingArea = JTextArea()
+  ): JTextPane {
+    val typingArea = JTextPane()
     val referenceTextPane = JTextPane()
     referenceTextPane.text = originalText
     val listener =
