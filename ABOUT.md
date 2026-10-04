@@ -32,6 +32,10 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 - **Real-time feedback**: as you type, each character that does not match the reference is
   highlighted in the reference pane, and the whole text is highlighted in green when you complete it
   with zero errors.
+- **Per-hand letter coloring**: each character in both the reference text pane and the typing area
+  is colored by hand — left-hand keys in blue, right-hand keys in purple. The colors are
+  theme-aware and distinct from the semantic colors (red for mismatches, green for completion).
+  The character-to-hand mapping is derived from the `KeyboardLayout`.
 - A **status bar** showing the cumulative error count (the WPM area and its `" | "` separator are
   hidden until WPM is implemented).
 - A **Reset** hyperlink (lowercase "reset"), plus an **Enter** key shortcut that regenerates a fresh

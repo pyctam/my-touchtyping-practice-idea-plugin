@@ -22,7 +22,6 @@
    today there is no way to open it without finding it in the tool window bar.
 8. **Custom text input** — let users paste or type their own practice text instead of only
    generated ones.
-9. Use different colors for letters for left and right hands when generating the text.
 
 ## Bugs
 

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Added
+
+- **Per-hand letter coloring** — each character in both the reference text pane and the typing area
+  is now colored by hand: left-hand keys are rendered in blue and right-hand keys in purple. The
+  colors are theme-aware (`JBColor`) and distinct from the plugin's semantic colors (red for
+  mismatches, green for completion). The character-to-hand mapping is derived from the
+  `KeyboardLayout`, so it stays in sync with the key assignments used by the text generator.
+  The typing area was converted from a `JTextArea` to a `JTextPane` to support per-character
+  styling.
+- Unit tests for the `HandColors` character-to-color mapping and the `applyTo` styling behavior.
+
 ## 0.1.5
 
 ### Added
