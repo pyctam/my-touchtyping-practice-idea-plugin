@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.6
+
 ### Added
 
 - **Per-hand letter coloring** — each character in both the reference text pane and the typing area
