@@ -145,7 +145,7 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 |-------------|---------------------------------------------------------------|
 | Plugin name | Touch Typing Practice                                         |
 | Plugin ID   | `com.github.pyctam.touchtypingpractice`                       |
-| Version     | 0.1.3                                                         |
+| Version     | 0.1.5                                                         |
 | Language    | Kotlin (JVM 17)                                               |
 | Target IDE  | IntelliJ IDEA 2023.3 and later (`233` and up, no upper bound) |
 | Build       | Gradle 8.10.2 + IntelliJ Platform Gradle Plugin               |

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.5
+
 ### Added
 
 - Unit tests for the cumulative error counter: the counter increments on a wrong character, stays
