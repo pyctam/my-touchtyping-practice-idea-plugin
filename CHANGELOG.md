@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 0.1.7
+
+### Added
+
+- Unit tests for `TouchTypingUIComponentsFactory.createTextPane`: verifies the reference text pane
+  is non-focusable, non-editable, and correctly sets the provided text.
+
+### Changed
+
+- **Auto-focus typing area on tool window open** — the typing area now automatically receives
+  keyboard focus and places the caret at the end of any existing text whenever the tool window is
+  opened or re-shown. Previously, after closing and reopening the tool window, the user had to
+  manually click in the typing area to start typing. The read-only sample text pane is now
+  non-focusable, preventing the IDE from placing the cursor in it.
+
 ## 0.1.6
 
 ### Added

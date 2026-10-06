@@ -124,9 +124,10 @@ class TouchTypingToolWindow {
     logger.info("Practice reset: new text generated and UI updated")
   }
 
-  /** Requests focus on the typing area (called after the window is shown). */
+  /** Requests focus on the typing area and places the caret at the end of existing text. */
   fun requestFocus() {
     typingArea.requestFocusInWindow()
+    typingArea.setCaretPosition(typingArea.document.length)
   }
 
   /**
