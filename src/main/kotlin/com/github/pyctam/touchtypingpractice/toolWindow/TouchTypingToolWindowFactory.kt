@@ -9,6 +9,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
+import java.awt.event.ComponentAdapter
+import java.awt.event.ComponentEvent
 import javax.swing.SwingUtilities
 
 /**
@@ -29,9 +31,19 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     val contentFactory = ContentFactory.getInstance()
     val window = TouchTypingToolWindow()
 
-    toolWindow.contentManager.addContent(
-      contentFactory.createContent(window.buildContent(), null, false)
+    val mainPanel = window.buildContent()
+
+    // Restore focus to the typing area whenever the tool window content becomes visible
+    // (i.e., the tool window is opened or re-shown).
+    mainPanel.addComponentListener(
+      object : ComponentAdapter() {
+        override fun componentShown(event: ComponentEvent) {
+          SwingUtilities.invokeLater { window.requestFocus() }
+        }
+      }
     )
+
+    toolWindow.contentManager.addContent(contentFactory.createContent(mainPanel, null, false))
     SwingUtilities.invokeLater { window.requestFocus() }
 
     // Subscribe to settings changes to support hot-reload.
@@ -46,8 +58,16 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
             SwingUtilities.invokeLater {
               try {
                 toolWindow.contentManager.removeAllContents(true)
+                val newPanel = window.buildContent()
+                newPanel.addComponentListener(
+                  object : ComponentAdapter() {
+                    override fun componentShown(event: ComponentEvent) {
+                      SwingUtilities.invokeLater { window.requestFocus() }
+                    }
+                  }
+                )
                 toolWindow.contentManager.addContent(
-                  contentFactory.createContent(window.buildContent(), null, false)
+                  contentFactory.createContent(newPanel, null, false)
                 )
                 window.requestFocus()
                 logger.info("Tool window content recreated successfully")

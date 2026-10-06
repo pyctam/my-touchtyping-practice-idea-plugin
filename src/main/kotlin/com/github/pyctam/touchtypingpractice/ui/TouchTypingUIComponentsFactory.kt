@@ -40,6 +40,7 @@ object TouchTypingUIComponentsFactory {
     val pane = JTextPane()
     pane.text = typingText
     pane.isEditable = false
+    pane.isFocusable = false
     pane.font = applyFont(pane.font, fontFamily, fontSizePt)
     pane.border = JBUI.Borders.compound(JBUI.Borders.empty(PADDING_SMALL))
     HandColors.applyTo(pane, typingText)
