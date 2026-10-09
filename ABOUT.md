@@ -27,6 +27,11 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 
 - A **right-anchored tool window** ("Touch Typing Practice") that is `DumbAware`, so it stays
   available even while the IDE is indexing.
+- A **toggle shortcut** (`ToggleTouchTypingPracticeAction`, registered in `plugin.xml`) that opens
+  the tool window when it is closed and hides it when it is open. It is bound to the double-stroke
+  `Ctrl+Alt+P, P` on Windows/Linux and `Control+Option+P, P` on macOS in the default keymap. Because
+  the shortcut is bound through the Action System (not a raw key listener), the action appears in
+  Settings | Keymap, participates in conflict detection, and keeps working when the user rebinds it.
 - A **reference text pane** showing the text to type, and a separate **typing input area** where you
   enter it.
 - **Real-time feedback**: as you type, each character that does not match the reference is
@@ -90,8 +95,8 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   state and statistics.
 - **Unit tests** covering the finger bitmask logic, settings state normalization, the interactive
   finger-selection behavior of the settings dialog, the pure text generator and keyboard layout, the
-  Enter-to-reset key detector, and the completion callback that drives the "Hit Enter to reset"
-  hint.
+  Enter-to-reset key detector, the completion callback that drives the "Hit Enter to reset"
+  hint, and the tool-window toggle action (hide when visible, activate when hidden).
 - Build tooling: **Spotless** (ktfmt, Google style), **Kover** (coverage), and **Qodana** (code
   quality).
 
@@ -118,9 +123,7 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
    selector (Random / Words / Sentences) so real text can be practiced.
 6. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
    produce the most errors and show a "weak fingers" summary.
-7. **Action + shortcut** — register an `AnAction` (e.g. `Ctrl+Alt+T`) to toggle the tool window;
-   today there is no way to open it without finding it in the tool window bar.
-8. **Custom text input** — let users paste or type their own practice text instead of only generated
+7. **Custom text input** — let users paste or type their own practice text instead of only generated
    ones.
 
 ### Cleanup & quality
@@ -147,7 +150,7 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 |-------------|---------------------------------------------------------------|
 | Plugin name | Touch Typing Practice                                         |
 | Plugin ID   | `com.github.pyctam.touchtypingpractice`                       |
-| Version     | 0.1.7                                                         |
+| Version     | 0.1.8                                                         |
 | Language    | Kotlin (JVM 17)                                               |
 | Target IDE  | IntelliJ IDEA 2023.3 and later (`233` and up, no upper bound) |
 | Build       | Gradle 8.10.2 + IntelliJ Platform Gradle Plugin               |

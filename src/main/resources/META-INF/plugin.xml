@@ -16,4 +16,13 @@
                              displayName="Touch Typing Practice"
                              id="com.github.pyctam.touchtypingpractice.config.Configuration"/>
     </extensions>
+
+    <actions>
+        <action id="com.github.pyctam.touchtypingpractice.toolWindow.ToggleTouchTypingPracticeAction"
+                class="com.github.pyctam.touchtypingpractice.toolWindow.ToggleTouchTypingPracticeAction"
+                text="Toggle Touch Typing Practice"
+                description="Open or close the Touch Typing Practice tool window">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt P" second-keystroke="P"/>
+        </action>
+    </actions>
 </idea-plugin>
