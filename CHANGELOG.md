@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.1.8
+
+### Added
+
+- **Toggle tool window shortcut** — a new `ToggleTouchTypingPracticeAction` (registered in
+  `plugin.xml`) opens the Touch Typing Practice tool window when it is closed and hides it when it
+  is open. It is bound to the double-stroke shortcut `Ctrl+Alt+P, P` on Windows/Linux and
+  `Control+Option+P, P` on macOS in the default keymap. Because the shortcut is bound through the
+  Action System (not a raw key listener), the action appears in Settings | Keymap, participates in
+  conflict detection, and keeps working when the user rebinds it.
+- Unit tests for `ToggleTouchTypingPracticeAction`: the toggle decision (hide when visible,
+  activate when hidden), repeated toggling, and the tool window id constant.
+
 ## 0.1.7
 
 ### Added

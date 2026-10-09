@@ -32,6 +32,10 @@ right-hand keys in purple — so you can see at a glance which finger should pre
 When you complete the text with no errors it is highlighted in green, a "Hit Enter to reset" hint
 appears next to the reset link, and pressing **Enter** loads a fresh sample.
 
+Open or close the tool window with a single shortcut: **Ctrl+Alt+P, P** on Windows/Linux and
+**Control+Option+P, P** on macOS (a double-stroke, bound through the Action System so it shows up
+in Settings | Keymap and can be rebound).
+
 Configure the practice to your hand, the specific fingers you want to train, and how many keys each
 finger may use — then watch mismatches get highlighted instantly and your error count grow as you
 go. The error total is cumulative: correcting a mistake never decreases it, and it only resets

@@ -1,4 +1,4 @@
-# TODO
+It was# TODO
 
 ## Features
 
@@ -18,9 +18,7 @@
    text can be practiced.
 6. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
    produce the most errors and show a "weak fingers" summary.
-7. **Action + shortcut** — register an `AnAction` (e.g., `Ctrl+Alt+T`) to toggle the tool window;
-   today there is no way to open it without finding it in the tool window bar.
-8. **Custom text input** — let users paste or type their own practice text instead of only
+7. **Custom text input** — let users paste or type their own practice text instead of only
    generated ones.
 
 ## Bugs
