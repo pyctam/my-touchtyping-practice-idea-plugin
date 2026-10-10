@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.9
+
 ### Added
 
 - **Finger-aware English word generation** — practice text can now be generated from the bundled
