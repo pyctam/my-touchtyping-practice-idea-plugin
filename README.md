@@ -4,26 +4,6 @@
 [![Version](https://img.shields.io/jetbrains/plugin/v/34632-touch-typing-practice.svg)](https://plugins.jetbrains.com/plugin/34632-touch-typing-practice)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/34632-touch-typing-practice.svg)](https://plugins.jetbrains.com/plugin/34632-touch-typing-practice)
 
-## Template ToDo list
-
-- [x] Create a new [IntelliJ Platform Plugin Template][template] project.
-- [ ] Get familiar with the [template documentation][template].
-- [ ] Adjust the [pluginGroup](./gradle.properties) and [pluginName](./gradle.properties), as well as
-  the [id](./src/main/resources/META-INF/plugin.xml) and [sources package](./src/main/kotlin).
-- [ ] Adjust the plugin description in `README` (see [Tips][docs:plugin-description])
-- [ ] Review
-  the [Legal Agreements](https://plugins.jetbrains.com/docs/marketplace/legal-agreements.html?from=IJPluginTemplate).
-- [ ] [Publish a plugin manually](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate)
-  for the first time.
-- [ ] Set the `MARKETPLACE_ID` in the above README badges. You can obtain it once the plugin is published to JetBrains
-  Marketplace.
-- [ ] Set the [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html?from=IJPluginTemplate)
-  related [secrets](https://github.com/JetBrains/intellij-platform-plugin-template#environment-variables).
-- [ ] Set
-  the [Deployment Token](https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html?from=IJPluginTemplate).
-- [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified
-  about releases containing new features and fixes.
-
 <!-- Plugin description -->
 Practice touch typing right inside your IDE. Touch Typing Practice adds a dedicated tool window to
 IntelliJ IDEA where a practice string is generated for you and you type it out with real-time,
@@ -39,7 +19,7 @@ practice, so every generated character can be typed with your enabled keys. Choo
 Letters** mode.
 
 Open or close the tool window with a single shortcut: **Ctrl+Alt+P, P** on Windows/Linux and
-**Control+Option+P, P** on macOS (a double-stroke, bound through the Action System so it shows up
+**Command+Option+P, P** on macOS (a double-stroke, bound through the Action System so it shows up
 in Settings | Keymap and can be rebound).
 
 Configure the practice to your hand, the specific fingers you want to train, how many keys each
@@ -82,13 +62,13 @@ Garamond, Calibri, Verdana, Copperplate Gothic) ahead of your other installed fo
 ## Prerequisites
 
 - Build the plugin locally using `./gradlew buildPlugin`
-- The plugin will be available at `build/distributions/my-touchtyping-practice-idea-plugin-*.zip`
+- The plugin will be available at `build/distributions/Touch Typing Practice-*.zip`
 
 ## Installation Steps
 
 ### Step 1: Open Settings/Preferences
 
-1. Launch **IntelliJ IDEA 2025.3.2**
+1. Launch **IntelliJ IDEA 2023.3 or later**
 2. Open Settings/Preferences:
 
 - **On Linux**: `File` → `Settings`
@@ -112,8 +92,8 @@ In the Settings window:
 2. Navigate to your project directory: `build/distributions/`
 3. Select the plugin file:
 
-- Look for: `my-touchtyping-practice-idea-plugin-*.zip`
-- Example: `my-touchtyping-practice-idea-plugin-1.0.0.zip`
+- Look for: `Touch Typing Practice-*.zip`
+- Example: `Touch Typing Practice-0.1.9.zip`
 
 4. Click **`OK`** to proceed
 

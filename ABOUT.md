@@ -29,7 +29,7 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   available even while the IDE is indexing.
 - A **toggle shortcut** (`ToggleTouchTypingPracticeAction`, registered in `plugin.xml`) that opens
   the tool window when it is closed and hides it when it is open. It is bound to the double-stroke
-  `Ctrl+Alt+P, P` on Windows/Linux and `Control+Option+P, P` on macOS in the default keymap. Because
+  `Ctrl+Alt+P, P` on Windows/Linux and `Command+Option+P, P` on macOS in the default keymap. Because
   the shortcut is bound through the Action System (not a raw key listener), the action appears in
   Settings | Keymap, participates in conflict detection, and keeps working when the user rebinds it.
 - A **reference text pane** showing the text to type, and a separate **typing input area** where you
@@ -109,54 +109,8 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   corrections, and resets only with the sample text.
 - A **`TouchTypingSessionService`** project-level service scaffolded as the home for future session
   state and statistics.
-- **Unit tests** covering the finger bitmask logic, settings state normalization, the interactive
-  finger-selection behavior of the settings dialog, the pure text generator and keyboard layout, the
-  Enter-to-reset key detector, the completion callback that drives the "Hit Enter to reset"
-  hint, and the tool-window toggle action (hide when visible, activate when hidden).
 - Build tooling: **Spotless** (ktfmt, Google style), **Kover** (coverage), and **Qodana** (code
   quality).
-
----
-
-## Part 2 — What still has to be implemented
-
-### Core features (highest value first)
-
-1. **Real WPM and accuracy** — the status bar's WPM area (and its `" | "` separator) is hidden
-   until implemented; there is no timing code. Track session start time, compute words-per-minute
-   and accuracy percentage, and reveal the WPM label in the status bar.
-2. **Session statistics** — `TouchTypingSessionService` is still an empty stub. Implement session
-   history (WPM, accuracy, duration per session), persist it via `PersistentStateComponent`, and
-   surface it in a small stats tab or popup.
-3. **Numbers & punctuation** — the generator currently draws only lowercase letters (plus a space);
-   numbers and punctuation are not supported. Add settings checkboxes and extend the character set
-   to include them.
-4. **Text length setting** — the text is now sentence-length (word count in `[MIN_WORDS_COUNT,
-   MAX_WORDS_COUNT]` = 5–20, each word ≤ `MAX_WORD_LENGTH` = 7, total 9–159 characters). Add a
-   setting to control the length, e.g. by exposing `MIN_WORDS_COUNT`, `MAX_WORDS_COUNT`, and
-   `MAX_WORD_LENGTH` as UI inputs.
-5. **Difficulty levels / curated text** — practice text is always random characters. Add a mode
-   selector (Random / Words / Sentences) so real text can be practiced.
-6. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
-   produce the most errors and show a "weak fingers" summary.
-7. **Custom text input** — let users paste or type their own practice text instead of only generated
-   ones.
-
-### Cleanup & quality
-
-- **Reduce logging** — the per-keystroke `logger.info` output has been removed; a few remaining
-  `logger.info` calls (reset, completion, tool-window lifecycle) could be moved to `debug`.
-- **Remove duplication** — the reset key handling is now a single reusable `EnterKeyDetector`
-  (previously a copy-pasted R-key `KeyListener`); it is still instantiated in two places
-  (`buildContent()` and `reset()`).
-- **Fix stale comments** — the generation rules are now sentence-length (word count in
-  `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]` = 5–20, each word ≤ `MAX_WORD_LENGTH` = 7, total 9–159
-  characters); keep comments in sync as the generator evolves.
-- **Remove template leftovers** — the `projectService` message, the `"(2)"` configurable-name
-  suffix, and unused constants/methods have been removed; the README still contains the template
-  ToDo list.
-- **More tests** — unit tests now cover config, the pure text generator, the keyboard layout, and
-  the Enter-to-reset detector; add more as new features land.
 
 ---
 

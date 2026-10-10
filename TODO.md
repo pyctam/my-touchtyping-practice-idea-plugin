@@ -1,4 +1,4 @@
-It was# TODO
+# TODO
 
 ## Features
 
@@ -146,3 +146,9 @@ It was# TODO
     preserved, never that the foreground attribute was set on the document. Add assertions that
     read back the character attributes and verify the expected color.
     *`test/.../ui/HandColorsTest.kt`.*
+26. **Fix stale comments** — the generation rules are now sentence-length (word count in
+    `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]` = 5–20, each word ≤ `MAX_WORD_LENGTH` = 7, total 9–159
+    characters); keep comments in sync as the generator evolves.
+27. **More tests** — unit tests now cover config, the pure text generator, the keyboard layout, the
+    word list and word-based generation, the Enter-to-reset detector, the completion callback, and
+    the tool-window toggle action; add more as new features land.
