@@ -29,6 +29,9 @@ class Settings : PersistentStateComponent<Settings> {
   /** Which hand(s) to practice. */
   var practiceMode: PracticeMode = BOTH_HANDS
 
+  /** How the practice text is generated (random letters, exact words, or adapted words). */
+  var generationMode: GenerationMode = GenerationMode.ADAPTED_WORDS
+
   /** Maximum number of keys each finger may be assigned. */
   var keyLimitPerFinger: Int = 1
 

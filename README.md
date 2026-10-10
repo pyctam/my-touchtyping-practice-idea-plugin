@@ -32,16 +32,22 @@ right-hand keys in purple — so you can see at a glance which finger should pre
 When you complete the text with no errors it is highlighted in green, a "Hit Enter to reset" hint
 appears next to the reset link, and pressing **Enter** loads a fresh sample.
 
+Practice with real English words: the bundled word list is adapted to the keys you currently
+practice, so every generated character can be typed with your enabled keys. Choose between
+**Adapted Words** (real words with unavailable letters removed, favoring recognizable fragments),
+**Exact Words** (only words typed entirely with your enabled keys), or the classic **Random
+Letters** mode.
+
 Open or close the tool window with a single shortcut: **Ctrl+Alt+P, P** on Windows/Linux and
 **Control+Option+P, P** on macOS (a double-stroke, bound through the Action System so it shows up
 in Settings | Keymap and can be rebound).
 
-Configure the practice to your hand, the specific fingers you want to train, and how many keys each
-finger may use — then watch mismatches get highlighted instantly and your error count grow as you
-go. The error total is cumulative: correcting a mistake never decreases it, and it only resets
-when you load a fresh sample. Pick the font and size for the practice text from a selector that
-features fonts with true small caps (Georgia, Palatino Linotype, Garamond, Calibri, Verdana,
-Copperplate Gothic) ahead of your other installed fonts.
+Configure the practice to your hand, the specific fingers you want to train, how many keys each
+finger may use, and the word generation mode — then watch mismatches get highlighted instantly and
+your error count grow as you go. The error total is cumulative: correcting a mistake never
+decreases it, and it only resets when you load a fresh sample. Pick the font and size for the
+practice text from a selector that features fonts with true small caps (Georgia, Palatino Linotype,
+Garamond, Calibri, Verdana, Copperplate Gothic) ahead of your other installed fonts.
 <!-- Plugin description end -->
 
 ## Installation
@@ -139,8 +145,63 @@ After the IDE restarts, confirm the plugin is installed:
 The plugin is now ready to use in your IntelliJ IDEA!
 
 ---
-Plugin based on the [IntelliJ Platform Plugin Template][template].
 
-[template]: https://github.com/JetBrains/intellij-platform-plugin-template
+## Word List and Source Attribution
 
-[docs:plugin-description]: https://plugins.jetbrains.com/docs/intellij/plugin-user-experience.html#plugin-description-and-presentation
+The word-based practice modes (**Adapted Words** and **Exact Words**) generate exercises from the
+bundled English word list at `src/main/resources/google-10000-english.txt`.
+
+- **Dataset:** Google 10,000 English Words — the 10,000 most common English words, one per line,
+  ordered by frequency (most common first).
+- **Source repository:** <https://github.com/first20hours/google-10000-english>
+- **Word-list file:** <https://github.com/first20hours/google-10000-english/blob/master/google-10000-english.txt>
+- **Use in this plugin:** the dataset is used to generate English-word-based typing exercises that
+  are adapted to the keys currently enabled in the lesson. This project does not author or maintain
+  the word list; it is bundled as-is for offline use.
+
+### How the word list is loaded
+
+`WordList` (in `src/main/kotlin/.../generation/WordList.kt`) reads the resource from the classpath
+(`/google-10000-english.txt`) of the packaged plugin — never from a machine-specific filesystem
+path. The list is loaded and parsed **once** per application and cached: blank lines are skipped,
+words are normalized to lowercase, duplicates are removed (first occurrence wins, preserving the
+source frequency order), and entries that are not pure letter words are rejected. If the resource
+is missing or unreadable, a clear error is logged and the plugin falls back to the Random Letters
+mode.
+
+### How to update or replace the dataset
+
+Replace the contents of `src/main/resources/google-10000-english.txt` with a new one-word-per-line
+list (lowercase letters are expected; other entries are skipped safely). The file is picked up
+automatically by the Gradle build and included in the packaged plugin. If you replace the dataset
+with one from a different source, update the attribution above and verify the new source's license
+before distributing the plugin.
+
+### How exact-word and adapted-word generation work
+
+- **Exact Words:** only dictionary words whose every character is typed with an enabled key are
+  used. Candidates are ranked by source frequency (the list order is used as a frequency proxy —
+  the source file does not provide explicit frequency values).
+- **Adapted Words:** each dictionary word is filtered to the enabled keys — characters whose keys
+  are not enabled are omitted, the original order is preserved, and the result is ranked to favor
+  high-retention, common, recognizable fragments (e.g. `through` → `hgh` when only the index-finger
+  keys `f, g, j, h` are enabled). The original source word is retained with each adapted result for
+  debugging and analytics. Adapted strings are letter-filtered fragments and are not presented as
+  correctly spelled English words.
+- Candidate pools are precomputed per (mode, enabled-key set) and cached, so the dictionary is not
+  rescanned on every generation request.
+
+### License and redistribution
+
+Per the source repository's own notice, the data files are derived from the **Google Web Trillion
+Word Corpus** (as described by Thorsten Brants and Alex Franz), distributed by the **Linguistic
+Data Consortium**; subsets of the corpus were distributed by **Peter Norvig**; corpus editing and
+cleanup was done by **Josh Kaufman**. The source states that **educational and personal/research
+use is permitted** under the LDC license, Norvig's MIT license for his contributions, and US fair
+use doctrine, and that **commercial use is not recommended without licensing the data from the
+Linguistic Data Consortium**. This plugin is distributed free of charge; if you plan to use or
+redistribute the bundled word list commercially, review the LDC terms first.
+
+---
+
+```

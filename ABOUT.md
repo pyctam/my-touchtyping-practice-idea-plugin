@@ -63,6 +63,7 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
       followed by every other font installed on the system. On first open, the first available
       featured font is preselected automatically.
     - **Practice mode**: Left Hand, Right Hand, or Both Hands.
+    - **Word generation mode**: Random Letters (legacy), Exact Words, or Adapted Words (default).
     - **Key limit per finger** (1–6), controlling how many keys each finger may be assigned.
     - **Finger selection**: pick specific fingers (Thumb, Index, Middle, Ring, Little) or use the
       "Use All Fingers" shortcut, with validation that at least one finger is selected.
@@ -71,18 +72,29 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 
 ### Practice text generation
 
-- An **application-level `PracticeTextGeneratorService`** — a thin adapter over a pure,
-  IDE-independent `PracticeTextGenerator` — that builds a character set from the configured hand,
-  fingers, and per-finger key limit, then generates a random practice string.
+- An **application-level `PracticeTextGeneratorService`** — a thin adapter over pure,
+  IDE-independent generators — that builds the set of enabled keys from the configured hand,
+  fingers, and per-finger key limit, then generates a practice string according to the selected
+  generation mode.
 - A per-hand, per-finger **keyboard layout map** (home row first, then extensions) drives which keys
   are eligible.
-- Generation rules: the text contains a random number of words in `[MIN_WORDS_COUNT,
-  MAX_WORDS_COUNT]` (5–20), approximating the length of a modern English sentence. Each word is a
-  random run of lowercase letters with a length in `[1, MAX_WORD_LENGTH]` (1–7, approximating the
-  average English word length, kept as a constant for now). Words are separated by a single space,
-  and the total length is 9–159 characters. `MIN_WORDS_COUNT`, `MAX_WORDS_COUNT`, and
-  `MAX_WORD_LENGTH` are documented as candidates for future UI settings. The generator takes an
-  injectable `Random`, so its output is deterministic and unit-testable.
+- **Random Letters mode** (legacy): the text contains a random number of words in
+  `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]` (5–20), approximating the length of a modern English
+  sentence. Each word is a random run of lowercase letters with a length in `[1, MAX_WORD_LENGTH]`
+  (1–7). Words are separated by a single space, and the total length is 9–159 characters.
+  `MIN_WORDS_COUNT`, `MAX_WORDS_COUNT`, and `MAX_WORD_LENGTH` are documented as candidates for
+  future UI settings.
+- **Word-based modes** (Exact Words, Adapted Words): exercises are generated from the bundled
+  **Google 10,000 English Words** list (`src/main/resources/google-10000-english.txt`, source:
+  <https://github.com/first20hours/google-10000-english>). `WordList` loads and normalizes the
+  resource once (classpath load, lowercase, de-duplicated, invalid entries rejected) and caches it.
+  `WordExerciseGenerator` adapts each word to the enabled keys: Exact Words keeps only words typed
+  entirely with enabled keys; Adapted Words omits unavailable letters (preserving order) and ranks
+  candidates by retained letters, retention ratio, source frequency (list order as proxy), and a
+  vowel bonus, de-duplicating identical adapted strings. Candidate pools are cached per
+  (mode, enabled-key mask). If the word list is missing, the service falls back to Random Letters.
+  See the README "Word List and Source Attribution" section for dataset attribution and licensing.
+- The generators take an injectable `Random`, so their output is deterministic and unit-testable.
 
 ### UI & architecture
 
