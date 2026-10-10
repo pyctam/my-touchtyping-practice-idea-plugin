@@ -157,12 +157,26 @@ class WordExerciseGeneratorTest {
 
   @Test
   fun exactModePrefersCommonWords() {
+    // All three words are exact (all letters enabled) and "the"/"and" tie on length (3), so
+    // source frequency decides: "the" (index 0) must rank before "and" (index 1).
+    val list = WordList.fromLines(listOf("the", "and", "of"))
+    val generator = WordExerciseGenerator(list, Random(1))
+    val pool = generator.rankedPool(config(generationMode = GenerationMode.EXACT_WORDS))
+    assertEquals(listOf("the", "and", "of"), pool.map { it.source })
+  }
+
+  @Test
+  fun exactModePrefersLongerWordsForPractice() {
+    // In exact mode retainedCount equals the word length, so longer words rank first.
     val generator = WordExerciseGenerator(wordList, Random(1))
-    // All fingers, high key limit -> all letters enabled, so "the" is an exact candidate.
     val pool =
       generator.rankedPool(config(keyLimit = 6, generationMode = GenerationMode.EXACT_WORDS))
-    // "the" (index 0) is the most common word and must rank first.
-    assertEquals("the", pool.first().source)
+    for (i in 1 until pool.size) {
+      assertTrue(
+        "Ranking violated at position $i",
+        pool[i - 1].retainedCount >= pool[i].retainedCount
+      )
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -171,21 +185,21 @@ class WordExerciseGeneratorTest {
 
   @Test
   fun rankingPrefersHigherRetainedCountThenRetentionThenFrequency() {
-    // Custom list so the pool contents are fully controlled.
+    // Custom list so the pool contents are fully controlled. Enabled: a, b, z.
     val list =
       WordList.fromLines(
         listOf(
-          "zzzz", // 4 retained (enabled z)
-          "ab", // 1 retained (a)
-          "ba", // 1 retained (b)
-          "a", // 1 retained (a)
+          "zzzz", // 4 retained
+          "ab", // 2 retained (exact)
+          "ba", // 2 retained (exact)
+          "a", // 1 retained
         )
       )
     val generator = WordExerciseGenerator(list, Random(1))
     val pool = generator.rankedPool(config(), setOf('a', 'b', 'z'))
-    // "zzzz" ranks first (4 retained). The three 1-letter results tie on retainedCount and
-    // retention (1.0), so source frequency decides: "a" (index 0), "ab" (index 1), "ba" (index 2).
-    assertEquals(listOf("zzzz", "a", "ab", "ba"), pool.map { it.adapted })
+    // "zzzz" ranks first (4 retained). "ab" and "ba" tie on retainedCount (2) and retention (1.0),
+    // so source frequency decides: "ab" (index 1) before "ba" (index 2). "a" (1 retained) is last.
+    assertEquals(listOf("zzzz", "ab", "ba", "a"), pool.map { it.adapted })
   }
 
   @Test
