@@ -157,11 +157,12 @@ class WordExerciseGeneratorTest {
 
   @Test
   fun exactModePrefersCommonWords() {
-    // All three words are exact (all letters enabled) and "the"/"and" tie on length (3), so
-    // source frequency decides: "the" (index 0) must rank before "and" (index 1).
+    // All letters enabled (keyLimit 6) so all three words are exact. "the"/"and" tie on length
+    // (3), so source frequency decides: "the" (index 0) must rank before "and" (index 1).
     val list = WordList.fromLines(listOf("the", "and", "of"))
     val generator = WordExerciseGenerator(list, Random(1))
-    val pool = generator.rankedPool(config(generationMode = GenerationMode.EXACT_WORDS))
+    val pool =
+      generator.rankedPool(config(keyLimit = 6, generationMode = GenerationMode.EXACT_WORDS))
     assertEquals(listOf("the", "and", "of"), pool.map { it.source })
   }
 
