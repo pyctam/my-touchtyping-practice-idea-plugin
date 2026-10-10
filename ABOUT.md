@@ -86,12 +86,16 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   future UI settings.
 - **Word-based modes** (Exact Words, Adapted Words): exercises are generated from the bundled
   **Google 10,000 English Words** list (`src/main/resources/google-10000-english.txt`, source:
-  <https://github.com/first20hours/google-10000-english>). `WordList` loads and normalizes the
-  resource once (classpath load, lowercase, de-duplicated, invalid entries rejected) and caches it.
-  `WordExerciseGenerator` adapts each word to the enabled keys: Exact Words keeps only words typed
-  entirely with enabled keys; Adapted Words omits unavailable letters (preserving order) and ranks
-  candidates by retained letters, retention ratio, source frequency (list order as proxy), and a
-  vowel bonus, de-duplicating identical adapted strings. Candidate pools are cached per
+  <https://github.com/first20hours/google-10000-english>). Note that this is a **word-frequency
+  list, not a dictionary of verified English words**: the entries were selected by their frequency
+  in the Google Web Trillion Word Corpus (derived from public web pages), so the list may include
+  single letters, state abbreviations, and other non-standard tokens. `WordList` loads and
+  normalizes the resource once (classpath load, lowercase, de-duplicated, invalid entries rejected)
+  and caches it.
+  `WordExerciseGenerator` adapts each entry to the enabled keys: Exact Words keeps only entries
+  typed entirely with enabled keys; Adapted Words omits unavailable letters (preserving order) and
+  ranks candidates by retained letters, retention ratio, source frequency (list order as proxy),
+  and a vowel bonus, de-duplicating identical adapted strings. Candidate pools are cached per
   (mode, enabled-key mask). If the word list is missing, the service falls back to Random Letters.
   See the README "Word List and Source Attribution" section for dataset attribution and licensing.
 - The generators take an injectable `Random`, so their output is deterministic and unit-testable.

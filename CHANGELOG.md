@@ -7,9 +7,12 @@
 - **Finger-aware English word generation** — practice text can now be generated from the bundled
   Google 10,000 English Words list (`src/main/resources/google-10000-english.txt`, source:
   <https://github.com/first20hours/google-10000-english>), adapted to the keys enabled by the
-  current lesson. A new **Word Generation Mode** setting offers three modes: **Adapted Words**
-  (default) — real words with unavailable letters removed, ranked to favor recognizable,
-  high-retention fragments; **Exact Words** — only dictionary words typed entirely with the enabled
+  current lesson. Note that the source is a **word-frequency list, not a dictionary of verified
+  English words** (entries were selected by frequency in the Google Web Trillion Word Corpus, so
+  the list may include single letters, state abbreviations, and other non-standard tokens). A new
+  **Word Generation Mode** setting offers three modes: **Adapted Words**
+  (default) — list entries with unavailable letters removed, ranked to favor recognizable,
+  high-retention fragments; **Exact Words** — only list entries typed entirely with the enabled
   keys; and **Random Letters** — the previous random-letter behavior.
 - `WordList`: one-time classpath loading and normalization of the bundled word list (blank lines,
   duplicates, and invalid entries handled; missing resource produces a clear error and a fallback

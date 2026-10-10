@@ -32,10 +32,10 @@ right-hand keys in purple — so you can see at a glance which finger should pre
 When you complete the text with no errors it is highlighted in green, a "Hit Enter to reset" hint
 appears next to the reset link, and pressing **Enter** loads a fresh sample.
 
-Practice with real English words: the bundled word list is adapted to the keys you currently
+Practice with English words: the bundled word-frequency list is adapted to the keys you currently
 practice, so every generated character can be typed with your enabled keys. Choose between
-**Adapted Words** (real words with unavailable letters removed, favoring recognizable fragments),
-**Exact Words** (only words typed entirely with your enabled keys), or the classic **Random
+**Adapted Words** (list entries with unavailable letters removed, favoring recognizable fragments),
+**Exact Words** (only entries typed entirely with your enabled keys), or the classic **Random
 Letters** mode.
 
 Open or close the tool window with a single shortcut: **Ctrl+Alt+P, P** on Windows/Linux and
@@ -151,13 +151,21 @@ The plugin is now ready to use in your IntelliJ IDEA!
 The word-based practice modes (**Adapted Words** and **Exact Words**) generate exercises from the
 bundled English word list at `src/main/resources/google-10000-english.txt`.
 
-- **Dataset:** Google 10,000 English Words — the 10,000 most common English words, one per line,
+- **Dataset:** Google 10,000 English Words — the 10,000 most frequent tokens, one per line,
   ordered by frequency (most common first).
 - **Source repository:** <https://github.com/first20hours/google-10000-english>
 - **Word-list file:** <https://github.com/first20hours/google-10000-english/blob/master/google-10000-english.txt>
 - **Use in this plugin:** the dataset is used to generate English-word-based typing exercises that
   are adapted to the keys currently enabled in the lesson. This project does not author or maintain
   the word list; it is bundled as-is for offline use.
+
+> **Note:** This is a **word-frequency list, not a dictionary of verified English words.** The
+> 10,000 entries were selected based on their frequency in the Google Web Trillion Word Corpus,
+> which was derived from text on public web pages. Frequency in a corpus does not guarantee that
+> an entry is a valid English word — the list may include single letters, state abbreviations
+> (e.g. `nj`, `nv`, `nh`), and other non-standard tokens. In **Exact Words** mode, only entries
+> that are fully typeable with the enabled keys are offered, so with a small key set the pool may
+> be dominated by these short non-word tokens.
 
 ### How the word list is loaded
 
@@ -179,16 +187,16 @@ before distributing the plugin.
 
 ### How exact-word and adapted-word generation work
 
-- **Exact Words:** only dictionary words whose every character is typed with an enabled key are
+- **Exact Words:** only list entries whose every character is typed with an enabled key are
   used. Candidates are ranked by source frequency (the list order is used as a frequency proxy —
   the source file does not provide explicit frequency values).
-- **Adapted Words:** each dictionary word is filtered to the enabled keys — characters whose keys
+- **Adapted Words:** each list entry is filtered to the enabled keys — characters whose keys
   are not enabled are omitted, the original order is preserved, and the result is ranked to favor
   high-retention, common, recognizable fragments (e.g. `through` → `hgh` when only the index-finger
-  keys `f, g, j, h` are enabled). The original source word is retained with each adapted result for
+  keys `f, g, j, h` are enabled). The original source entry is retained with each adapted result for
   debugging and analytics. Adapted strings are letter-filtered fragments and are not presented as
   correctly spelled English words.
-- Candidate pools are precomputed per (mode, enabled-key set) and cached, so the dictionary is not
+- Candidate pools are precomputed per (mode, enabled-key set) and cached, so the list is not
   rescanned on every generation request.
 
 ### License and redistribution
@@ -203,5 +211,3 @@ Linguistic Data Consortium**. This plugin is distributed free of charge; if you 
 redistribute the bundled word list commercially, review the LDC terms first.
 
 ---
-
-```
