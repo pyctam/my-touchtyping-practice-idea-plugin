@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+## 0.1.9
+
+### Added
+
+- **Finger-aware English word generation** — practice text can now be generated from the bundled
+  Google 10,000 English Words list (`src/main/resources/google-10000-english.txt`, source:
+  <https://github.com/first20hours/google-10000-english>), adapted to the keys enabled by the
+  current lesson. Note that the source is a **word-frequency list, not a dictionary of verified
+  English words** (entries were selected by frequency in the Google Web Trillion Word Corpus, so
+  the list may include single letters, state abbreviations, and other non-standard tokens). A new
+  **Word Generation Mode** setting offers three modes: **Adapted Words**
+  (default) — list entries with unavailable letters removed, ranked to favor recognizable,
+  high-retention fragments; **Exact Words** — only list entries typed entirely with the enabled
+  keys; and **Random Letters** — the previous random-letter behavior.
+- `WordList`: one-time classpath loading and normalization of the bundled word list (blank lines,
+  duplicates, and invalid entries handled; missing resource produces a clear error and a fallback
+  to Random Letters).
+- `WordExerciseGenerator`: key-aware adaptation (e.g. `flash` → `flsh` when `a` is unavailable),
+  deterministic candidate ranking (retained letters, retention ratio, source frequency, vowel
+  bonus), de-duplication of identical adapted strings, recent-word avoidance, and cached candidate
+  pools per (mode, enabled-key mask).
+- Unit tests for word-list loading/normalization, adaptation (including `FLASH` → `FLSH`), exact
+  and adapted generation, key compliance, ranking determinism, caching, and performance.
+
+### Changed
+
+- `PracticeTextConfig` and `Settings` gained a `generationMode` field (default `ADAPTED_WORDS`);
+  the settings dialog gained a "Word Generation Mode" group.
+- README and ABOUT now document the word list, its source attribution, and licensing terms.
+
 ## 0.1.8
 
 ### Added

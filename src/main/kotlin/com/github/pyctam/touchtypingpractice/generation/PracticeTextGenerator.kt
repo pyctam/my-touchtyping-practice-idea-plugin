@@ -1,14 +1,17 @@
 package com.github.pyctam.touchtypingpractice.generation
 
-import com.github.pyctam.touchtypingpractice.config.Finger
 import kotlin.random.Random
 
 /**
- * Pure, IDE-independent practice-text generator.
+ * Pure, IDE-independent practice-text generator (random-letter mode).
  *
  * Given a [PracticeTextConfig] it builds the set of eligible characters from the [KeyboardLayout]
  * and produces a random practice string. All randomness is injected via [random] so the output is
  * deterministic under a seeded [Random], which makes the generation rules unit-testable.
+ *
+ * Word-based generation (exact and adapted English words) lives in [WordExerciseGenerator]; the
+ * [com.github.pyctam.touchtypingpractice.services.PracticeTextGeneratorService] dispatches between
+ * the two based on [com.github.pyctam.touchtypingpractice.config.GenerationMode].
  *
  * Generation rules:
  * - The word count is a random value in `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]` (5–20), approximating
@@ -37,7 +40,7 @@ class PracticeTextGenerator(private val random: Random = Random.Default) {
    * @return a string of the eligible characters; always contains at least a space.
    */
   fun buildAvailableCharacters(config: PracticeTextConfig): String {
-    val letters = availableKeys(config).filter { it in LOWERCASE_LETTERS }
+    val letters = enabledKeysFor(config).filter { it in LOWERCASE_LETTERS }
     return letters + " "
   }
 
@@ -65,20 +68,6 @@ class PracticeTextGenerator(private val random: Random = Random.Default) {
         }
       }
     return words.joinToString(" ")
-  }
-
-  /** Concatenates the eligible keys for every selected finger, in [Finger] declaration order. */
-  private fun availableKeys(config: PracticeTextConfig): String {
-    val sb = StringBuilder()
-    for (finger in Finger.entries) {
-      if (Finger.isFingerSelected(config.selectedFingers, finger)) {
-        sb.append(
-          KeyboardLayout.keysFor(config.practiceMode, finger, config.keyLimitPerFinger)
-            .joinToString("")
-        )
-      }
-    }
-    return sb.toString()
   }
 
   companion object {

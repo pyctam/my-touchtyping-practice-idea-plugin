@@ -6,6 +6,11 @@ import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_CH
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_ERROR_AT_LEAST_ONE
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_HINT
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_TITLE
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_GENERATION_MODE_HINT
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_GENERATION_MODE_RADIO_ADAPTED
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_GENERATION_MODE_RADIO_EXACT
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_GENERATION_MODE_RADIO_RANDOM
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_GENERATION_MODE_TITLE
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_HINT
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_TITLE
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_HINT
@@ -15,6 +20,9 @@ import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_TITLE
 import com.github.pyctam.touchtypingpractice.UIBundle.TEXT_FONT_HINT
 import com.github.pyctam.touchtypingpractice.UIBundle.TEXT_FONT_TITLE
+import com.github.pyctam.touchtypingpractice.config.GenerationMode.ADAPTED_WORDS
+import com.github.pyctam.touchtypingpractice.config.GenerationMode.EXACT_WORDS
+import com.github.pyctam.touchtypingpractice.config.GenerationMode.RANDOM
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.BOTH_HANDS
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.LEFT_HAND
 import com.github.pyctam.touchtypingpractice.config.PracticeMode.RIGHT_HAND
@@ -82,6 +90,18 @@ class Configuration : BoundConfigurable("Touch Typing Practice") {
             }
           }
           .bind({ settings.practiceMode }, { settings.practiceMode = it })
+      }
+
+      group(UIBundle.message(CONFIG_GENERATION_MODE_TITLE)) {
+        buttonsGroup {
+            row { comment(UIBundle.message(CONFIG_GENERATION_MODE_HINT)) }
+            row {
+              radioButton(UIBundle.message(CONFIG_GENERATION_MODE_RADIO_RANDOM), RANDOM)
+              radioButton(UIBundle.message(CONFIG_GENERATION_MODE_RADIO_EXACT), EXACT_WORDS)
+              radioButton(UIBundle.message(CONFIG_GENERATION_MODE_RADIO_ADAPTED), ADAPTED_WORDS)
+            }
+          }
+          .bind({ settings.generationMode }, { settings.generationMode = it })
       }
 
       group(UIBundle.message(CONFIG_KEY_LIMIT_PER_FINDER_TITLE)) {

@@ -4,26 +4,6 @@
 [![Version](https://img.shields.io/jetbrains/plugin/v/34632-touch-typing-practice.svg)](https://plugins.jetbrains.com/plugin/34632-touch-typing-practice)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/34632-touch-typing-practice.svg)](https://plugins.jetbrains.com/plugin/34632-touch-typing-practice)
 
-## Template ToDo list
-
-- [x] Create a new [IntelliJ Platform Plugin Template][template] project.
-- [ ] Get familiar with the [template documentation][template].
-- [ ] Adjust the [pluginGroup](./gradle.properties) and [pluginName](./gradle.properties), as well as
-  the [id](./src/main/resources/META-INF/plugin.xml) and [sources package](./src/main/kotlin).
-- [ ] Adjust the plugin description in `README` (see [Tips][docs:plugin-description])
-- [ ] Review
-  the [Legal Agreements](https://plugins.jetbrains.com/docs/marketplace/legal-agreements.html?from=IJPluginTemplate).
-- [ ] [Publish a plugin manually](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate)
-  for the first time.
-- [ ] Set the `MARKETPLACE_ID` in the above README badges. You can obtain it once the plugin is published to JetBrains
-  Marketplace.
-- [ ] Set the [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html?from=IJPluginTemplate)
-  related [secrets](https://github.com/JetBrains/intellij-platform-plugin-template#environment-variables).
-- [ ] Set
-  the [Deployment Token](https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html?from=IJPluginTemplate).
-- [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified
-  about releases containing new features and fixes.
-
 <!-- Plugin description -->
 Practice touch typing right inside your IDE. Touch Typing Practice adds a dedicated tool window to
 IntelliJ IDEA where a practice string is generated for you and you type it out with real-time,
@@ -32,16 +12,22 @@ right-hand keys in purple — so you can see at a glance which finger should pre
 When you complete the text with no errors it is highlighted in green, a "Hit Enter to reset" hint
 appears next to the reset link, and pressing **Enter** loads a fresh sample.
 
+Practice with English words: the bundled word-frequency list is adapted to the keys you currently
+practice, so every generated character can be typed with your enabled keys. Choose between
+**Adapted Words** (list entries with unavailable letters removed, favoring recognizable fragments),
+**Exact Words** (only entries typed entirely with your enabled keys), or the classic **Random
+Letters** mode.
+
 Open or close the tool window with a single shortcut: **Ctrl+Alt+P, P** on Windows/Linux and
-**Control+Option+P, P** on macOS (a double-stroke, bound through the Action System so it shows up
+**Command+Option+P, P** on macOS (a double-stroke, bound through the Action System so it shows up
 in Settings | Keymap and can be rebound).
 
-Configure the practice to your hand, the specific fingers you want to train, and how many keys each
-finger may use — then watch mismatches get highlighted instantly and your error count grow as you
-go. The error total is cumulative: correcting a mistake never decreases it, and it only resets
-when you load a fresh sample. Pick the font and size for the practice text from a selector that
-features fonts with true small caps (Georgia, Palatino Linotype, Garamond, Calibri, Verdana,
-Copperplate Gothic) ahead of your other installed fonts.
+Configure the practice to your hand, the specific fingers you want to train, how many keys each
+finger may use, and the word generation mode — then watch mismatches get highlighted instantly and
+your error count grow as you go. The error total is cumulative: correcting a mistake never
+decreases it, and it only resets when you load a fresh sample. Pick the font and size for the
+practice text from a selector that features fonts with true small caps (Georgia, Palatino Linotype,
+Garamond, Calibri, Verdana, Copperplate Gothic) ahead of your other installed fonts.
 <!-- Plugin description end -->
 
 ## Installation
@@ -76,13 +62,13 @@ Copperplate Gothic) ahead of your other installed fonts.
 ## Prerequisites
 
 - Build the plugin locally using `./gradlew buildPlugin`
-- The plugin will be available at `build/distributions/my-touchtyping-practice-idea-plugin-*.zip`
+- The plugin will be available at `build/distributions/Touch Typing Practice-*.zip`
 
 ## Installation Steps
 
 ### Step 1: Open Settings/Preferences
 
-1. Launch **IntelliJ IDEA 2025.3.2**
+1. Launch **IntelliJ IDEA 2023.3 or later**
 2. Open Settings/Preferences:
 
 - **On Linux**: `File` → `Settings`
@@ -106,8 +92,8 @@ In the Settings window:
 2. Navigate to your project directory: `build/distributions/`
 3. Select the plugin file:
 
-- Look for: `my-touchtyping-practice-idea-plugin-*.zip`
-- Example: `my-touchtyping-practice-idea-plugin-1.0.0.zip`
+- Look for: `Touch Typing Practice-*.zip`
+- Example: `Touch Typing Practice-0.1.9.zip`
 
 4. Click **`OK`** to proceed
 
@@ -139,8 +125,69 @@ After the IDE restarts, confirm the plugin is installed:
 The plugin is now ready to use in your IntelliJ IDEA!
 
 ---
-Plugin based on the [IntelliJ Platform Plugin Template][template].
 
-[template]: https://github.com/JetBrains/intellij-platform-plugin-template
+## Word List and Source Attribution
 
-[docs:plugin-description]: https://plugins.jetbrains.com/docs/intellij/plugin-user-experience.html#plugin-description-and-presentation
+The word-based practice modes (**Adapted Words** and **Exact Words**) generate exercises from the
+bundled English word list at `src/main/resources/google-10000-english.txt`.
+
+- **Dataset:** Google 10,000 English Words — the 10,000 most frequent tokens, one per line,
+  ordered by frequency (most common first).
+- **Source repository:** <https://github.com/first20hours/google-10000-english>
+- **Word-list file:** <https://github.com/first20hours/google-10000-english/blob/master/google-10000-english.txt>
+- **Use in this plugin:** the dataset is used to generate English-word-based typing exercises that
+  are adapted to the keys currently enabled in the lesson. This project does not author or maintain
+  the word list; it is bundled as-is for offline use.
+
+> **Note:** This is a **word-frequency list, not a dictionary of verified English words.** The
+> 10,000 entries were selected based on their frequency in the Google Web Trillion Word Corpus,
+> which was derived from text on public web pages. Frequency in a corpus does not guarantee that
+> an entry is a valid English word — the list may include single letters, state abbreviations
+> (e.g. `nj`, `nv`, `nh`), and other non-standard tokens. In **Exact Words** mode, only entries
+> that are fully typeable with the enabled keys are offered, so with a small key set the pool may
+> be dominated by these short non-word tokens.
+
+### How the word list is loaded
+
+`WordList` (in `src/main/kotlin/.../generation/WordList.kt`) reads the resource from the classpath
+(`/google-10000-english.txt`) of the packaged plugin — never from a machine-specific filesystem
+path. The list is loaded and parsed **once** per application and cached: blank lines are skipped,
+words are normalized to lowercase, duplicates are removed (first occurrence wins, preserving the
+source frequency order), and entries that are not pure letter words are rejected. If the resource
+is missing or unreadable, a clear error is logged and the plugin falls back to the Random Letters
+mode.
+
+### How to update or replace the dataset
+
+Replace the contents of `src/main/resources/google-10000-english.txt` with a new one-word-per-line
+list (lowercase letters are expected; other entries are skipped safely). The file is picked up
+automatically by the Gradle build and included in the packaged plugin. If you replace the dataset
+with one from a different source, update the attribution above and verify the new source's license
+before distributing the plugin.
+
+### How exact-word and adapted-word generation work
+
+- **Exact Words:** only list entries whose every character is typed with an enabled key are
+  used. Candidates are ranked by source frequency (the list order is used as a frequency proxy —
+  the source file does not provide explicit frequency values).
+- **Adapted Words:** each list entry is filtered to the enabled keys — characters whose keys
+  are not enabled are omitted, the original order is preserved, and the result is ranked to favor
+  high-retention, common, recognizable fragments (e.g. `through` → `hgh` when only the index-finger
+  keys `f, g, j, h` are enabled). The original source entry is retained with each adapted result for
+  debugging and analytics. Adapted strings are letter-filtered fragments and are not presented as
+  correctly spelled English words.
+- Candidate pools are precomputed per (mode, enabled-key set) and cached, so the list is not
+  rescanned on every generation request.
+
+### License and redistribution
+
+Per the source repository's own notice, the data files are derived from the **Google Web Trillion
+Word Corpus** (as described by Thorsten Brants and Alex Franz), distributed by the **Linguistic
+Data Consortium**; subsets of the corpus were distributed by **Peter Norvig**; corpus editing and
+cleanup was done by **Josh Kaufman**. The source states that **educational and personal/research
+use is permitted** under the LDC license, Norvig's MIT license for his contributions, and US fair
+use doctrine, and that **commercial use is not recommended without licensing the data from the
+Linguistic Data Consortium**. This plugin is distributed free of charge; if you plan to use or
+redistribute the bundled word list commercially, review the LDC terms first.
+
+---

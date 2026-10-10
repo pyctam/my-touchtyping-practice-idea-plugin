@@ -1,4 +1,4 @@
-It was# TODO
+# TODO
 
 ## Features
 
@@ -14,8 +14,9 @@ It was# TODO
    MAX_WORDS_COUNT]` (5–20), each word ≤ `MAX_WORD_LENGTH` (7), total 9–159 characters. Add a
    setting to control the length, e.g. by exposing `MIN_WORDS_COUNT`, `MAX_WORDS_COUNT`, and
    `MAX_WORD_LENGTH` as UI inputs.
-5. **Difficulty levels / curated text** — add a mode selector (Random / Words / Sentences) so real
-   text can be practiced.
+5. **Difficulty levels / curated text** — a mode selector (Random Letters / Exact Words /
+   Adapted Words) now exists and word-based modes use the bundled Google 10,000 English Words list.
+   Remaining: a Sentences mode (real sentences, not just words) and per-difficulty tuning.
 6. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
    produce the most errors and show a "weak fingers" summary.
 7. **Custom text input** — let users paste or type their own practice text instead of only
@@ -145,3 +146,9 @@ It was# TODO
     preserved, never that the foreground attribute was set on the document. Add assertions that
     read back the character attributes and verify the expected color.
     *`test/.../ui/HandColorsTest.kt`.*
+26. **Fix stale comments** — the generation rules are now sentence-length (word count in
+    `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]` = 5–20, each word ≤ `MAX_WORD_LENGTH` = 7, total 9–159
+    characters); keep comments in sync as the generator evolves.
+27. **More tests** — unit tests now cover config, the pure text generator, the keyboard layout, the
+    word list and word-based generation, the Enter-to-reset detector, the completion callback, and
+    the tool-window toggle action; add more as new features land.

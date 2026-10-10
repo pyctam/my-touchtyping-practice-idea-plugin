@@ -11,7 +11,7 @@ import com.intellij.openapi.wm.ToolWindowManager
  * it when it is visible.
  *
  * Registered in `plugin.xml` and bound to the double-stroke shortcut `Ctrl+Alt+P, P`
- * (`Control+Option+P, P` on macOS) in the default keymap. Because the shortcut is bound through the
+ * (`Command+Option+P, P` on macOS) in the default keymap. Because the shortcut is bound through the
  * Action System (not a raw key listener), the action appears in Settings | Keymap, participates in
  * conflict detection, and keeps working when the user rebinds it.
  *
