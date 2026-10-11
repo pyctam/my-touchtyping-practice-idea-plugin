@@ -7,10 +7,12 @@ import javax.swing.text.DocumentFilter
 /**
  * [DocumentFilter] that prevents the typing area from growing beyond [maxLength] characters.
  *
- * Insertions and replacements that would exceed the limit are silently ignored, while removals
- * (delete/backspace) are always allowed. When the current text already contains a mismatch against
- * [originalText], new input is blocked until the user corrects it (the user must fix errors before
- * continuing).
+ * Insertions and replacements that would exceed the limit are silently ignored. When the current
+ * text already contains a mismatch against [originalText], new input is blocked until the user
+ * corrects it (the user must fix errors before continuing). Removals (delete/backspace) are allowed
+ * while the text is incomplete, but once the text is completed (it matches [originalText] exactly),
+ * completion is a terminal state: removals and replacements are blocked until the practice text is
+ * reset.
  *
  * Extracted from [TouchTypingDocumentListener] so the input-guarding rule is a single, reusable,
  * testable unit.
@@ -45,6 +47,10 @@ class TextLengthLimiterFilter(
     text: String,
     attrs: AttributeSet?
   ) {
+    if (isCompleted(fb)) {
+      logger.debug("Rejected replacement - text is completed (terminal state)")
+      return
+    }
     if (hasErrors(fb)) {
       logger.debug("Rejected replacement - errors exist")
       return
@@ -58,7 +64,11 @@ class TextLengthLimiterFilter(
   }
 
   override fun remove(fb: FilterBypass, offset: Int, length: Int) {
-    // Always allow removals (delete/backspace).
+    if (isCompleted(fb)) {
+      logger.debug("Rejected removal - text is completed (terminal state)")
+      return
+    }
+    // Always allow removals (delete/backspace) while the text is not completed.
     super.remove(fb, offset, length)
   }
 
@@ -71,4 +81,8 @@ class TextLengthLimiterFilter(
     }
     return false
   }
+
+  /** Whether the current document text matches [originalText] exactly (completed). */
+  private fun isCompleted(fb: FilterBypass): Boolean =
+    fb.document.getText(0, fb.document.length) == originalText
 }

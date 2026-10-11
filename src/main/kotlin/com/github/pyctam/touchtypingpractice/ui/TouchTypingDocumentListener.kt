@@ -21,12 +21,17 @@ import javax.swing.text.DefaultHighlighter
  * right-hand keys) via [HandColors.applyTo], matching the reference pane.
  *
  * A [TextLengthLimiterFilter] is installed on the typing area to prevent typing beyond the
- * reference length and to block new input while errors are unresolved.
+ * reference length, to block new input while errors are unresolved, and to make completion a
+ * terminal state (no edits until the text is reset).
+ *
+ * Insertions are reported to [stats] (typing speed / accuracy), which ends the session when the
+ * text is completed.
  *
  * @param typingArea the editable area the user types into.
  * @param referenceTextPane the non-editable pane showing the text to type.
  * @param originalText the reference text being typed.
  * @param errorCounter the cumulative counter incremented by newly introduced mismatches.
+ * @param stats the session typing-speed/accuracy tracker fed by insertions and errors.
  * @param onCompletionChanged callback that fires when completion state changes.
  */
 class TouchTypingDocumentListener(
@@ -34,6 +39,7 @@ class TouchTypingDocumentListener(
   private val referenceTextPane: JTextPane,
   private val originalText: String,
   private val errorCounter: ErrorCounter,
+  private val stats: TypingStats,
   private val onCompletionChanged: (Boolean) -> Unit = {},
 ) : DocumentListener {
 
@@ -62,6 +68,8 @@ class TouchTypingDocumentListener(
   }
 
   override fun insertUpdate(event: DocumentEvent?) {
+    // Report the inserted characters to the session stats (starts the clock on the first one).
+    stats.recordInsertion(event?.length ?: 0)
     updateHighlights()
   }
 
@@ -96,6 +104,7 @@ class TouchTypingDocumentListener(
           errorCounter.increment(mismatchCount - lastMismatchCount)
         }
         lastMismatchCount = mismatchCount
+        stats.setErrors(errorCounter.getCount())
 
         // Highlight the whole sample text green when it is completed without errors.
         val completed = typed.length == originalText.length && mismatchCount == 0
@@ -106,6 +115,8 @@ class TouchTypingDocumentListener(
         if (completed != lastCompletionState) {
           lastCompletionState = completed
           onCompletionChanged(completed)
+          // Completion is a terminal state: end the session and freeze the WPM/accuracy.
+          if (completed) stats.complete()
         }
 
         // Apply per-hand colors to the typed text (blue for left-hand, purple for right-hand).

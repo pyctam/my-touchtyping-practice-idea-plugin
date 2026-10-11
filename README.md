@@ -25,7 +25,9 @@ in Settings | Keymap and can be rebound).
 Configure the practice to your hand, the specific fingers you want to train, how many keys each
 finger may use, and the word generation mode — then watch mismatches get highlighted instantly and
 your error count grow as you go. The error total is cumulative: correcting a mistake never
-decreases it, and it only resets when you load a fresh sample. Pick the font and size for the
+decreases it, and it only resets when you load a fresh sample. The status bar also shows your
+typing speed (WPM) and accuracy in real time: a session starts on your first keystroke and the
+numbers freeze when you complete the text (highlighted in green). Pick the font and size for the
 practice text from a selector that features fonts with true small caps (Georgia, Palatino Linotype,
 Garamond, Calibri, Verdana, Copperplate Gothic) ahead of your other installed fonts.
 <!-- Plugin description end -->
@@ -93,7 +95,7 @@ In the Settings window:
 3. Select the plugin file:
 
 - Look for: `Touch Typing Practice-*.zip`
-- Example: `Touch Typing Practice-0.1.9.zip`
+- Example: `Touch Typing Practice-0.1.10.zip`
 
 4. Click **`OK`** to proceed
 

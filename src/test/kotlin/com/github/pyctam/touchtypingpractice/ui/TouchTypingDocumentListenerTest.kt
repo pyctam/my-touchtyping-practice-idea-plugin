@@ -28,6 +28,7 @@ class TouchTypingDocumentListenerTest {
    */
   private fun createTypingArea(
     errorCounter: ErrorCounter = ErrorCounter(),
+    stats: TypingStats = TypingStats(),
     callback: (Boolean) -> Unit = {}
   ): JTextPane {
     val typingArea = JTextPane()
@@ -39,6 +40,7 @@ class TouchTypingDocumentListenerTest {
         referenceTextPane,
         originalText,
         errorCounter,
+        stats,
         callback
       )
     typingArea.document.addDocumentListener(listener)
@@ -92,20 +94,51 @@ class TouchTypingDocumentListenerTest {
   }
 
   @Test
-  fun completionThenCorrectionFiresTrueThenFalse() {
+  fun completionIsTerminalState() {
+    // Completion is a terminal state: once the text is completed (green), removals are blocked by
+    // the TextLengthLimiterFilter, so the completion state can no longer drop back to false.
     val states = mutableListOf<Boolean>()
     val typingArea = createTypingArea { states.add(it) }
 
     typingArea.text = originalText
     flushEdt()
-    // Remove one character -> incomplete again.
-    typingArea.text = originalText.dropLast(1)
+    // Attempt to remove one character -> rejected by the filter (terminal state).
+    typingArea.document.remove(originalText.length - 1, 1)
     flushEdt()
 
     assertEquals(
-      "Expected true on completion then false after correction",
-      listOf(true, false),
+      "Expected a single completion=true callback; removal after completion is rejected",
+      listOf(true),
       states
+    )
+    assertEquals(
+      "Expected the text to stay completed after a rejected removal",
+      originalText,
+      typingArea.text
+    )
+  }
+
+  @Test
+  fun statsFreezeAtCompletion() {
+    val stats = TypingStats()
+    val typingArea = createTypingArea(stats = stats)
+
+    typingArea.text = originalText
+    flushEdt()
+
+    val wpmAtCompletion = stats.wpm
+    val accuracyAtCompletion = stats.accuracy
+    assertEquals("Expected 100% accuracy for a clean run", 100, accuracyAtCompletion)
+
+    // A rejected removal must not change the frozen stats.
+    typingArea.document.remove(originalText.length - 1, 1)
+    flushEdt()
+
+    assertEquals("Expected the WPM to stay frozen after completion", wpmAtCompletion, stats.wpm)
+    assertEquals(
+      "Expected the accuracy to stay frozen after completion",
+      accuracyAtCompletion,
+      stats.accuracy
     )
   }
 

@@ -29,7 +29,7 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
   override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
     logger.info("Creating Touch Typing Practice tool window content")
     val contentFactory = ContentFactory.getInstance()
-    val window = TouchTypingToolWindow()
+    var window = TouchTypingToolWindow()
 
     val mainPanel = window.buildContent()
 
@@ -57,6 +57,9 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
             logger.info("Settings changed - recreating tool window content")
             SwingUtilities.invokeLater {
               try {
+                // A fresh window (and therefore fresh ErrorCounter/TypingStats) per rebuild, so
+                // change listeners do not accumulate across hot-reloads.
+                window = TouchTypingToolWindow()
                 toolWindow.contentManager.removeAllContents(true)
                 val newPanel = window.buildContent()
                 newPanel.addComponentListener(

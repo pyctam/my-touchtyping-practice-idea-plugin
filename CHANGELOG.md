@@ -2,6 +2,43 @@
 
 ## Unreleased
 
+## 0.1.10
+
+### Added
+
+- **Real WPM + accuracy in the status bar** — the status bar now shows `Typing errors: N |
+  Typing speed: N WPM | Accuracy: N%`. A session starts on the first keystroke and ends when the
+  text is completed (highlighted in green); the WPM and accuracy update live on every keystroke
+  and freeze at completion. Before the first keystroke all three values show zero. WPM uses the
+  standard 5-character convention and counts only correct characters (net WPM =
+  (insertions − errors) / 5 / minutes); accuracy is (insertions − errors) / insertions × 100.
+  The previously hidden WPM area and its `" | "` separator are now revealed, and a new accuracy
+  label (with its own separator) was added.
+- `TypingStats`: a pure, IDE-independent session tracker (insertion counts, cumulative errors,
+  injectable clock, change listeners) that computes WPM and accuracy and freezes at completion.
+- Unit tests for `TypingStats` (WPM/accuracy math, 5-character convention, error subtraction,
+  sub-second sessions, freeze on completion, reset, zero initial state, listener notifications)
+  and for the terminal completion state (removals after completion are rejected; stats stay
+  frozen).
+
+### Changed
+
+- **Completion is a terminal state** — once the practice text is completed (highlighted in
+  green), the typing area no longer accepts removals or replacements (backspace/delete are
+  blocked) until the text is reset via the reset link or Enter. Previously the user could
+  backspace out of the completed state.
+- **Tool window hot-reload no longer leaks listeners** — a fresh `TouchTypingToolWindow` (and
+  therefore a fresh `ErrorCounter` and `TypingStats`) is now created on every settings-change
+  rebuild, so change listeners no longer accumulate across hot-reloads.
+- The `ui.tool-window.status-accuracy` message ("Accuracy: N%") was added to the `UIBundle`
+  resource bundle (`messages/UI.properties`).
+- Fixed a typo in the public API: `UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_TITLE` /
+  `CONFIG_KEY_LIMIT_PER_FINDER_HINT` are now `CONFIG_KEY_LIMIT_PER_FINGER_TITLE` /
+  `CONFIG_KEY_LIMIT_PER_FINGER_HINT`, and the corresponding `UI.properties` keys
+  `ui.config.key-limit-per-finder.*` are now `ui.config.key-limit-per-finger.*`. The displayed
+  settings text was already correct ("Key Limit Per Finger"); only the internal identifiers were
+  misspelled.
+
 ## 0.1.9
 
 ### Added
