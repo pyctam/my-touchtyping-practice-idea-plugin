@@ -41,8 +41,12 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   is colored by hand — left-hand keys in blue, right-hand keys in purple. The colors are
   theme-aware and distinct from the semantic colors (red for mismatches, green for completion).
   The character-to-hand mapping is derived from the `KeyboardLayout`.
-- A **status bar** showing the cumulative error count (the WPM area and its `" | "` separator are
-  hidden until WPM is implemented).
+- A **status bar** showing the cumulative error count, typing speed (WPM), and accuracy:
+  `Typing errors: N | Typing speed: N WPM | Accuracy: N%`. A session starts on the first
+  keystroke and the WPM/accuracy update live on every keystroke, freezing when the text is
+  completed (highlighted in green); before the first keystroke all values show zero. WPM uses the
+  standard 5-character convention and counts only correct characters (net WPM =
+  (insertions − errors) / 5 / minutes); accuracy is (insertions − errors) / insertions × 100.
 - A **Reset** hyperlink (lowercase "reset"), plus an **Enter** key shortcut that regenerates a fresh
   practice text and clears the input once the text has been completed (highlighted in green). While
   the text is incomplete, Enter is ignored. When the text is completed and highlighted in green, a
@@ -51,8 +55,9 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   states.
 - **Hot-reload**: settings changes are published over a `MessageBus` topic and the tool window
   rebuilds itself without an IDE restart.
-- A `DocumentFilter` that prevents typing beyond the length of the reference text and blocks new
-  input while there are unresolved errors.
+- A `DocumentFilter` that prevents typing beyond the length of the reference text, blocks new
+  input while there are unresolved errors, and makes completion a terminal state (no removals or
+  replacements once the text is completed, until it is reset).
 
 ### Settings & configuration
 
@@ -120,7 +125,7 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 |-------------|---------------------------------------------------------------|
 | Plugin name | Touch Typing Practice                                         |
 | Plugin ID   | `com.github.pyctam.touchtypingpractice`                       |
-| Version     | 0.1.9                                                         |
+| Version     | 0.1.10                                                        |
 | Language    | Kotlin (JVM 17)                                               |
 | Target IDE  | IntelliJ IDEA 2023.3 and later (`233` and up, no upper bound) |
 | Build       | Gradle 8.10.2 + IntelliJ Platform Gradle Plugin               |

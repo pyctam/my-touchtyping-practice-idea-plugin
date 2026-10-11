@@ -2,9 +2,10 @@
 
 ## Features
 
-1. **Real WPM + accuracy** — the status bar's WPM area (and its `" | "` separator) is hidden until
-   implemented. Track session start time, compute words-per-minute and accuracy %, and reveal the
-   WPM label in the status bar.
+1. **Real WPM + accuracy** — **Done (0.1.10).** The status bar shows `Typing errors: N |
+   Typing speed: N WPM | Accuracy: N%`. A session starts on the first keystroke and ends when the
+   text is completed (green highlight); WPM (net, 5-character convention) and accuracy update live
+   and freeze at completion. All values show zero before the first keystroke.
 2. **Session statistics** — session history (WPM, accuracy, duration per session), persisted via
    `PersistentStateComponent`, surfaced in a small stats tab or popup. (The current
    `TouchTypingSessionService` is an empty scaffold — see Bugs.)
@@ -26,13 +27,10 @@
 
 ### Correctness
 
-1. **`ErrorCounter` listener leak on hot-reload** — `TouchTypingToolWindowFactory` creates one
-   `TouchTypingToolWindow` and reuses it on every settings change, but `createStatusPanel()` calls
-   `errorCounter.addChangeListener { ... }` on every build and `ErrorCounter` has no
-   `removeChangeListener`. After N settings changes there are N listeners updating N dead labels.
-   The `TouchTypingToolWindow` KDoc ("a fresh instance is created each time the content is
-   (re)built") is stale/wrong. Fix: create a new `TouchTypingToolWindow` per rebuild, or give
-   `ErrorCounter` a single replaceable listener.
+1. **`ErrorCounter` listener leak on hot-reload** — **Fixed (0.1.10).**
+   `TouchTypingToolWindowFactory` now creates a fresh `TouchTypingToolWindow` (and therefore a
+   fresh `ErrorCounter` and `TypingStats`) on every settings-change rebuild, so change listeners no
+   longer accumulate across hot-reloads.
    *`toolWindow/TouchTypingToolWindowFactory.kt`, `toolWindow/TouchTypingToolWindow.kt`,
    `ui/ErrorCounter.kt`.*
 2. **Settings dialog: Cancel does not roll back most fields** — in `Configuration.createPanel()`,

@@ -34,6 +34,7 @@ object UIBundle : DynamicBundle(UIBundle::class.java, BUNDLE) {
   const val TOOL_WINDOW_RESET_TOOLTIP = "ui.tool-window.reset-tooltip"
   const val TOOL_WINDOW_STATUS_ERRORS = "ui.tool-window.status-errors"
   const val TOOL_WINDOW_STATUS_WPM = "ui.tool-window.status-wpm"
+  const val TOOL_WINDOW_STATUS_ACCURACY = "ui.tool-window.status-accuracy"
   const val TOOL_WINDOW_STATUS_SEPARATOR = "ui.tool-window.status-separator"
 
   @JvmStatic

@@ -9,6 +9,7 @@ import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
 import com.github.pyctam.touchtypingpractice.ui.HandColors
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.PADDING_SMALL
+import com.github.pyctam.touchtypingpractice.ui.TypingStats
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
@@ -38,6 +39,7 @@ class TouchTypingToolWindow {
 
   private val logger = Logger.getInstance(TouchTypingToolWindow::class.java)
   private val errorCounter = ErrorCounter()
+  private val typingStats = TypingStats()
   private val textGenerator = PracticeTextGeneratorService()
 
   private lateinit var referenceTextPane: JTextPane
@@ -61,6 +63,7 @@ class TouchTypingToolWindow {
         referenceTextPane,
         typingText,
         errorCounter,
+        typingStats,
         fontFamily,
         settings.textFontSize,
         onCompletionChanged = { setHitEnterHintVisible(it) }
@@ -96,6 +99,7 @@ class TouchTypingToolWindow {
     // Ensure any completion highlight (light green background) is removed on reset.
     referenceTextPane.highlighter.removeAllHighlights()
     errorCounter.setCount(0)
+    typingStats.reset()
     setHitEnterHintVisible(false)
 
     val newInput =
@@ -103,6 +107,7 @@ class TouchTypingToolWindow {
         referenceTextPane,
         newTypingText,
         errorCounter,
+        typingStats,
         TextFont.effectiveFamily(settings.textFontFamily),
         settings.textFontSize,
         onCompletionChanged = { setHitEnterHintVisible(it) }
@@ -144,38 +149,50 @@ class TouchTypingToolWindow {
   }
 
   /**
-   * Creates the status panel showing the error count and (later) typing speed.
+   * Creates the status panel showing the error count, typing speed (WPM), and accuracy.
    *
-   * The error count is shown first. The WPM label and the `" | "` separator between them are hidden
-   * until WPM is actually implemented; they are revealed together once the feature lands. All
-   * strings are sourced from [UIBundle]. Uses IntelliJ's standard spacing (8px padding) and
-   * medium-weight typography.
+   * Layout: `Typing errors: N | Typing speed: N WPM | Accuracy: N%`. All three values start at zero
+   * before the first keystroke and update live while the user types; the WPM and accuracy freeze
+   * when the text is completed (a terminal state until reset). All strings are sourced from
+   * [UIBundle]. Uses IntelliJ's standard spacing (8px padding) and medium-weight typography.
    */
   private fun createStatusPanel(): BorderLayoutPanel {
     val errorsLabel = JBLabel(UIBundle.message(UIBundle.TOOL_WINDOW_STATUS_ERRORS, 0))
     errorsLabel.font = JBFont.medium()
 
-    // Hidden until WPM is implemented: the separator (spaces are layout, added here) and the WPM
-    // label are revealed together once the feature lands.
+    // The separator (spaces are layout, added here) between the status items.
     val separatorLabel =
       JBLabel(" " + UIBundle.message(UIBundle.TOOL_WINDOW_STATUS_SEPARATOR) + " ")
     separatorLabel.font = JBFont.medium()
-    separatorLabel.isVisible = false
 
     val wpmLabel = JBLabel(UIBundle.message(UIBundle.TOOL_WINDOW_STATUS_WPM, 0))
     wpmLabel.font = JBFont.medium()
-    wpmLabel.isVisible = false
+
+    val accuracySeparatorLabel =
+      JBLabel(" " + UIBundle.message(UIBundle.TOOL_WINDOW_STATUS_SEPARATOR) + " ")
+    accuracySeparatorLabel.font = JBFont.medium()
+
+    val accuracyLabel = JBLabel(UIBundle.message(UIBundle.TOOL_WINDOW_STATUS_ACCURACY, 0))
+    accuracyLabel.font = JBFont.medium()
 
     errorCounter.addChangeListener {
       errorsLabel.text =
         UIBundle.message(UIBundle.TOOL_WINDOW_STATUS_ERRORS, errorCounter.getCount())
     }
 
-    // Left-aligned row: errors (visible) | separator (hidden) | WPM (hidden).
+    typingStats.addChangeListener {
+      wpmLabel.text = UIBundle.message(UIBundle.TOOL_WINDOW_STATUS_WPM, typingStats.wpm)
+      accuracyLabel.text =
+        UIBundle.message(UIBundle.TOOL_WINDOW_STATUS_ACCURACY, typingStats.accuracy)
+    }
+
+    // Left-aligned row: errors | separator | WPM | separator | accuracy.
     val statusRow = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0))
     statusRow.add(errorsLabel)
     statusRow.add(separatorLabel)
     statusRow.add(wpmLabel)
+    statusRow.add(accuracySeparatorLabel)
+    statusRow.add(accuracyLabel)
     statusRow.border = JBUI.Borders.empty(PADDING_SMALL)
 
     val panel = BorderLayoutPanel()
