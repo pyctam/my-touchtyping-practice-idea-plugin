@@ -19,8 +19,8 @@ object UIBundle : DynamicBundle(UIBundle::class.java, BUNDLE) {
   const val CONFIG_GENERATION_MODE_RADIO_RANDOM = "ui.config.generation-mode.radio.random"
   const val CONFIG_GENERATION_MODE_RADIO_EXACT = "ui.config.generation-mode.radio.exact-words"
   const val CONFIG_GENERATION_MODE_RADIO_ADAPTED = "ui.config.generation-mode.radio.adapted-words"
-  const val CONFIG_KEY_LIMIT_PER_FINDER_TITLE = "ui.config.key-limit-per-finder.title"
-  const val CONFIG_KEY_LIMIT_PER_FINDER_HINT = "ui.config.key-limit-per-finder.hint"
+  const val CONFIG_KEY_LIMIT_PER_FINGER_TITLE = "ui.config.key-limit-per-finger.title"
+  const val CONFIG_KEY_LIMIT_PER_FINGER_HINT = "ui.config.key-limit-per-finger.hint"
   const val CONFIG_FINGER_SELECTION_TITLE = "ui.config.finger-selection.title"
   const val CONFIG_FINGER_SELECTION_HINT = "ui.config.finger-selection.hint"
   const val CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS =

@@ -79,64 +79,62 @@
 
 ### Style / consistency
 
-1. **Typo in public API** — `CONFIG_KEY_LIMIT_PER_FINDER_*` in `UIBundle.kt`: "FINDER" should be
-   "FINGER" (the `UI.properties` keys say `key-limit-per-finder` too — fix both).
-2. **Redundant EDT hops** — `TouchTypingDocumentListener.updateHighlights()` wraps work in
+1. **Redundant EDT hops** — `TouchTypingDocumentListener.updateHighlights()` wraps work in
    `SwingUtilities.invokeLater`, but `DocumentListener` callbacks already fire on the EDT. Same in
    `ErrorCounter.notifyListeners()` (double `invokeLater`). Also `catch (t: Throwable)` around the
    highlight logic is broader than needed.
-3. **Java-style accessors** — `ErrorCounter.getCount()/setCount()` → a Kotlin `var count: Int`
+2. **Java-style accessors** — `ErrorCounter.getCount()/setCount()` → a Kotlin `var count: Int`
    with the notification in the setter.
-4. **Manual service lookup** — `Settings.getInstance()` → `application.service<Settings>()`
+3. **Manual service lookup** — `Settings.getInstance()` → `application.service<Settings>()`
    (3 call sites).
-5. **`TextFont` is a data class in name only** — it wraps a `String`, but every API
+4. **`TextFont` is a data class in name only** — it wraps a `String`, but every API
    (`allAvailableFamilies()`, `effectiveFamily()`, `Settings.textFontFamily`) uses raw `String`;
    only `DEFAULT` is a `TextFont`. Either use the type consistently or collapse it to an `object`
    of functions.
-6. **Unnecessary defensiveness** — `KeyboardLayout.keysFor` uses `.orEmpty()` on maps that are
+5. **Unnecessary defensiveness** — `KeyboardLayout.keysFor` uses `.orEmpty()` on maps that are
    total over `Finger.entries` — plain indexing is clearer.
-7. **Side effect in `createPanel()`** — `Configuration.createPanel()` mutates
+6. **Side effect in `createPanel()`** — `Configuration.createPanel()` mutates
    `settings.textFontFamily` when the panel is created (normalization that persists without
    Apply). Consider normalizing in `Settings.loadState`/getter instead.
-8. **MessageBus connection not scoped** — the factory subscribes with `connect()` (no scope) — it
+7. **MessageBus connection not scoped** — the factory subscribes with `connect()` (no scope) — it
    lives for the application lifetime per tool-window creation. `connect(project)` (or the tool
    window's content) would auto-dispose it.
-9. **Logging** — remaining `logger.info` calls (reset, completion, tool-window lifecycle) →
+8. **Logging** — remaining `logger.info` calls (reset, completion, tool-window lifecycle) →
    `debug`.
-10. **O(N) re-color per keystroke** — `HandColors.applyTo` re-colors the entire text on every
-    keystroke. The `DocumentEvent` carries the changed offset/length, which is discarded. Not a
-    bottleneck at 5–20 words, but won't scale. Fix: drive re-coloring from the `DocumentEvent`
-    range (only re-color the inserted/changed characters).
-    *`ui/HandColors.kt`, `ui/TouchTypingDocumentListener.kt`.*
-11. **Uppercase letters are never colored** — the `KeyboardLayout` only defines lowercase keys, so
+9. **O(N) re-color per keystroke** — `HandColors.applyTo` re-colors the entire text on every
+   keystroke. The `DocumentEvent` carries the changed offset/length, which is discarded. Not a
+   bottleneck at 5–20 words, but won't scale. Fix: drive re-coloring from the `DocumentEvent`
+   range (only re-color the inserted/changed characters).
+   *`ui/HandColors.kt`, `ui/TouchTypingDocumentListener.kt`.*
+10. **Uppercase letters are never colored** — the `KeyboardLayout` only defines lowercase keys, so
     a pasted or shifted uppercase letter stays uncolored. Consider normalizing to lowercase before
     lookup in `colorFor()`.
     *`ui/HandColors.kt`.*
-12. **`ALL_KEYS_LIMIT = 100` magic number** — silently breaks if a finger ever gains >100 keys.
+11. **`ALL_KEYS_LIMIT = 100` magic number** — silently breaks if a finger ever gains >100 keys.
     Prefer `Int.MAX_VALUE` or add a `KeyboardLayout.allKeys(mode, finger)` accessor that returns
     the full list without a limit parameter.
     *`ui/HandColors.kt`, `generation/KeyboardLayout.kt`.*
-13. **Redundant `text` parameter in `applyTo`** — every call site passes a value equal to
+12. **Redundant `text` parameter in `applyTo`** — every call site passes a value equal to
     `pane.text`. Drop the parameter and read `pane.text` internally.
     *`ui/HandColors.kt`.*
-14. **Per-character `SimpleAttributeSet` allocation** — a new `SimpleAttributeSet` is allocated per
+13. **Per-character `SimpleAttributeSet` allocation** — a new `SimpleAttributeSet` is allocated per
     character per keystroke. Two static sets (one for LEFT, one for RIGHT) could be reused.
     *`ui/HandColors.kt`.*
-15. **Layering: `HandColors` (in `ui`) reaches into `generation` + `config`** — the
+14. **Layering: `HandColors` (in `ui`) reaches into `generation` + `config`** — the
     character-to-hand mapping is a domain concept, not a UI concern. Consider moving the mapping
     logic to the `generation` or `config` package.
     *`ui/HandColors.kt`.*
-16. **Completion side-effects re-run on every keystroke** — `logger.info` + `addHighlight` for the
+15. **Completion side-effects re-run on every keystroke** — `logger.info` + `addHighlight` for the
     completion state fire on every keystroke while the text is complete, not just on the
     transition into completion. Guard with a state-change check.
     *`ui/TouchTypingDocumentListener.kt`.*
-17. **Tests don't verify actual coloring** — `HandColorsTest.applyTo` tests only assert text is
+16. **Tests don't verify actual coloring** — `HandColorsTest.applyTo` tests only assert text is
     preserved, never that the foreground attribute was set on the document. Add assertions that
     read back the character attributes and verify the expected color.
     *`test/.../ui/HandColorsTest.kt`.*
-18. **Fix stale comments** — the generation rules are now sentence-length (word count in
+17. **Fix stale comments** — the generation rules are now sentence-length (word count in
     `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]` = 5–20, each word ≤ `MAX_WORD_LENGTH` = 7, total 9–159
     characters); keep comments in sync as the generator evolves.
-19. **More tests** — unit tests now cover config, the pure text generator, the keyboard layout, the
+18. **More tests** — unit tests now cover config, the pure text generator, the keyboard layout, the
     word list and word-based generation, the Enter-to-reset detector, the completion callback, and
     the tool-window toggle action; add more as new features land.

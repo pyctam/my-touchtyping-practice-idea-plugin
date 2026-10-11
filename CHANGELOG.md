@@ -32,6 +32,12 @@
   rebuild, so change listeners no longer accumulate across hot-reloads.
 - The `ui.tool-window.status-accuracy` message ("Accuracy: N%") was added to the `UIBundle`
   resource bundle (`messages/UI.properties`).
+- Fixed a typo in the public API: `UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_TITLE` /
+  `CONFIG_KEY_LIMIT_PER_FINDER_HINT` are now `CONFIG_KEY_LIMIT_PER_FINGER_TITLE` /
+  `CONFIG_KEY_LIMIT_PER_FINGER_HINT`, and the corresponding `UI.properties` keys
+  `ui.config.key-limit-per-finder.*` are now `ui.config.key-limit-per-finger.*`. The displayed
+  settings text was already correct ("Key Limit Per Finger"); only the internal identifiers were
+  misspelled.
 
 ## 0.1.9
 
