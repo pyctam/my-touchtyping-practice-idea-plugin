@@ -71,6 +71,7 @@ object TouchTypingUIComponentsFactory {
    * @param referenceTextPane the reference pane to highlight mismatches against.
    * @param typingText the original text being typed.
    * @param errorCounter the counter updated with the current mismatch count.
+   * @param stats the session typing-speed/accuracy tracker fed by insertions and errors.
    * @param fontFamily the font family to render with.
    * @param fontSizePt font size in points.
    * @param onCompletionChanged a callback to be called when the typing input is completed.
@@ -80,6 +81,7 @@ object TouchTypingUIComponentsFactory {
     referenceTextPane: JTextPane,
     typingText: String,
     errorCounter: ErrorCounter,
+    stats: TypingStats,
     fontFamily: String,
     fontSizePt: Int = 13,
     onCompletionChanged: (Boolean) -> Unit = {}
@@ -91,6 +93,7 @@ object TouchTypingUIComponentsFactory {
         referenceTextPane,
         typingText,
         errorCounter,
+        stats,
         onCompletionChanged
       )
     typingArea.document.addDocumentListener(listener)

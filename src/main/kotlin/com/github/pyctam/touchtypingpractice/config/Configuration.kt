@@ -11,8 +11,8 @@ import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_GENERATION_MODE_RAD
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_GENERATION_MODE_RADIO_EXACT
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_GENERATION_MODE_RADIO_RANDOM
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_GENERATION_MODE_TITLE
-import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_HINT
-import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINDER_TITLE
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINGER_HINT
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_KEY_LIMIT_PER_FINGER_TITLE
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_HINT
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_BOTHHANDS
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO_LEFTHAND
@@ -104,8 +104,8 @@ class Configuration : BoundConfigurable("Touch Typing Practice") {
           .bind({ settings.generationMode }, { settings.generationMode = it })
       }
 
-      group(UIBundle.message(CONFIG_KEY_LIMIT_PER_FINDER_TITLE)) {
-        row { comment(UIBundle.message(CONFIG_KEY_LIMIT_PER_FINDER_HINT)) }
+      group(UIBundle.message(CONFIG_KEY_LIMIT_PER_FINGER_TITLE)) {
+        row { comment(UIBundle.message(CONFIG_KEY_LIMIT_PER_FINGER_HINT)) }
         row { spinner(1..6).bindIntValue(settings::keyLimitPerFinger) }
       }
 
