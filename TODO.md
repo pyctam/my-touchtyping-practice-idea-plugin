@@ -33,13 +33,7 @@
    exposes the live object as serializable state. Return a copy (a small data class) so the
    serializer never holds the live instance.
    *`config/Settings.kt`.*
-3. **No word wrap on the typing `JTextPane`** — the KDoc in `createTypingArea()` claims
-   "word-wrapping `JTextPane`" but no wrapping is configured. Unlike the old `JTextArea` with
-   `setLineWrap(true)`, a `JTextPane` does not wrap by default. Long lines will show a horizontal
-   scrollbar. Fix: set `wrapStyleWord = true` and `wrapStyleLength` on the pane, or configure the
-   view factory.
-   *`ui/TouchTypingUIComponentsFactory.kt`.*
-4. **Rich-text paste in the typing area** — `JTextPane` accepts rich-text paste (fonts, colors,
+3. **Rich-text paste in the typing area** — `JTextPane` accepts rich-text paste (fonts, colors,
    HTML from browser/Word), unlike the old `JTextArea` which pasted plain text only. Pasted
    attributes persist until the next keystroke re-runs `applyTo`. Fix: set
    `typingArea.editorKit = PlainTextEditorKit()` to restore plain-text-only paste semantics.

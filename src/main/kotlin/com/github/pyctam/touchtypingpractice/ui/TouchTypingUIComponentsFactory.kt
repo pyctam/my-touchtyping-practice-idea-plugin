@@ -8,6 +8,7 @@ import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.components.BorderLayoutPanel
 import java.awt.Font
 import javax.swing.JTextPane
+import javax.swing.ScrollPaneConstants
 
 /**
  * UI components factory for the Touch Typing Practice plugin. Follows the IntelliJ IDEA Design
@@ -30,14 +31,14 @@ object TouchTypingUIComponentsFactory {
    * Creates the reference text pane showing the text to type.
    *
    * Each character is colored by hand (blue for left-hand keys, purple for right-hand keys) via
-   * [HandColors.applyTo].
+   * [HandColors.applyTo]. Long lines wrap at the pane width (no horizontal scrollbar).
    *
    * @param typingText the text to display.
    * @param fontFamily the font family to render with.
    * @param fontSizePt font size in points.
    */
   fun createTextPane(typingText: String, fontFamily: String, fontSizePt: Int = 13): JTextPane {
-    val pane = JTextPane()
+    val pane = createWrappingTextPane()
     pane.text = typingText
     pane.isEditable = false
     pane.isFocusable = false
@@ -54,6 +55,8 @@ object TouchTypingUIComponentsFactory {
    */
   fun createSampleTextPanel(referenceTextPane: JTextPane): JBScrollPane {
     val scrollPane = JBScrollPane(referenceTextPane)
+    // The reference pane wraps words, so a horizontal scrollbar is never needed.
+    scrollPane.horizontalScrollBarPolicy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
     scrollPane.border =
       JBUI.Borders.compound(
         JBUI.Borders.empty(0, PADDING_SMALL, PADDING_SMALL, PADDING_SMALL),
@@ -99,6 +102,8 @@ object TouchTypingUIComponentsFactory {
     typingArea.document.addDocumentListener(listener)
 
     val scrollPane = JBScrollPane(typingArea)
+    // The typing area wraps words, so a horizontal scrollbar is never needed.
+    scrollPane.horizontalScrollBarPolicy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
     scrollPane.border =
       JBUI.Borders.compound(
         JBUI.Borders.empty(0, PADDING_SMALL, PADDING_SMALL, PADDING_SMALL),
@@ -109,11 +114,24 @@ object TouchTypingUIComponentsFactory {
 
   /** Creates a word-wrapping [JTextPane] for typing input with per-hand character colors. */
   private fun createTypingArea(fontFamily: String, fontSizePt: Int): JTextPane {
-    val typingArea = JTextPane()
+    val typingArea = createWrappingTextPane()
     typingArea.font = applyFont(UIUtil.getLabelFont(), fontFamily, fontSizePt)
     typingArea.border = JBUI.Borders.compound(JBUI.Borders.empty(PADDING_SMALL))
     return typingArea
   }
+
+  /**
+   * Creates a [JTextPane] that wraps long lines at the viewport width instead of growing
+   * horizontally.
+   *
+   * Unlike `JTextArea`, a [JTextPane] does not wrap by default: its view reports
+   * `getScrollableTracksViewportWidth()` as `false`, so a long line forces a horizontal scrollbar.
+   * Overriding it to `true` makes the view track the viewport width and wrap.
+   */
+  private fun createWrappingTextPane(): JTextPane =
+    object : JTextPane() {
+      override fun getScrollableTracksViewportWidth(): Boolean = true
+    }
 
   /**
    * Derives a font with the given family and size from [baseFont]. If [fontFamily] is not installed

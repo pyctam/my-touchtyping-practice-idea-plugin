@@ -95,7 +95,7 @@ In the Settings window:
 3. Select the plugin file:
 
 - Look for: `Touch Typing Practice-*.zip`
-- Example: `Touch Typing Practice-0.1.10.zip`
+- Example: `Touch Typing Practice-0.1.11.zip`
 
 4. Click **`OK`** to proceed
 
