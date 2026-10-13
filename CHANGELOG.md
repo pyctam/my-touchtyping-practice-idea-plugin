@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 0.1.11
+
+### Fixed
+
+- **Word wrap in the reference and typing panes** — both the reference text pane and the typing
+  area now wrap long lines at the pane width instead of showing a horizontal scrollbar. A
+  `JTextPane` does not wrap by default (unlike the previous `JTextArea`), so a long practice line
+  forced a horizontal scrollbar. Both panes now use a `JTextPane` that overrides
+  `getScrollableTracksViewportWidth()` to return `true`, and both scroll panes use
+  `HORIZONTAL_SCROLLBAR_NEVER`.
+- Unit tests for the word-wrapping behavior: both panes report
+  `getScrollableTracksViewportWidth() == true` and both scroll panes use
+  `HORIZONTAL_SCROLLBAR_NEVER`.
+
 ## 0.1.10
 
 ### Added

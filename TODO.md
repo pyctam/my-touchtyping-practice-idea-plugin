@@ -33,13 +33,7 @@
    exposes the live object as serializable state. Return a copy (a small data class) so the
    serializer never holds the live instance.
    *`config/Settings.kt`.*
-3. **No word wrap on the typing `JTextPane`** — **Fixed.** Both the reference pane
-    (`createTextPane`) and the typing area (`createTypingArea`) now use a `JTextPane` that
-    overrides `getScrollableTracksViewportWidth()` to return `true` (a `JTextPane` does not wrap
-    by default, unlike `JTextArea`), and both scroll panes use `HORIZONTAL_SCROLLBAR_NEVER`, so
-    long lines wrap at the pane width instead of showing a horizontal scrollbar.
-    *`ui/TouchTypingUIComponentsFactory.kt`.*
-4. **Rich-text paste in the typing area** — `JTextPane` accepts rich-text paste (fonts, colors,
+3. **Rich-text paste in the typing area** — `JTextPane` accepts rich-text paste (fonts, colors,
    HTML from browser/Word), unlike the old `JTextArea` which pasted plain text only. Pasted
    attributes persist until the next keystroke re-runs `applyTo`. Fix: set
    `typingArea.editorKit = PlainTextEditorKit()` to restore plain-text-only paste semantics.
