@@ -33,10 +33,13 @@
    exposes the live object as serializable state. Return a copy (a small data class) so the
    serializer never holds the live instance.
    *`config/Settings.kt`.*
-3. **Rich-text paste in the typing area** — `JTextPane` accepts rich-text paste (fonts, colors,
-   HTML from browser/Word), unlike the old `JTextArea` which pasted plain text only. Pasted
-   attributes persist until the next keystroke re-runs `applyTo`. Fix: set
-   `typingArea.editorKit = PlainTextEditorKit()` to restore plain-text-only paste semantics.
+3. **~~Paste in the typing area~~ (done)** — the typing area is a practice surface: the user must
+   *type* the reference text, not copy it in. A `JTextPane` with its default `StyledEditorKit`
+   accepted both plain-text and rich-text paste (HTML from a browser, RTF from Word), letting the
+   user bypass the practice. Fixed by installing a `NoPasteTransferHandler` (a `TransferHandler`
+   whose `canImport`/`importData` return `false`) on the typing area, so both Ctrl+V paste and
+   drag-and-drop are no-ops. The document stays a `StyledDocument` (a `PlainTextEditorKit` would
+   install a `PlainDocument` and break `HandColors.applyTo`), so per-hand coloring keeps working.
    *`ui/TouchTypingUIComponentsFactory.kt`.*
 
 ### Duplication / dead code

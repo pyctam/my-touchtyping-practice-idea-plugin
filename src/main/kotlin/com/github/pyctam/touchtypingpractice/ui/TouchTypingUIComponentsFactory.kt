@@ -9,6 +9,7 @@ import com.intellij.util.ui.components.BorderLayoutPanel
 import java.awt.Font
 import javax.swing.JTextPane
 import javax.swing.ScrollPaneConstants
+import javax.swing.TransferHandler
 
 /**
  * UI components factory for the Touch Typing Practice plugin. Follows the IntelliJ IDEA Design
@@ -112,11 +113,28 @@ object TouchTypingUIComponentsFactory {
     return TypingInputComponents(scrollPane, typingArea)
   }
 
-  /** Creates a word-wrapping [JTextPane] for typing input with per-hand character colors. */
+  /**
+   * Creates a word-wrapping [JTextPane] for the typing area that rejects all paste and
+   * drag-and-drop.
+   *
+   * The typing area is a practice surface: the user is expected to *type* the reference text, not
+   * copy it in. A [JTextPane] with its default [javax.swing.text.StyledEditorKit] would otherwise
+   * accept both plain-text and rich-text paste (HTML from a browser, RTF from Word), letting the
+   * user bypass the practice entirely. Installing a [NoPasteTransferHandler] that rejects every
+   * import makes both Ctrl+V paste and drag-and-drop a no-op, so the only way to fill the area is
+   * to type.
+   *
+   * The document stays a [javax.swing.text.StyledDocument] (a `PlainTextEditorKit` would install a
+   * `PlainDocument`), so [HandColors.applyTo] can still color each character by hand.
+   */
   private fun createTypingArea(fontFamily: String, fontSizePt: Int): JTextPane {
-    val typingArea = createWrappingTextPane()
+    val typingArea =
+      object : JTextPane() {
+        override fun getScrollableTracksViewportWidth(): Boolean = true
+      }
     typingArea.font = applyFont(UIUtil.getLabelFont(), fontFamily, fontSizePt)
     typingArea.border = JBUI.Borders.compound(JBUI.Borders.empty(PADDING_SMALL))
+    typingArea.transferHandler = NoPasteTransferHandler()
     return typingArea
   }
 
@@ -146,3 +164,14 @@ object TouchTypingUIComponentsFactory {
 
 /** Holds the typing input components needed to reset the input later. */
 data class TypingInputComponents(val scrollPane: JBScrollPane, val typingArea: JTextPane)
+
+/**
+ * A [TransferHandler] that rejects every import, so no paste or drag-and-drop is allowed. The
+ * typing area is a practice surface: the only way to fill it is to type.
+ */
+private class NoPasteTransferHandler : TransferHandler() {
+
+  override fun canImport(transferSupport: TransferSupport): Boolean = false
+
+  override fun importData(transferSupport: TransferSupport): Boolean = false
+}

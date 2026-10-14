@@ -1,6 +1,12 @@
 package com.github.pyctam.touchtypingpractice.ui
 
+import java.awt.datatransfer.DataFlavor
+import java.awt.datatransfer.StringSelection
+import java.awt.datatransfer.Transferable
+import javax.swing.JComponent
 import javax.swing.ScrollPaneConstants
+import javax.swing.TransferHandler
+import javax.swing.text.StyledDocument
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -95,6 +101,39 @@ class TouchTypingUIComponentsFactoryTest {
     )
   }
 
+  // --- No-paste tests ---
+  //
+  // The typing area is a practice surface: the user is expected to *type* the reference text, not
+  // copy it in. The factory installs a NoPasteTransferHandler that rejects every import, so both
+  // Ctrl+V paste (plain or rich) and drag-and-drop are no-ops, while the document stays a
+  // StyledDocument so per-hand coloring (HandColors.applyTo) keeps working.
+
+  @Test
+  fun typingAreaRejectsAllPaste() {
+    val components = createTypingInputComponents()
+    val typingArea = components.typingArea
+    val handler = typingArea.transferHandler
+
+    assertFalse(
+      "Typing area should reject plain-text paste (the user must type, not paste)",
+      handler.canImport(createTransferSupport(typingArea, StringSelection("hello")))
+    )
+    assertFalse(
+      "Typing area should reject the HTML flavor (rich-text paste)",
+      handler.canImport(createTransferSupport(typingArea, HtmlTransferable()))
+    )
+  }
+
+  @Test
+  fun typingAreaKeepsStyledDocument() {
+    val components = createTypingInputComponents()
+
+    assertTrue(
+      "Typing area document must stay a StyledDocument so HandColors.applyTo can color per character",
+      components.typingArea.document is StyledDocument
+    )
+  }
+
   /** Builds the typing input components with a plain reference pane and default stats. */
   private fun createTypingInputComponents(): TypingInputComponents {
     val referencePane = TouchTypingUIComponentsFactory.createTextPane("hello world", "Monospaced")
@@ -105,5 +144,22 @@ class TouchTypingUIComponentsFactoryTest {
       TypingStats(),
       "Monospaced"
     )
+  }
+
+  /** Wraps [transferable] in a [TransferHandler.TransferSupport] for [component]. */
+  private fun createTransferSupport(
+    component: JComponent,
+    transferable: Transferable
+  ): TransferHandler.TransferSupport = TransferHandler.TransferSupport(component, transferable)
+
+  /** A [Transferable] that offers only the HTML flavor, simulating a rich-text clipboard. */
+  private class HtmlTransferable : Transferable {
+    private val htmlFlavor = DataFlavor("text/html", "HTML")
+
+    override fun getTransferDataFlavors(): Array<DataFlavor> = arrayOf(htmlFlavor)
+
+    override fun isDataFlavorSupported(flavor: DataFlavor): Boolean = flavor == htmlFlavor
+
+    override fun getTransferData(flavor: DataFlavor): Any = "<html><body>hello</body></html>"
   }
 }
