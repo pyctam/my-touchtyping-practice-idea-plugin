@@ -9,6 +9,7 @@ import com.intellij.util.ui.components.BorderLayoutPanel
 import java.awt.Font
 import javax.swing.JTextPane
 import javax.swing.ScrollPaneConstants
+import javax.swing.TransferHandler
 
 /**
  * UI components factory for the Touch Typing Practice plugin. Follows the IntelliJ IDEA Design
@@ -112,11 +113,23 @@ object TouchTypingUIComponentsFactory {
     return TypingInputComponents(scrollPane, typingArea)
   }
 
-  /** Creates a word-wrapping [JTextPane] for typing input with per-hand character colors. */
+  /**
+   * Creates a word-wrapping [JTextPane] for the typing area.
+   *
+   * The typing area accepts keyboard input only: a [TypingOnlyTransferHandler] rejects every
+   * clipboard and drag-and-drop import, so the reference text can only be entered by typing it.
+   *
+   * The document stays a [javax.swing.text.StyledDocument] (a `PlainTextEditorKit` would install a
+   * `PlainDocument`), so [HandColors.applyTo] can still color each character by hand.
+   */
   private fun createTypingArea(fontFamily: String, fontSizePt: Int): JTextPane {
-    val typingArea = createWrappingTextPane()
+    val typingArea =
+      object : JTextPane() {
+        override fun getScrollableTracksViewportWidth(): Boolean = true
+      }
     typingArea.font = applyFont(UIUtil.getLabelFont(), fontFamily, fontSizePt)
     typingArea.border = JBUI.Borders.compound(JBUI.Borders.empty(PADDING_SMALL))
+    typingArea.transferHandler = TypingOnlyTransferHandler()
     return typingArea
   }
 
@@ -146,3 +159,14 @@ object TouchTypingUIComponentsFactory {
 
 /** Holds the typing input components needed to reset the input later. */
 data class TypingInputComponents(val scrollPane: JBScrollPane, val typingArea: JTextPane)
+
+/**
+ * A [TransferHandler] that rejects every clipboard and drag-and-drop import, so the typing area
+ * accepts keyboard input only.
+ */
+private class TypingOnlyTransferHandler : TransferHandler() {
+
+  override fun canImport(transferSupport: TransferSupport): Boolean = false
+
+  override fun importData(transferSupport: TransferSupport): Boolean = false
+}

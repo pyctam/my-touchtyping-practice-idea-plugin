@@ -16,8 +16,7 @@
    Remaining: a Sentences mode (real sentences, not just words) and per-difficulty tuning.
 5. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
    produce the most errors and show a "weak fingers" summary.
-6. **Custom text input** — let users paste or type their own practice text instead of only
-   generated ones.
+6. **Custom text input** — let users type their own practice text instead of only generated ones.
 
 ## Bugs
 
@@ -33,11 +32,6 @@
    exposes the live object as serializable state. Return a copy (a small data class) so the
    serializer never holds the live instance.
    *`config/Settings.kt`.*
-3. **Rich-text paste in the typing area** — `JTextPane` accepts rich-text paste (fonts, colors,
-   HTML from browser/Word), unlike the old `JTextArea` which pasted plain text only. Pasted
-   attributes persist until the next keystroke re-runs `applyTo`. Fix: set
-   `typingArea.editorKit = PlainTextEditorKit()` to restore plain-text-only paste semantics.
-   *`ui/TouchTypingUIComponentsFactory.kt`.*
 
 ### Duplication / dead code
 
@@ -101,7 +95,7 @@
    range (only re-color the inserted/changed characters).
    *`ui/HandColors.kt`, `ui/TouchTypingDocumentListener.kt`.*
 10. **Uppercase letters are never colored** — the `KeyboardLayout` only defines lowercase keys, so
-    a pasted or shifted uppercase letter stays uncolored. Consider normalizing to lowercase before
+    a shifted uppercase letter stays uncolored. Consider normalizing to lowercase before
     lookup in `colorFor()`.
     *`ui/HandColors.kt`.*
 11. **`ALL_KEYS_LIMIT = 100` magic number** — silently breaks if a finger ever gains >100 keys.
