@@ -101,25 +101,24 @@ class TouchTypingUIComponentsFactoryTest {
     )
   }
 
-  // --- No-paste tests ---
+  // --- Keyboard-only input tests ---
   //
-  // The typing area is a practice surface: the user is expected to *type* the reference text, not
-  // copy it in. The factory installs a NoPasteTransferHandler that rejects every import, so both
-  // Ctrl+V paste (plain or rich) and drag-and-drop are no-ops, while the document stays a
+  // The typing area accepts keyboard input only. The factory installs a TypingOnlyTransferHandler
+  // that rejects every clipboard and drag-and-drop import, while the document stays a
   // StyledDocument so per-hand coloring (HandColors.applyTo) keeps working.
 
   @Test
-  fun typingAreaRejectsAllPaste() {
+  fun typingAreaAcceptsKeyboardInputOnly() {
     val components = createTypingInputComponents()
     val typingArea = components.typingArea
     val handler = typingArea.transferHandler
 
     assertFalse(
-      "Typing area should reject plain-text paste (the user must type, not paste)",
+      "Typing area should reject a plain-text clipboard import (keyboard input only)",
       handler.canImport(createTransferSupport(typingArea, StringSelection("hello")))
     )
     assertFalse(
-      "Typing area should reject the HTML flavor (rich-text paste)",
+      "Typing area should reject an HTML clipboard import (keyboard input only)",
       handler.canImport(createTransferSupport(typingArea, HtmlTransferable()))
     )
   }

@@ -16,8 +16,7 @@
    Remaining: a Sentences mode (real sentences, not just words) and per-difficulty tuning.
 5. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
    produce the most errors and show a "weak fingers" summary.
-6. **Custom text input** — let users paste or type their own practice text instead of only
-   generated ones.
+6. **Custom text input** — let users type their own practice text instead of only generated ones.
 
 ## Bugs
 
@@ -33,14 +32,6 @@
    exposes the live object as serializable state. Return a copy (a small data class) so the
    serializer never holds the live instance.
    *`config/Settings.kt`.*
-3. **~~Paste in the typing area~~ (done)** — the typing area is a practice surface: the user must
-   *type* the reference text, not copy it in. A `JTextPane` with its default `StyledEditorKit`
-   accepted both plain-text and rich-text paste (HTML from a browser, RTF from Word), letting the
-   user bypass the practice. Fixed by installing a `NoPasteTransferHandler` (a `TransferHandler`
-   whose `canImport`/`importData` return `false`) on the typing area, so both Ctrl+V paste and
-   drag-and-drop are no-ops. The document stays a `StyledDocument` (a `PlainTextEditorKit` would
-   install a `PlainDocument` and break `HandColors.applyTo`), so per-hand coloring keeps working.
-   *`ui/TouchTypingUIComponentsFactory.kt`.*
 
 ### Duplication / dead code
 
@@ -104,7 +95,7 @@
    range (only re-color the inserted/changed characters).
    *`ui/HandColors.kt`, `ui/TouchTypingDocumentListener.kt`.*
 10. **Uppercase letters are never colored** — the `KeyboardLayout` only defines lowercase keys, so
-    a pasted or shifted uppercase letter stays uncolored. Consider normalizing to lowercase before
+    a shifted uppercase letter stays uncolored. Consider normalizing to lowercase before
     lookup in `colorFor()`.
     *`ui/HandColors.kt`.*
 11. **`ALL_KEYS_LIMIT = 100` magic number** — silently breaks if a finger ever gains >100 keys.
