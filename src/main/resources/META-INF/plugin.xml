@@ -11,7 +11,7 @@
         <toolWindow anchor="right"
                     factoryClass="com.github.pyctam.touchtypingpractice.toolWindow.TouchTypingToolWindowFactory"
                     id="Touch Typing Practice"
-                    secondary="false"/>
+                    secondary="true"/>
         <projectConfigurable instance="com.github.pyctam.touchtypingpractice.config.Configuration"
                              displayName="Touch Typing Practice"
                              id="com.github.pyctam.touchtypingpractice.config.Configuration"/>

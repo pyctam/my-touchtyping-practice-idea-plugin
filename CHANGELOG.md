@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.1.13]
+
+### Changed
+
+- **Tool window registered in the secondary group** — the `Touch Typing Practice` tool window is
+  now registered with `secondary="true"` in `plugin.xml`, so it no longer replaces other primary
+  tool windows on the right side; it is placed in the secondary group instead.
+
 ## [0.1.12]
 
 ### Changed
@@ -241,7 +249,9 @@
 
 - Initial release of the Touch Typing Practice plugin.
 
-[Unreleased]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.12...HEAD
+[Unreleased]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.13...HEAD
+
+[0.1.13]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.12...v0.1.13
 
 [0.1.12]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.11...v0.1.12
 
