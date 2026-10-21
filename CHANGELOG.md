@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## Unreleased
 
 ### Added
 
@@ -17,7 +17,7 @@
 - Unit tests for the per-finger and per-hand color mapping, the `NONE` mode, and the settings-page
   radio group (initial selection, commit on click, and reset).
 
-## [0.1.13]
+## 0.1.13
 
 ### Changed
 
@@ -25,7 +25,7 @@
   now registered with `secondary="true"` in `plugin.xml`, so it no longer replaces other primary
   tool windows on the right side; it is placed in the secondary group instead.
 
-## [0.1.12]
+## 0.1.12
 
 ### Changed
 
@@ -35,7 +35,7 @@
 - Unit tests for the keyboard-only input behavior: the typing area rejects both plain-text and
   HTML clipboard imports, and its document remains a `StyledDocument`.
 
-## [0.1.11]
+## 0.1.11
 
 ### Fixed
 
@@ -49,7 +49,7 @@
   `getScrollableTracksViewportWidth() == true` and both scroll panes use
   `HORIZONTAL_SCROLLBAR_NEVER`.
 
-## [0.1.10]
+## 0.1.10
 
 ### Added
 
@@ -86,7 +86,7 @@
   settings text was already correct ("Key Limit Per Finger"); only the internal identifiers were
   misspelled.
 
-## [0.1.9]
+## 0.1.9
 
 ### Added
 
@@ -116,7 +116,7 @@
   the settings dialog gained a "Word Generation Mode" group.
 - README and ABOUT now document the word list, its source attribution, and licensing terms.
 
-## [0.1.8]
+## 0.1.8
 
 ### Added
 
@@ -129,7 +129,7 @@
 - Unit tests for `ToggleTouchTypingPracticeAction`: the toggle decision (hide when visible,
   activate when hidden), repeated toggling, and the tool window id constant.
 
-## [0.1.7]
+## 0.1.7
 
 ### Added
 
@@ -144,7 +144,7 @@
   manually click in the typing area to start typing. The read-only sample text pane is now
   non-focusable, preventing the IDE from placing the cursor in it.
 
-## [0.1.6]
+## 0.1.6
 
 ### Added
 
@@ -157,7 +157,7 @@
   styling.
 - Unit tests for the `HandColors` character-to-color mapping and the `applyTo` styling behavior.
 
-## [0.1.5]
+## 0.1.5
 
 ### Added
 
@@ -177,7 +177,7 @@
   the sample text is reset (via the reset link or Enter). Previously the counter showed the current
   mismatch count and dropped as soon as the user fixed the errors.
 
-## [0.1.4]
+## 0.1.4
 
 ### Added
 
@@ -215,7 +215,7 @@
   `DynamicBundle(Class, String)` constructor instead of the deprecated `DynamicBundle(String)`
   constructor, resolving the deprecation warning on newer IDE versions.
 
-## [0.1.3]
+## 0.1.3
 
 ### Changed
 
@@ -230,7 +230,7 @@
 - Unit tests for the new generation rules: no word exceeds the max word length, the total text
   length stays within the limit, and words are separated by exactly one space.
 
-## [0.1.2]
+## 0.1.2
 
 ### Changed
 
@@ -243,7 +243,7 @@
 
 - Unit tests for the new Enter-to-reset key detector.
 
-## [0.1.1]
+## 0.1.1
 
 ### Added
 
@@ -258,38 +258,8 @@
 - Reorganized the codebase into focused, testable units (pure text-generation logic, a finger-selection model, and
   separated tool-window/UI components) and removed all dead code.
 
-## [0.1.0]
+## 0.1.0
 
 ### Added
 
 - Initial release of the Touch Typing Practice plugin.
-
-[Unreleased]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.13...HEAD
-
-[0.1.13]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.12...v0.1.13
-
-[0.1.12]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.11...v0.1.12
-
-[0.1.11]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.10...v0.1.11
-
-[0.1.10]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.9...v0.1.10
-
-[0.1.9]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.8...v0.1.9
-
-[0.1.8]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.7...v0.1.8
-
-[0.1.7]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.6...v0.1.7
-
-[0.1.6]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.5...v0.1.6
-
-[0.1.5]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.4...v0.1.5
-
-[0.1.4]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.3...v0.1.4
-
-[0.1.3]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.2...v0.1.3
-
-[0.1.2]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.1...v0.1.2
-
-[0.1.1]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/compare/v0.1.0...v0.1.1
-
-[0.1.0]: https://github.com/pyctam/my-touchtyping-practice-idea-plugin/commits/v0.1.0
