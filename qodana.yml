@@ -10,3 +10,7 @@ exclude:
   - name: All
     paths:
       - .qodana
+      # package.kt files hold only a package-level KDoc + `package` declaration. Qodana's
+      # headless analysis false-positives "Unresolved reference in KDoc" on the same-package
+      # references there (the IDE resolves them fine), so exclude them from analysis.
+      - '**/package.kt'
