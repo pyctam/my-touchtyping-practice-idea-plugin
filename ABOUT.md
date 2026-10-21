@@ -37,10 +37,12 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 - **Real-time feedback**: as you type, each character that does not match the reference is
   highlighted in the reference pane, and the whole text is highlighted in green when you complete it
   with zero errors.
-- **Per-hand letter coloring**: each character in both the reference text pane and the typing area
-  is colored by hand — left-hand keys in blue, right-hand keys in purple. The colors are
-  theme-aware and distinct from the semantic colors (red for mismatches, green for completion).
-  The character-to-hand mapping is derived from the `KeyboardLayout`.
+- **Configurable letter coloring**: each character in both the reference text pane and the typing
+  area is colored according to the selected **Text Coloring** mode — **No Coloring** (default text
+  color), **Hand Colors** (left-hand keys in blue, right-hand keys in purple), or **Finger Colors**
+  (every finger of each hand gets its own distinct color, the default). The colors are theme-aware
+  and distinct from the semantic colors (red for mismatches, green for completion). The
+  character-to-hand/finger mapping is derived from the `KeyboardLayout`.
 - A **status bar** showing the cumulative error count, typing speed (WPM), and accuracy:
   `Typing errors: N | Typing speed: N WPM | Accuracy: N%`. A session starts on the first
   keystroke and the WPM/accuracy update live on every keystroke, freezing when the text is
@@ -69,6 +71,8 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
       featured font is preselected automatically.
     - **Practice mode**: Left Hand, Right Hand, or Both Hands.
     - **Word generation mode**: Random Letters (legacy), Exact Words, or Adapted Words (default).
+    - **Text coloring mode**: No Coloring, Hand Colors, or Finger Colors (default) — controls how
+      the sample text and the typed text are colored.
     - **Key limit per finger** (1–6), controlling how many keys each finger may be assigned.
     - **Finger selection**: pick specific fingers (Thumb, Index, Middle, Ring, Little) or use the
       "Use All Fingers" shortcut, with validation that at least one finger is selected.
@@ -125,7 +129,7 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 |-------------|---------------------------------------------------------------|
 | Plugin name | Touch Typing Practice                                         |
 | Plugin ID   | `com.github.pyctam.touchtypingpractice`                       |
-| Version     | 0.1.13                                                        |
+| Version     | 0.1.14                                                        |
 | Language    | Kotlin (JVM 17)                                               |
 | Target IDE  | IntelliJ IDEA 2023.3 and later (`233` and up, no upper bound) |
 | Build       | Gradle 8.10.2 + IntelliJ Platform Gradle Plugin               |

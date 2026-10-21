@@ -1,5 +1,6 @@
 package com.github.pyctam.touchtypingpractice.ui
 
+import com.github.pyctam.touchtypingpractice.config.ColoringMode
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.ui.JBColor
 import javax.swing.JTextPane
@@ -17,8 +18,8 @@ import javax.swing.text.DefaultHighlighter
  * count is cumulative and never decreases on corrections), and highlights the whole reference text
  * in green when it is completed with zero errors.
  *
- * Each character in the typing area is colored by hand (blue for left-hand keys, purple for
- * right-hand keys) via [HandColors.applyTo], matching the reference pane.
+ * Each character in the typing area is colored according to [coloringMode] (none, by hand, or by
+ * finger) via [TextColors.applyTo], matching the reference pane.
  *
  * A [TextLengthLimiterFilter] is installed on the typing area to prevent typing beyond the
  * reference length, to block new input while errors are unresolved, and to make completion a
@@ -32,6 +33,7 @@ import javax.swing.text.DefaultHighlighter
  * @param originalText the reference text being typed.
  * @param errorCounter the cumulative counter incremented by newly introduced mismatches.
  * @param stats the session typing-speed/accuracy tracker fed by insertions and errors.
+ * @param coloringMode how the typed characters are colored.
  * @param onCompletionChanged callback that fires when completion state changes.
  */
 class TouchTypingDocumentListener(
@@ -40,6 +42,7 @@ class TouchTypingDocumentListener(
   private val originalText: String,
   private val errorCounter: ErrorCounter,
   private val stats: TypingStats,
+  private val coloringMode: ColoringMode = ColoringMode.FINGER,
   private val onCompletionChanged: (Boolean) -> Unit = {},
 ) : DocumentListener {
 
@@ -81,7 +84,7 @@ class TouchTypingDocumentListener(
     // Not needed for plain text.
   }
 
-  /** Recomputes the mismatch highlights, hand colors, and error count on the EDT. */
+  /** Recomputes the mismatch highlights, character colors, and error count on the EDT. */
   private fun updateHighlights() {
     SwingUtilities.invokeLater {
       try {
@@ -119,8 +122,8 @@ class TouchTypingDocumentListener(
           if (completed) stats.complete()
         }
 
-        // Apply per-hand colors to the typed text (blue for left-hand, purple for right-hand).
-        HandColors.applyTo(typingArea, typed)
+        // Apply per-character colors to the typed text according to the configured mode.
+        TextColors.applyTo(typingArea, typed, coloringMode)
       } catch (t: Throwable) {
         logger.warn("Failed to update highlights", t)
       }

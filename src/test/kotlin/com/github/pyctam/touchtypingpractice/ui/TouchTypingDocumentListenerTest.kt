@@ -41,7 +41,7 @@ class TouchTypingDocumentListenerTest {
         originalText,
         errorCounter,
         stats,
-        callback
+        onCompletionChanged = callback
       )
     typingArea.document.addDocumentListener(listener)
     return typingArea

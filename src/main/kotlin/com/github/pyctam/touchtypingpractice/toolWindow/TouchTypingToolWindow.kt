@@ -6,7 +6,7 @@ import com.github.pyctam.touchtypingpractice.config.TextFont
 import com.github.pyctam.touchtypingpractice.services.PracticeTextGeneratorService
 import com.github.pyctam.touchtypingpractice.ui.EnterKeyDetector
 import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
-import com.github.pyctam.touchtypingpractice.ui.HandColors
+import com.github.pyctam.touchtypingpractice.ui.TextColors
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.PADDING_SMALL
 import com.github.pyctam.touchtypingpractice.ui.TypingStats
@@ -55,7 +55,12 @@ class TouchTypingToolWindow {
     val typingText = textGenerator.generatePracticeText()
 
     referenceTextPane =
-      TouchTypingUIComponentsFactory.createTextPane(typingText, fontFamily, settings.textFontSize)
+      TouchTypingUIComponentsFactory.createTextPane(
+        typingText,
+        fontFamily,
+        settings.textFontSize,
+        settings.coloringMode
+      )
     val sampleTextPanel = TouchTypingUIComponentsFactory.createSampleTextPanel(referenceTextPane)
     val resetPanel = createResetPanel()
     val typingInput =
@@ -66,6 +71,7 @@ class TouchTypingToolWindow {
         typingStats,
         fontFamily,
         settings.textFontSize,
+        settings.coloringMode,
         onCompletionChanged = { setHitEnterHintVisible(it) }
       )
     typingInputPanel = typingInput.scrollPane
@@ -94,8 +100,8 @@ class TouchTypingToolWindow {
     val newTypingText = textGenerator.generatePracticeText()
 
     referenceTextPane.text = newTypingText
-    // Re-apply per-hand colors to the new reference text.
-    HandColors.applyTo(referenceTextPane, newTypingText)
+    // Re-apply per-character colors to the new reference text.
+    TextColors.applyTo(referenceTextPane, newTypingText, settings.coloringMode)
     // Ensure any completion highlight (light green background) is removed on reset.
     referenceTextPane.highlighter.removeAllHighlights()
     errorCounter.setCount(0)
@@ -110,6 +116,7 @@ class TouchTypingToolWindow {
         typingStats,
         TextFont.effectiveFamily(settings.textFontFamily),
         settings.textFontSize,
+        settings.coloringMode,
         onCompletionChanged = { setHitEnterHintVisible(it) }
       )
     val newTypingInputPanel = newInput.scrollPane

@@ -32,6 +32,9 @@ class Settings : PersistentStateComponent<Settings> {
   /** How the practice text is generated (random letters, exact words, or adapted words). */
   var generationMode: GenerationMode = GenerationMode.ADAPTED_WORDS
 
+  /** How the sample text and typed text are colored (none, by hand, or by finger). */
+  var coloringMode: ColoringMode = ColoringMode.FINGER
+
   /** Maximum number of keys each finger may be assigned. */
   var keyLimitPerFinger: Int = 1
 

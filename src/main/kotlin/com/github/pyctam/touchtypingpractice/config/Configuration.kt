@@ -1,6 +1,11 @@
 package com.github.pyctam.touchtypingpractice.config
 
 import com.github.pyctam.touchtypingpractice.UIBundle
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_COLORING_MODE_HINT
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_COLORING_MODE_RADIO_FINGER
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_COLORING_MODE_RADIO_HAND
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_COLORING_MODE_RADIO_NONE
+import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_COLORING_MODE_TITLE
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_CHECKBOX_SPECIFIC_FINGERS
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_CHECKBOX_USE_ALL_FINGERS
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_FINGER_SELECTION_ERROR_AT_LEAST_ONE
@@ -20,6 +25,9 @@ import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_RADIO
 import com.github.pyctam.touchtypingpractice.UIBundle.CONFIG_PRACTICE_MODE_TITLE
 import com.github.pyctam.touchtypingpractice.UIBundle.TEXT_FONT_HINT
 import com.github.pyctam.touchtypingpractice.UIBundle.TEXT_FONT_TITLE
+import com.github.pyctam.touchtypingpractice.config.ColoringMode.FINGER
+import com.github.pyctam.touchtypingpractice.config.ColoringMode.HAND
+import com.github.pyctam.touchtypingpractice.config.ColoringMode.NONE
 import com.github.pyctam.touchtypingpractice.config.GenerationMode.ADAPTED_WORDS
 import com.github.pyctam.touchtypingpractice.config.GenerationMode.EXACT_WORDS
 import com.github.pyctam.touchtypingpractice.config.GenerationMode.RANDOM
@@ -41,10 +49,11 @@ import javax.swing.JCheckBox
 /**
  * Project-level settings page for Touch Typing Practice.
  *
- * The font size, practice mode, and key-limit fields are bound to [Settings] directly through the
- * IntelliJ UI DSL. The finger selection is not DSL-bound (it is a bitmask with a derived "Use All
- * Fingers" shortcut), so it is edited through a [FingerSelection] working copy and committed to
- * [Settings] on Apply. This keeps Cancel safe and lets [isModified] detect changes.
+ * The font family, font size, coloring mode, practice mode, generation mode, and key-limit fields
+ * are bound to [Settings] directly through the IntelliJ UI DSL. The finger selection is not
+ * DSL-bound (it is a bitmask with a derived "Use All Fingers" shortcut), so it is edited through a
+ * [FingerSelection] working copy and committed to [Settings] on Apply. This keeps Cancel safe and
+ * lets [isModified] detect changes.
  */
 class Configuration : BoundConfigurable("Touch Typing Practice") {
 
@@ -78,6 +87,18 @@ class Configuration : BoundConfigurable("Touch Typing Practice") {
             )
           spinner(8..24, 1).bindIntValue(settings::textFontSize)
         }
+      }
+
+      group(UIBundle.message(CONFIG_COLORING_MODE_TITLE)) {
+        buttonsGroup {
+            row { comment(UIBundle.message(CONFIG_COLORING_MODE_HINT)) }
+            row {
+              radioButton(UIBundle.message(CONFIG_COLORING_MODE_RADIO_NONE), NONE)
+              radioButton(UIBundle.message(CONFIG_COLORING_MODE_RADIO_HAND), HAND)
+              radioButton(UIBundle.message(CONFIG_COLORING_MODE_RADIO_FINGER), FINGER)
+            }
+          }
+          .bind({ settings.coloringMode }, { settings.coloringMode = it })
       }
 
       group(UIBundle.message(CONFIG_PRACTICE_MODE_TITLE)) {
@@ -200,7 +221,8 @@ class Configuration : BoundConfigurable("Touch Typing Practice") {
   }
 
   override fun apply() {
-    // Commits the non-finger fields (font size, practice mode, key limit) to [Settings].
+    // Commits the non-finger fields (font family, font size, coloring mode, practice mode,
+    // generation mode, key limit) to [Settings].
     super.apply()
 
     if (fingerSelection.isEmpty) {
@@ -219,7 +241,8 @@ class Configuration : BoundConfigurable("Touch Typing Practice") {
   }
 
   override fun reset() {
-    // Reloads the non-finger fields (font size, practice mode, key limit) from [Settings].
+    // Reloads the non-finger fields (font family, font size, coloring mode, practice mode,
+    // generation mode, key limit) from [Settings].
     super.reset()
     fingerSelection = FingerSelection(settings.selectedFingers)
     syncFingerSelectionUI()
