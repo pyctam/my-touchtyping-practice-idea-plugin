@@ -105,7 +105,7 @@ class TouchTypingUIComponentsFactoryTest {
   //
   // The typing area accepts keyboard input only. The factory installs a TypingOnlyTransferHandler
   // that rejects every clipboard and drag-and-drop import, while the document stays a
-  // StyledDocument so per-hand coloring (HandColors.applyTo) keeps working.
+  // StyledDocument so per-character coloring (TextColors.applyTo) keeps working.
 
   @Test
   fun typingAreaAcceptsKeyboardInputOnly() {
@@ -128,7 +128,7 @@ class TouchTypingUIComponentsFactoryTest {
     val components = createTypingInputComponents()
 
     assertTrue(
-      "Typing area document must stay a StyledDocument so HandColors.applyTo can color per character",
+      "Typing area document must stay a StyledDocument so TextColors.applyTo can color per character",
       components.typingArea.document is StyledDocument
     )
   }

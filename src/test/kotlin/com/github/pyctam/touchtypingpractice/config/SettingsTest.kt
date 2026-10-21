@@ -15,6 +15,11 @@ class SettingsTest {
   }
 
   @Test
+  fun defaultColoringModeIsFinger() {
+    assertEquals(ColoringMode.FINGER, Settings().coloringMode)
+  }
+
+  @Test
   fun loadStateNormalizesEmptyMaskToAllFingers() {
     val loaded = Settings().apply { selectedFingers = 0 }
     val settings = Settings()
@@ -47,6 +52,7 @@ class SettingsTest {
         textFontSize = 20
         keyLimitPerFinger = 4
         practiceMode = PracticeMode.LEFT_HAND
+        coloringMode = ColoringMode.HAND
         selectedFingers = Finger.encodeSelectedFingers(0, Finger.LITTLE)
       }
     val settings = Settings()
@@ -55,6 +61,7 @@ class SettingsTest {
     assertEquals(20, settings.textFontSize)
     assertEquals(4, settings.keyLimitPerFinger)
     assertEquals(PracticeMode.LEFT_HAND, settings.practiceMode)
+    assertEquals(ColoringMode.HAND, settings.coloringMode)
     assertEquals(Finger.encodeSelectedFingers(0, Finger.LITTLE), settings.selectedFingers)
   }
 }

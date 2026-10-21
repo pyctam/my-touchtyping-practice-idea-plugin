@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Text coloring by finger** — the sample text and the typed text can now be colored in one of
+  three modes, selectable from the settings page: **No Coloring** (default text color), **Hand
+  Colors** (left-hand keys in blue, right-hand keys in purple), and **Finger Colors** (every finger
+  of each hand gets its own distinct color). **Finger Colors** is the default. All colors are
+  theme-aware (`JBColor`) and remain distinct from the semantic colors (red for mismatches, green
+  for completion).
+- A `ColoringMode` setting (`NONE`, `HAND`, `FINGER`) persisted in `touchTypingPractice.xml`, and a
+  "Text Coloring" radio group on the settings page bound to it.
+- `TextColors` (replacing `HandColors`) with a 10-color per-finger palette and a
+  `colorFor(char, mode)` / `applyTo(pane, text, mode)` API; `applyTo` is a no-op for `NONE`.
+- Unit tests for the per-finger and per-hand color mapping, the `NONE` mode, and the settings-page
+  radio group (initial selection, commit on click, and reset).
+
 ## [0.1.13]
 
 ### Changed

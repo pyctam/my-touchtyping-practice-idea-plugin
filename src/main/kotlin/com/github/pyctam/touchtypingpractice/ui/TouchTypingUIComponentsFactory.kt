@@ -1,5 +1,6 @@
 package com.github.pyctam.touchtypingpractice.ui
 
+import com.github.pyctam.touchtypingpractice.config.ColoringMode
 import com.github.pyctam.touchtypingpractice.config.TextFont
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBScrollPane
@@ -31,21 +32,27 @@ object TouchTypingUIComponentsFactory {
   /**
    * Creates the reference text pane showing the text to type.
    *
-   * Each character is colored by hand (blue for left-hand keys, purple for right-hand keys) via
-   * [HandColors.applyTo]. Long lines wrap at the pane width (no horizontal scrollbar).
+   * Each character is colored according to [coloringMode] (none, by hand, or by finger) via
+   * [TextColors.applyTo]. Long lines wrap at the pane width (no horizontal scrollbar).
    *
    * @param typingText the text to display.
    * @param fontFamily the font family to render with.
    * @param fontSizePt font size in points.
+   * @param coloringMode how the characters are colored.
    */
-  fun createTextPane(typingText: String, fontFamily: String, fontSizePt: Int = 13): JTextPane {
+  fun createTextPane(
+    typingText: String,
+    fontFamily: String,
+    fontSizePt: Int = 13,
+    coloringMode: ColoringMode = ColoringMode.FINGER
+  ): JTextPane {
     val pane = createWrappingTextPane()
     pane.text = typingText
     pane.isEditable = false
     pane.isFocusable = false
     pane.font = applyFont(pane.font, fontFamily, fontSizePt)
     pane.border = JBUI.Borders.compound(JBUI.Borders.empty(PADDING_SMALL))
-    HandColors.applyTo(pane, typingText)
+    TextColors.applyTo(pane, typingText, coloringMode)
     return pane
   }
 
@@ -69,8 +76,8 @@ object TouchTypingUIComponentsFactory {
   /**
    * Creates the typing input area with a [TouchTypingDocumentListener] for real-time feedback.
    *
-   * The typing area is a [JTextPane] so each character can be colored by hand (blue for left-hand
-   * keys, purple for right-hand keys), matching the reference pane.
+   * The typing area is a [JTextPane] so each character can be colored according to [coloringMode]
+   * (none, by hand, or by finger), matching the reference pane.
    *
    * @param referenceTextPane the reference pane to highlight mismatches against.
    * @param typingText the original text being typed.
@@ -78,6 +85,7 @@ object TouchTypingUIComponentsFactory {
    * @param stats the session typing-speed/accuracy tracker fed by insertions and errors.
    * @param fontFamily the font family to render with.
    * @param fontSizePt font size in points.
+   * @param coloringMode how the characters are colored.
    * @param onCompletionChanged a callback to be called when the typing input is completed.
    * @return the scroll pane and typing area needed to reset the input later.
    */
@@ -88,6 +96,7 @@ object TouchTypingUIComponentsFactory {
     stats: TypingStats,
     fontFamily: String,
     fontSizePt: Int = 13,
+    coloringMode: ColoringMode = ColoringMode.FINGER,
     onCompletionChanged: (Boolean) -> Unit = {}
   ): TypingInputComponents {
     val typingArea = createTypingArea(fontFamily, fontSizePt)
@@ -98,6 +107,7 @@ object TouchTypingUIComponentsFactory {
         typingText,
         errorCounter,
         stats,
+        coloringMode,
         onCompletionChanged
       )
     typingArea.document.addDocumentListener(listener)
@@ -120,7 +130,7 @@ object TouchTypingUIComponentsFactory {
    * clipboard and drag-and-drop import, so the reference text can only be entered by typing it.
    *
    * The document stays a [javax.swing.text.StyledDocument] (a `PlainTextEditorKit` would install a
-   * `PlainDocument`), so [HandColors.applyTo] can still color each character by hand.
+   * `PlainDocument`), so [TextColors.applyTo] can still color each character.
    */
   private fun createTypingArea(fontFamily: String, fontSizePt: Int): JTextPane {
     val typingArea =

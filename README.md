@@ -7,10 +7,11 @@
 <!-- Plugin description -->
 Practice touch typing right inside your IDE. Touch Typing Practice adds a dedicated tool window to
 IntelliJ IDEA where a practice string is generated for you and you type it out with real-time,
-character-by-character feedback. Each letter is colored by hand — left-hand keys in blue,
-right-hand keys in purple — so you can see at a glance which finger should press which key.
-When you complete the text with no errors it is highlighted in green, a "Hit Enter to reset" hint
-appears next to the reset link, and pressing **Enter** loads a fresh sample.
+character-by-character feedback. Each letter is colored so you can see at a glance which finger
+should press which key — pick **No Coloring**, **Hand Colors** (left-hand keys in blue, right-hand
+keys in purple), or **Finger Colors** (every finger of each hand gets its own distinct color) from
+the settings. When you complete the text with no errors it is highlighted in green, a "Hit Enter to
+reset" hint appears next to the reset link, and pressing **Enter** loads a fresh sample.
 
 Practice with English words: the bundled word-frequency list is adapted to the keys you currently
 practice, so every generated character can be typed with your enabled keys. Choose between

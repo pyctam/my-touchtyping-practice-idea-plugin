@@ -9,6 +9,11 @@ import org.jetbrains.annotations.PropertyKey
 object UIBundle : DynamicBundle(UIBundle::class.java, BUNDLE) {
   const val TEXT_FONT_TITLE = "ui.config.text-font.title"
   const val TEXT_FONT_HINT = "ui.config.text-font.hint"
+  const val CONFIG_COLORING_MODE_TITLE = "ui.config.coloring-mode.title"
+  const val CONFIG_COLORING_MODE_HINT = "ui.config.coloring-mode.hint"
+  const val CONFIG_COLORING_MODE_RADIO_NONE = "ui.config.coloring-mode.radio.none"
+  const val CONFIG_COLORING_MODE_RADIO_HAND = "ui.config.coloring-mode.radio.hand"
+  const val CONFIG_COLORING_MODE_RADIO_FINGER = "ui.config.coloring-mode.radio.finger"
   const val CONFIG_PRACTICE_MODE_TITLE = "ui.config.practice-mode.title"
   const val CONFIG_PRACTICE_MODE_HINT = "ui.config.practice-mode.hint"
   const val CONFIG_PRACTICE_MODE_RADIO_LEFTHAND = "ui.config.practice-mode.radio.left-hand"

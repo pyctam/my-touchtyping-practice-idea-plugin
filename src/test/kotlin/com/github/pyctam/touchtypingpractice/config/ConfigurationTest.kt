@@ -6,6 +6,7 @@ import com.intellij.testFramework.runInEdtAndGet
 import com.intellij.testFramework.runInEdtAndWait
 import javax.swing.JCheckBox
 import javax.swing.JComponent
+import javax.swing.JRadioButton
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
@@ -13,7 +14,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Tests the interactive behavior of the "Finger Selection" settings in [Configuration].
+ * Tests the interactive behavior of the "Finger Selection" and "Text Coloring" settings in
+ * [Configuration].
  *
  * The selected fingers are stored as a bitmask ([Settings.selectedFingers]) and "Use All Fingers"
  * is a derived shortcut (checked iff all five fingers are selected). These tests drive the actual
@@ -23,6 +25,10 @@ import org.junit.Test
  * - Selecting all fingers checks "Use All Fingers".
  * - Checking "Use All Fingers" selects all fingers in one click.
  * - Applying with no fingers selected shows a warning and blocks the save.
+ *
+ * The coloring mode is a radio group bound to [Settings.coloringMode] directly, so the tests verify
+ * the initial selection, that applying after a click commits the new mode, and that
+ * [Configuration.reset] restores the saved mode.
  */
 class ConfigurationTest : BasePlatformTestCase() {
   private val fingerLabels = listOf("Thumb", "Index", "Middle", "Ring", "Little")
@@ -35,10 +41,15 @@ class ConfigurationTest : BasePlatformTestCase() {
 
   /**
    * Creates a fresh [Configuration] and its panel (on the EDT), seeding the saved finger selection
-   * with [initialSelectedFingers] so the dialog opens in that state.
+   * with [initialSelectedFingers] and the saved coloring mode with [initialColoringMode] so the
+   * dialog opens in that state.
    */
-  private fun createPanel(initialSelectedFingers: Int): JComponent {
+  private fun createPanel(
+    initialSelectedFingers: Int,
+    initialColoringMode: ColoringMode = ColoringMode.FINGER
+  ): JComponent {
     settings().selectedFingers = initialSelectedFingers
+    settings().coloringMode = initialColoringMode
     configuration = Configuration()
     val create: () -> JComponent = { configuration.createComponent() }
     panel = runInEdtAndGet(create)
@@ -66,6 +77,29 @@ class ConfigurationTest : BasePlatformTestCase() {
 
   private fun click(box: JCheckBox) {
     runInEdtAndWait { box.doClick() }
+  }
+
+  private fun radioButtonWithText(text: String): JRadioButton =
+    findRadioButtons(panel).first { it.text == text }
+
+  private fun findRadioButtons(root: JComponent): List<JRadioButton> {
+    val result = mutableListOf<JRadioButton>()
+    fun walk(component: JComponent) {
+      if (component is JRadioButton) {
+        result.add(component)
+      }
+      for (child in component.components) {
+        if (child is JComponent) {
+          walk(child)
+        }
+      }
+    }
+    walk(root)
+    return result
+  }
+
+  private fun clickRadio(button: JRadioButton) {
+    runInEdtAndWait { button.doClick() }
   }
 
   @Test
@@ -197,5 +231,62 @@ class ConfigurationTest : BasePlatformTestCase() {
     assertTrue(checkBoxWithText("Thumb").isSelected)
     assertTrue(checkBoxWithText("Index").isSelected)
     assertFalse(checkBoxWithText("Middle").isSelected)
+  }
+
+  // --- Text Coloring mode tests ---
+
+  @Test
+  fun testColoringModeInitialSelectionMatchesSavedMode() {
+    createPanel(Finger.ALL_MASK, ColoringMode.HAND)
+
+    assertTrue(
+      "Expected 'Hand Colors' to be selected",
+      radioButtonWithText("Hand Colors").isSelected
+    )
+    assertFalse(
+      "Expected 'No Coloring' to be unselected",
+      radioButtonWithText("No Coloring").isSelected
+    )
+    assertFalse(
+      "Expected 'Finger Colors' to be unselected",
+      radioButtonWithText("Finger Colors").isSelected
+    )
+  }
+
+  @Test
+  fun testClickingColoringModeRadioCommitsMode() {
+    createPanel(Finger.ALL_MASK, ColoringMode.FINGER)
+
+    clickRadio(radioButtonWithText("No Coloring"))
+    assertTrue(radioButtonWithText("No Coloring").isSelected)
+
+    configuration.apply()
+
+    assertEquals(
+      "Expected the clicked mode to be committed to Settings",
+      ColoringMode.NONE,
+      settings().coloringMode
+    )
+    assertTrue(radioButtonWithText("No Coloring").isSelected)
+    assertFalse(radioButtonWithText("Finger Colors").isSelected)
+  }
+
+  @Test
+  fun testResetRestoresSavedColoringMode() {
+    createPanel(Finger.ALL_MASK, ColoringMode.HAND)
+
+    // Make a change: switch to Finger Colors.
+    clickRadio(radioButtonWithText("Finger Colors"))
+    assertTrue(radioButtonWithText("Finger Colors").isSelected)
+
+    runInEdtAndWait { configuration.reset() }
+
+    assertEquals(
+      "Expected the saved mode to be restored",
+      ColoringMode.HAND,
+      settings().coloringMode
+    )
+    assertTrue(radioButtonWithText("Hand Colors").isSelected)
+    assertFalse(radioButtonWithText("Finger Colors").isSelected)
   }
 }
