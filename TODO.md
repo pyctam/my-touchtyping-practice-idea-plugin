@@ -17,6 +17,8 @@
 5. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
    produce the most errors and show a "weak fingers" summary.
 6. **Custom text input** — let users type their own practice text instead of only generated ones.
+7. Allow deleting only one character, and only when it is a typo. If a key is pressed correctly, do not
+   allow deleting the typed character.
 
 ## Bugs
 
