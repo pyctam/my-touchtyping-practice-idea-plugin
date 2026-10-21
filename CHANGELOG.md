@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.14
+
 ### Added
 
 - **Text coloring by finger** — the sample text and the typed text can now be colored in one of
