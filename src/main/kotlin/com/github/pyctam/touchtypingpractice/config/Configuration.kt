@@ -49,11 +49,11 @@ import javax.swing.JCheckBox
 /**
  * Project-level settings page for Touch Typing Practice.
  *
- * The font size, coloring mode, practice mode, and key-limit fields are bound to [Settings]
- * directly through the IntelliJ UI DSL. The finger selection is not DSL-bound (it is a bitmask with
- * a derived "Use All Fingers" shortcut), so it is edited through a [FingerSelection] working copy
- * and committed to [Settings] on Apply. This keeps Cancel safe and lets [isModified] detect
- * changes.
+ * The font family, font size, coloring mode, practice mode, generation mode, and key-limit fields
+ * are bound to [Settings] directly through the IntelliJ UI DSL. The finger selection is not
+ * DSL-bound (it is a bitmask with a derived "Use All Fingers" shortcut), so it is edited through a
+ * [FingerSelection] working copy and committed to [Settings] on Apply. This keeps Cancel safe and
+ * lets [isModified] detect changes.
  */
 class Configuration : BoundConfigurable("Touch Typing Practice") {
 
@@ -221,8 +221,8 @@ class Configuration : BoundConfigurable("Touch Typing Practice") {
   }
 
   override fun apply() {
-    // Commits the non-finger fields (font size, coloring mode, practice mode, key limit) to
-    // [Settings].
+    // Commits the non-finger fields (font family, font size, coloring mode, practice mode,
+    // generation mode, key limit) to [Settings].
     super.apply()
 
     if (fingerSelection.isEmpty) {
@@ -241,8 +241,8 @@ class Configuration : BoundConfigurable("Touch Typing Practice") {
   }
 
   override fun reset() {
-    // Reloads the non-finger fields (font size, coloring mode, practice mode, key limit) from
-    // [Settings].
+    // Reloads the non-finger fields (font family, font size, coloring mode, practice mode,
+    // generation mode, key limit) from [Settings].
     super.reset()
     fingerSelection = FingerSelection(settings.selectedFingers)
     syncFingerSelectionUI()
