@@ -22,8 +22,9 @@ import javax.swing.text.DefaultHighlighter
  * finger) via [TextColors.applyTo], matching the reference pane.
  *
  * A [TextLengthLimiterFilter] is installed on the typing area to prevent typing beyond the
- * reference length, to block new input while errors are unresolved, and to make completion a
- * terminal state (no edits until the text is reset).
+ * reference length, to block new input while errors are unresolved, to allow deleting only the
+ * single mistyped character (correctly typed characters cannot be deleted), and to make completion
+ * a terminal state (no edits until the text is reset).
  *
  * Insertions are reported to [stats] (typing speed / accuracy), which ends the session when the
  * text is completed.
@@ -92,14 +93,11 @@ class TouchTypingDocumentListener(
         val highlighter = referenceTextPane.highlighter
         highlighter.removeAllHighlights()
 
-        val compareLen = minOf(typed.length, originalText.length)
-        var mismatchCount = 0
-        for (i in 0 until compareLen) {
-          if (typed[i] != originalText[i]) {
-            highlighter.addHighlight(i, i + 1, mismatchPainter)
-            mismatchCount++
-          }
+        val mismatchIndices = TextComparison.mismatchIndices(typed, originalText)
+        for (i in mismatchIndices) {
+          highlighter.addHighlight(i, i + 1, mismatchPainter)
         }
+        val mismatchCount = mismatchIndices.size
 
         // Cumulative counting: only newly introduced mismatches are added; corrections (the
         // mismatch count dropping) never decrease the counter.

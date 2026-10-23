@@ -57,8 +57,17 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   states.
 - **Hot-reload**: settings changes are published over a `MessageBus` topic and the tool window
   rebuilds itself without an IDE restart.
+- A **selection-free, caret-pinned typing area** — the typing area is a pure forward-typing
+  surface: text cannot be selected (mouse drag, Shift+arrows, or programmatic `select` all collapse
+  to a caret at the end), and the caret is permanently pinned right after the last typed character
+  (arrow keys, Home/End, and mouse clicks do nothing). A `PinnedEndCaret` (a `DefaultCaret`
+  subclass) collapses every caret/selection change to a zero-length caret at the end, and a
+  `DocumentListener` re-pins the caret after every document change.
 - A `DocumentFilter` that prevents typing beyond the length of the reference text, blocks new
-  input while there are unresolved errors, and makes completion a terminal state (no removals or
+  input while there are unresolved errors, restricts deletion to the single mistyped character
+  (correctly typed characters cannot be deleted, multi-character deletions are blocked, and
+  replacements that delete existing text are rejected — the only correction path is to delete the
+  mistyped character and retype it), and makes completion a terminal state (no removals or
   replacements once the text is completed, until it is reset).
 
 ### Settings & configuration

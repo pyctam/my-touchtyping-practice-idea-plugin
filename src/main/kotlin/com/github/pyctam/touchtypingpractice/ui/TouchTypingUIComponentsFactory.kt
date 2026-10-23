@@ -11,6 +11,9 @@ import java.awt.Font
 import javax.swing.JTextPane
 import javax.swing.ScrollPaneConstants
 import javax.swing.TransferHandler
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
+import javax.swing.text.DefaultCaret
 
 /**
  * UI components factory for the Touch Typing Practice plugin. Follows the IntelliJ IDEA Design
@@ -129,6 +132,14 @@ object TouchTypingUIComponentsFactory {
    * The typing area accepts keyboard input only: a [TypingOnlyTransferHandler] rejects every
    * clipboard and drag-and-drop import, so the reference text can only be entered by typing it.
    *
+   * The typing area is selection-free: `select` is overridden to collapse any selection to a caret
+   * at the end of the text, `getSelectedText` always reports no selected text, a [PinnedEndCaret]
+   * pins the caret to the end on every caret movement (arrow keys, Home/End, mouse click), and a
+   * [DocumentListener] re-pins the caret to the end after every document change (typing). Together
+   * these make the typing area a pure forward-typing surface: the caret always sits right after the
+   * last typed character, so Backspace targets the last (possibly mistyped) character, and no text
+   * can ever be selected.
+   *
    * The document stays a [javax.swing.text.StyledDocument] (a `PlainTextEditorKit` would install a
    * `PlainDocument`), so [TextColors.applyTo] can still color each character.
    */
@@ -136,11 +147,37 @@ object TouchTypingUIComponentsFactory {
     val typingArea =
       object : JTextPane() {
         override fun getScrollableTracksViewportWidth(): Boolean = true
+
+        // Collapse any selection (mouse drag, Shift+arrows, programmatic select) to a caret at
+        // the end of the text, so the typing area is selection-free.
+        override fun select(start: Int, end: Int) {
+          (caret as? PinnedEndCaret)?.pinToEnd() ?: setCaretPosition(document.length)
+        }
+
+        // The typing area is selection-free: always report no selected text.
+        override fun getSelectedText(): String = ""
       }
     typingArea.font = applyFont(UIUtil.getLabelFont(), fontFamily, fontSizePt)
     typingArea.border = JBUI.Borders.compound(JBUI.Borders.empty(PADDING_SMALL))
     typingArea.transferHandler = TypingOnlyTransferHandler()
+    typingArea.caret = PinnedEndCaret(typingArea)
+    // Re-pin the caret to the end after every document change (typing), since document changes
+    // do not trigger a caret movement on their own.
+    typingArea.document.addDocumentListener(
+      object : DocumentListener {
+        override fun insertUpdate(e: DocumentEvent?) = pinCaretToEnd(typingArea)
+
+        override fun removeUpdate(e: DocumentEvent?) = pinCaretToEnd(typingArea)
+
+        override fun changedUpdate(e: DocumentEvent?) = Unit
+      }
+    )
     return typingArea
+  }
+
+  /** Moves the caret of [pane] to the end of its document (collapsing any selection). */
+  private fun pinCaretToEnd(pane: JTextPane) {
+    (pane.caret as? PinnedEndCaret)?.pinToEnd() ?: pane.setCaretPosition(pane.document.length)
   }
 
   /**
@@ -179,4 +216,43 @@ private class TypingOnlyTransferHandler : TransferHandler() {
   override fun canImport(transferSupport: TransferSupport): Boolean = false
 
   override fun importData(transferSupport: TransferSupport): Boolean = false
+}
+
+/**
+ * A [javax.swing.text.Caret] that is permanently pinned to the end of the document and never
+ * selects.
+ *
+ * Every attempt to move the caret (arrow keys, Home/End, mouse click, programmatic
+ * [javax.swing.text.JTextComponent.select]) is collapsed to a zero-length caret at the end of the
+ * text. This makes the typing area a pure forward-typing surface: the caret always sits right after
+ * the last typed character, so Backspace targets the last (possibly mistyped) character, and no
+ * text can ever be selected.
+ *
+ * [pinToEnd] moves the caret to the end of the document. It is called from the component's
+ * [javax.swing.text.JTextComponent.select] override, from a [javax.swing.event.DocumentListener]
+ * that re-pins after every document change, and from [setDot] (the single entry point for all caret
+ * movement in Swing). A re-entrancy guard prevents infinite recursion. The component additionally
+ * overrides [javax.swing.text.JTextComponent.getSelectedText] to always report no selected text, so
+ * the typing area is selection-free even when the internal mark lags behind the dot.
+ */
+private class PinnedEndCaret(
+  private val textComponent: javax.swing.text.JTextComponent,
+) : DefaultCaret() {
+
+  private var isPinning = false
+
+  /** Moves the caret to the end of the document. */
+  fun pinToEnd() {
+    if (isPinning) return
+    isPinning = true
+    try {
+      super.setDot(textComponent.document.length)
+    } finally {
+      isPinning = false
+    }
+  }
+
+  override fun setDot(pos: Int) {
+    pinToEnd()
+  }
 }

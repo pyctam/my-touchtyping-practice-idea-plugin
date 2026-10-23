@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+### Added
+
+- **Typing area is now a pure forward-typing surface** — the typing area no longer allows text
+  selection of any kind (mouse drag, Shift+arrows, or programmatic `select`), and the caret is
+  permanently pinned to the end of the typed text (arrow keys, Home/End do nothing). A new
+  `PinnedEndCaret` (a `DefaultCaret` subclass) collapses every caret/selection change to a
+  zero-length caret at the end of the document, so the caret always sits right after the last
+  typed character.
+- **Deletion is restricted to the single mistyped character** — the `TextLengthLimiterFilter` now
+  rejects any removal that is not exactly one character, and rejects the removal when the
+  character is not a mismatch against the reference text. Correctly typed characters can no longer
+  be deleted, and multi-character deletions are blocked. Replacements that delete existing text
+  (`length > 0`) are also rejected: the only correction path is to delete the mistyped character
+  (Backspace) and retype it. Completion remains a terminal state (no edits until reset).
+- `TextComparison`: a pure helper for comparing typed text against the reference text
+  (`mismatchIndices`, `hasErrors`, `isMismatchAt`), extracted from the duplicated char-by-char
+  compare loops in `TouchTypingDocumentListener.updateHighlights()` and
+  `TextLengthLimiterFilter.hasErrors()`.
+- Unit tests for the new deletion rules (`TextLengthLimiterFilterTest`: delete typo allowed,
+  delete correct char blocked, multi-char delete blocked, replace-with-deletion blocked,
+  post-completion delete still blocked, insertion blocked while errors exist) and for the
+  no-selection/caret-pinned behavior (`TouchTypingUIComponentsFactoryTest`: `select()` collapses
+  to a caret at the end, caret stays at end after typing and after `setDot` attempts).
+
 ## 0.1.14
 
 ### Added

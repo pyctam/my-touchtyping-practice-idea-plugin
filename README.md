@@ -13,6 +13,13 @@ keys in purple), or **Finger Colors** (every finger of each hand gets its own di
 the settings. When you complete the text with no errors it is highlighted in green, a "Hit Enter to
 reset" hint appears next to the reset link, and pressing **Enter** loads a fresh sample.
 
+The typing area is a pure forward-typing surface: you cannot select text or move the caret (arrow
+keys and Home/End do nothing — the caret is always pinned right after the last typed character).
+When you make a typo, the only way to fix it is to press **Backspace** to delete the single
+mistyped character and retype it — correctly typed characters cannot be deleted, multi-character
+deletions are blocked, and typing over selected text is not possible. New input is blocked until
+the typo is corrected.
+
 Practice with English words: the bundled word-frequency list is adapted to the keys you currently
 practice, so every generated character can be typed with your enabled keys. Choose between
 **Adapted Words** (list entries with unavailable letters removed, favoring recognizable fragments),
