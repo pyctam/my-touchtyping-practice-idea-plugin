@@ -4,8 +4,8 @@ package com.github.pyctam.touchtypingpractice.ui
  * Pure helper for comparing typed text against the original reference text.
  *
  * Centralizes the character-by-character mismatch logic that was previously duplicated in
- * [TouchTypingDocumentListener.updateHighlights] and [TextLengthLimiterFilter.hasErrors]. Also the
- * natural home for future WPM/accuracy and per-finger error analysis logic.
+ * `TouchTypingDocumentListener.updateHighlights()` and `TextLengthLimiterFilter.hasErrors()`. Also
+ * the natural home for future WPM/accuracy and per-finger error analysis logic.
  */
 object TextComparison {
 
