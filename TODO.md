@@ -118,5 +118,7 @@
     `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]` = 5–20, each word ≤ `MAX_WORD_LENGTH` = 7, total 9–159
     characters); keep comments in sync as the generator evolves.
 18. **More tests** — unit tests now cover config, the pure text generator, the keyboard layout, the
-    word list and word-based generation, the Enter-to-reset detector, the completion callback, and
-    the tool-window toggle action; add more as new features land.
+    word list and word-based generation, the Enter-to-reset detector, the completion callback, the
+    tool-window toggle action, the single-mistyped-character deletion rules
+    (`TextLengthLimiterFilterTest`), and the no-selection/caret-pinned typing area
+    (`TouchTypingUIComponentsFactoryTest`); add more as new features land.

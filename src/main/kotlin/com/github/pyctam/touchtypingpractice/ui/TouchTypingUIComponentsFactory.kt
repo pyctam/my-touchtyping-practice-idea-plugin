@@ -133,11 +133,12 @@ object TouchTypingUIComponentsFactory {
    * clipboard and drag-and-drop import, so the reference text can only be entered by typing it.
    *
    * The typing area is selection-free: `select` is overridden to collapse any selection to a caret
-   * at the end of the text, a [PinnedEndCaret] pins the caret to the end on every caret movement
-   * (arrow keys, Home/End, mouse click), and a [DocumentListener] re-pins the caret to the end
-   * after every document change (typing). Together these make the typing area a pure forward-typing
-   * surface: the caret always sits right after the last typed character, so Backspace targets the
-   * last (possibly mistyped) character, and no text can ever be selected.
+   * at the end of the text, `getSelectedText` always reports no selected text, a [PinnedEndCaret]
+   * pins the caret to the end on every caret movement (arrow keys, Home/End, mouse click), and a
+   * [DocumentListener] re-pins the caret to the end after every document change (typing). Together
+   * these make the typing area a pure forward-typing surface: the caret always sits right after the
+   * last typed character, so Backspace targets the last (possibly mistyped) character, and no text
+   * can ever be selected.
    *
    * The document stays a [javax.swing.text.StyledDocument] (a `PlainTextEditorKit` would install a
    * `PlainDocument`), so [TextColors.applyTo] can still color each character.
