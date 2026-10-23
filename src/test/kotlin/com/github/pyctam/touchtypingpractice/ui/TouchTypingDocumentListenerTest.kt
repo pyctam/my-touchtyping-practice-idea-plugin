@@ -52,7 +52,7 @@ class TouchTypingDocumentListenerTest {
     val states = mutableListOf<Boolean>()
     val typingArea = createTypingArea { states.add(it) }
 
-    typingArea.text = originalText
+    typingArea.document.insertString(0, originalText, null)
     flushEdt()
 
     assertEquals("Expected a single completion=true callback", listOf(true), states)
@@ -81,9 +81,9 @@ class TouchTypingDocumentListenerTest {
     val typingArea = createTypingArea { states.add(it) }
 
     // Two incomplete edits: both stay in the initial (false) state, so nothing fires.
-    typingArea.text = "he"
+    typingArea.document.insertString(0, "he", null)
     flushEdt()
-    typingArea.text = "hel"
+    typingArea.document.insertString(2, "l", null)
     flushEdt()
 
     assertEquals(
@@ -162,9 +162,10 @@ class TouchTypingDocumentListenerTest {
   // --- Cumulative error counter tests ---
   //
   // Note: the TextLengthLimiterFilter blocks insertions/replacements while the document has
-  // errors (the user must correct before continuing), so the tests simulate realistic
-  // character-by-character input: insertions via document.insertString, backspaces via
-  // document.remove (the filter always allows removals, mirroring the real BackSpace action).
+  // errors (the user must correct before continuing), and allows removals only for the single
+  // mistyped character. The tests simulate realistic character-by-character input: insertions
+  // via document.insertString, backspaces via document.remove (the filter allows removal of the
+  // typo, mirroring the real BackSpace action).
 
   @Test
   fun counterIncrementsOnWrongCharacter() {

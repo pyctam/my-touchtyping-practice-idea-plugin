@@ -17,8 +17,6 @@
 5. **Per-finger error analysis** — the generator already maps keys to fingers; track which fingers
    produce the most errors and show a "weak fingers" summary.
 6. **Custom text input** — let users type their own practice text instead of only generated ones.
-7. Allow deleting only one character, and only when it is a typo. If a key is pressed correctly, do not
-   allow deleting the typed character.
 
 ## Bugs
 
@@ -37,30 +35,24 @@
 
 ### Duplication / dead code
 
-1. **Mismatch comparison implemented twice** — `TouchTypingDocumentListener.updateHighlights()` and
-   `TextLengthLimiterFilter.hasErrors()` contain the same char-by-char compare loop. Extract one
-   pure helper, e.g. `object TextComparison { fun mismatchIndices(typed, original): IntArray;
-   fun hasErrors(typed, original): Boolean }`. Also the natural home for the future WPM/accuracy
-   and per-finger error analysis logic.
-   *`ui/TouchTypingDocumentListener.kt`, `ui/TextLengthLimiterFilter.kt`.*
-2. **`buildContent()` and `reset()` duplicate input wiring** — same
+1. **`buildContent()` and `reset()` duplicate input wiring** — same
    `createTypingInputComponents(...)` + same `EnterKeyDetector(::reset) { ... }` block in both
    methods. Extract `private fun attachTypingInput(text: String): TypingInputComponents`. Also
    `mainPanel.remove(typingInputPanel)` before `addToCenter(...)` is redundant —
    `BorderLayoutPanel.addToCenter` replaces the previous center component.
    *`toolWindow/TouchTypingToolWindow.kt`.*
-3. **Border construction duplicated in the UI factory** — `createSampleTextPanel()` and
+2. **Border construction duplicated in the UI factory** — `createSampleTextPanel()` and
    `createTypingInputComponents()` build the identical compound border; extract
    `private fun sectionBorder()`. Also `createMainPanel()` is a one-line wrapper with no logic —
    inline it.
    *`ui/TouchTypingUIComponentsFactory.kt`.*
-4. **`PracticeTextGeneratorService` is registered but never used as a service** —
+3. **`PracticeTextGeneratorService` is registered but never used as a service** —
    `TouchTypingToolWindow` does `PracticeTextGeneratorService()` (manual construction) instead of
    `application.service<PracticeTextGeneratorService>()`. Pick one: keep the `@Service` and look it
    up properly, or drop the service class and call `PracticeTextGenerator().generate(config)`
    directly.
    *`services/PracticeTextGeneratorService.kt`, `toolWindow/TouchTypingToolWindow.kt`.*
-5. **Dead code / template leftovers** —
+4. **Dead code / template leftovers** —
     - `TouchTypingSessionService` is an empty scaffold with `@Suppress("unused")`, yet it is a
       registered `@Service(Service.Level.PROJECT)` — instantiated and logging for **every project**
       for no reason. Delete it until the session-stats feature exists.

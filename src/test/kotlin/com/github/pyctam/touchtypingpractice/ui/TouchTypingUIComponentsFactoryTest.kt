@@ -133,6 +133,62 @@ class TouchTypingUIComponentsFactoryTest {
     )
   }
 
+  // --- No-selection / caret-pinned tests ---
+  //
+  // The typing area uses a PinnedEndCaret that keeps the caret permanently at the end of the
+  // text and collapses any selection. This makes the typing area a pure forward-typing surface.
+
+  @Test
+  fun typingAreaSelectionCollapsesToCaretAtEnd() {
+    val components = createTypingInputComponents()
+    val typingArea = components.typingArea
+
+    // Type some text.
+    typingArea.document.insertString(0, "hello", null)
+
+    // Attempt to select characters 0..3 (as a mouse drag would).
+    typingArea.select(0, 3)
+
+    // The selection must be collapsed: no selected text, caret at the end.
+    assertEquals("Expected no selection after a select() attempt", "", typingArea.selectedText)
+    assertEquals(
+      "Expected the caret to be pinned to the end of the text",
+      typingArea.document.length,
+      typingArea.caretPosition
+    )
+  }
+
+  @Test
+  fun typingAreaCaretStaysAtEndAfterTyping() {
+    val components = createTypingInputComponents()
+    val typingArea = components.typingArea
+
+    typingArea.document.insertString(0, "hello", null)
+
+    assertEquals(
+      "Expected the caret to be at the end after typing",
+      typingArea.document.length,
+      typingArea.caretPosition
+    )
+  }
+
+  @Test
+  fun typingAreaCaretPinnedAfterSetDotAttempt() {
+    val components = createTypingInputComponents()
+    val typingArea = components.typingArea
+
+    typingArea.document.insertString(0, "hello", null)
+
+    // Attempt to move the caret to position 0 (as an arrow key would).
+    typingArea.setCaretPosition(0)
+
+    assertEquals(
+      "Expected the caret to remain pinned to the end after a setDot attempt",
+      typingArea.document.length,
+      typingArea.caretPosition
+    )
+  }
+
   /** Builds the typing input components with a plain reference pane and default stats. */
   private fun createTypingInputComponents(): TypingInputComponents {
     val referencePane = TouchTypingUIComponentsFactory.createTextPane("hello world", "Monospaced")
