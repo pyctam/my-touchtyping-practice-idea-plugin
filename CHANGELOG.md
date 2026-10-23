@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.15
+
 ### Added
 
 - **Typing area is now a pure forward-typing surface** — the typing area no longer allows text
