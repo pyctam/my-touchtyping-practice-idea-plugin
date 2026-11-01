@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Changed
+
+- **De-duplicated typing-input wiring in the tool window** — `TouchTypingToolWindow.buildContent()`
+  and `reset()` previously each repeated the same block: create the typing-input components, assign
+  the `typingInputPanel`/`typingArea` fields, and attach the Enter-to-reset key detector. This is
+  now a single private `attachTypingInput(...)` helper shared by both, so the component creation,
+  field wiring, and key-detector attachment live in one place. Pure refactor with no behavior
+  change.
+
 ## 0.1.15
 
 ### Added
@@ -15,11 +24,11 @@
 - **Deletion is restricted to the single mistyped character** — the `TextLengthLimiterFilter` now
   rejects any removal that is not exactly one character, and rejects the removal when the
   character is not a mismatch against the reference text. Correctly typed characters can no longer
-  be deleted, and multi-character deletions are blocked. Replacements that delete existing text
-  (`length > 0`) are also rejected: the only correction path is to delete the mistyped character
-  (Backspace) and retype it. Completion remains a terminal state (no edits until reset).
-- `TextComparison`: a pure helper for comparing typed text against the reference text
-  (`mismatchIndices`, `hasErrors`, `isMismatchAt`), extracted from the duplicated char-by-char
+  be deleted, and multi-character deletions are blocked. Replacements that delete existing text (`length > 0`) are also
+  rejected: the only correction path is to delete the mistyped character (Backspace) and retype it. Completion remains a
+  terminal state (no edits until reset).
+- `TextComparison`: a pure helper for comparing typed text against the reference text (`mismatchIndices`, `hasErrors`,
+  `isMismatchAt`), extracted from the duplicated char-by-char
   compare loops in `TouchTypingDocumentListener.updateHighlights()` and
   `TextLengthLimiterFilter.hasErrors()`.
 - Unit tests for the new deletion rules (`TextLengthLimiterFilterTest`: delete typo allowed,
@@ -85,8 +94,8 @@
   Typing speed: N WPM | Accuracy: N%`. A session starts on the first keystroke and ends when the
   text is completed (highlighted in green); the WPM and accuracy update live on every keystroke
   and freeze at completion. Before the first keystroke all three values show zero. WPM uses the
-  standard 5-character convention and counts only correct characters (net WPM =
-  (insertions − errors) / 5 / minutes); accuracy is (insertions − errors) / insertions × 100.
+  standard 5-character convention and counts only correct characters (net WPM = (insertions − errors) / 5 / minutes);
+  accuracy is (insertions − errors) / insertions × 100.
   The previously hidden WPM area and its `" | "` separator are now revealed, and a new accuracy
   label (with its own separator) was added.
 - `TypingStats`: a pure, IDE-independent session tracker (insertion counts, cumulative errors,
@@ -123,8 +132,8 @@
   <https://github.com/first20hours/google-10000-english>), adapted to the keys enabled by the
   current lesson. Note that the source is a **word-frequency list, not a dictionary of verified
   English words** (entries were selected by frequency in the Google Web Trillion Word Corpus, so
-  the list may include single letters, state abbreviations, and other non-standard tokens). A new
-  **Word Generation Mode** setting offers three modes: **Adapted Words**
+  the list may include single letters, state abbreviations, and other non-standard tokens). A new **Word Generation
+  Mode** setting offers three modes: **Adapted Words**
   (default) — list entries with unavailable letters removed, ranked to favor recognizable,
   high-retention fragments; **Exact Words** — only list entries typed entirely with the enabled
   keys; and **Random Letters** — the previous random-letter behavior.
@@ -212,8 +221,8 @@
 - **"Hit Enter to reset" completion hint** — a hidden "Hit Enter to " label now sits to the left of
   the (lowercased) **reset** link under the sample text panel. It is revealed only when the practice
   text is completed and highlighted in green, hinting that the user can press **Enter** to reset; in
-  all other states it stays hidden. The hint uses the same font as the reset link but a muted
-  (disabled-foreground) color, since it is a secondary hint rather than a primary element.
+  all other states it stays hidden. The hint uses the same font as the reset link but a muted (disabled-foreground)
+  color, since it is a secondary hint rather than a primary element.
 - Unit tests for the completion callback that drives the hint: it fires only on completion-state
   transitions (true on completion, false after a correction) and not for repeated incomplete states.
 - Unit tests for the new generation rules: the word count is within `[MIN_WORDS_COUNT,
@@ -222,8 +231,8 @@
 
 ### Changed
 
-- **Lowercased reset link** — the reset hyperlink under the sample text panel is now lowercase
-  ("reset") so it reads as a single sentence with the "Hit Enter to " hint.
+- **Lowercased reset link** — the reset hyperlink under the sample text panel is now lowercase ("reset") so it reads as
+  a single sentence with the "Hit Enter to " hint.
 - **Tool-window i18n** — the reset link text, the "Hit Enter to " hint, and the reset tooltip are
   now sourced from the `UIBundle` resource bundle (`messages/UI.properties`) instead of being
   hardcoded in the tool window.
