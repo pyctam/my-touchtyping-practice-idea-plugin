@@ -9,6 +9,7 @@ import com.github.pyctam.touchtypingpractice.ui.ErrorCounter
 import com.github.pyctam.touchtypingpractice.ui.TextColors
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory
 import com.github.pyctam.touchtypingpractice.ui.TouchTypingUIComponentsFactory.PADDING_SMALL
+import com.github.pyctam.touchtypingpractice.ui.TypingInputComponents
 import com.github.pyctam.touchtypingpractice.ui.TypingStats
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.ui.JBColor
@@ -63,19 +64,7 @@ class TouchTypingToolWindow {
       )
     val sampleTextPanel = TouchTypingUIComponentsFactory.createSampleTextPanel(referenceTextPane)
     val resetPanel = createResetPanel()
-    val typingInput =
-      TouchTypingUIComponentsFactory.createTypingInputComponents(
-        referenceTextPane,
-        typingText,
-        errorCounter,
-        typingStats,
-        fontFamily,
-        settings.textFontSize,
-        settings.coloringMode,
-        onCompletionChanged = { setHitEnterHintVisible(it) }
-      )
-    typingInputPanel = typingInput.scrollPane
-    typingArea = typingInput.typingArea
+    val typingInput = attachTypingInput(typingText, settings, fontFamily)
 
     val statusPanel = createStatusPanel()
 
@@ -85,12 +74,9 @@ class TouchTypingToolWindow {
 
     mainPanel = TouchTypingUIComponentsFactory.createMainPanel()
     mainPanel.addToTop(northPanel)
-    mainPanel.addToCenter(typingInputPanel)
+    mainPanel.addToCenter(typingInput.scrollPane)
     mainPanel.addToBottom(statusPanel)
 
-    typingArea.addKeyListener(
-      EnterKeyDetector(::reset) { typingArea.text == referenceTextPane.text }
-    )
     return mainPanel
   }
 
@@ -108,29 +94,15 @@ class TouchTypingToolWindow {
     typingStats.reset()
     setHitEnterHintVisible(false)
 
-    val newInput =
-      TouchTypingUIComponentsFactory.createTypingInputComponents(
-        referenceTextPane,
-        newTypingText,
-        errorCounter,
-        typingStats,
-        TextFont.effectiveFamily(settings.textFontFamily),
-        settings.textFontSize,
-        settings.coloringMode,
-        onCompletionChanged = { setHitEnterHintVisible(it) }
-      )
-    val newTypingInputPanel = newInput.scrollPane
+    val fontFamily = TextFont.effectiveFamily(settings.textFontFamily)
+    val oldInputPanel = typingInputPanel
+    val newInput = attachTypingInput(newTypingText, settings, fontFamily)
 
-    mainPanel.remove(typingInputPanel)
-    mainPanel.addToCenter(newTypingInputPanel)
+    mainPanel.remove(oldInputPanel)
+    mainPanel.addToCenter(newInput.scrollPane)
     mainPanel.revalidate()
     mainPanel.repaint()
 
-    typingInputPanel = newTypingInputPanel
-    typingArea = newInput.typingArea
-    typingArea.addKeyListener(
-      EnterKeyDetector(::reset) { typingArea.text == referenceTextPane.text }
-    )
     typingArea.requestFocusInWindow()
 
     logger.info("Practice reset: new text generated and UI updated")
@@ -140,6 +112,42 @@ class TouchTypingToolWindow {
   fun requestFocus() {
     typingArea.requestFocusInWindow()
     typingArea.setCaretPosition(typingArea.document.length)
+  }
+
+  /**
+   * Creates the typing input components for [typingText], stores them in [typingInputPanel] and
+   * [typingArea], and wires the Enter-to-reset key detector onto the typing area.
+   *
+   * Shared by [buildContent] (initial build) and [reset] (in-place rebuild) so the component
+   * creation, field wiring, and key-detector attachment stay in one place.
+   *
+   * @param typingText the text to type.
+   * @param settings the current settings (font size and coloring mode).
+   * @param fontFamily the font family to render with.
+   * @return the created [TypingInputComponents] (scroll pane + typing area).
+   */
+  private fun attachTypingInput(
+    typingText: String,
+    settings: Settings,
+    fontFamily: String
+  ): TypingInputComponents {
+    val typingInput =
+      TouchTypingUIComponentsFactory.createTypingInputComponents(
+        referenceTextPane,
+        typingText,
+        errorCounter,
+        typingStats,
+        fontFamily,
+        settings.textFontSize,
+        settings.coloringMode,
+        onCompletionChanged = { setHitEnterHintVisible(it) }
+      )
+    typingInputPanel = typingInput.scrollPane
+    typingArea = typingInput.typingArea
+    typingArea.addKeyListener(
+      EnterKeyDetector(::reset) { typingArea.text == referenceTextPane.text }
+    )
+    return typingInput
   }
 
   /**

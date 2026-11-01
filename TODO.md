@@ -26,33 +26,23 @@
    `bindItem({ settings.textFontFamily }, ...)`, `bindIntValue(settings::textFontSize)`, and
    `bind({ settings.practiceMode }, ...)` write straight into the persisted `Settings` on every UI
    change. Only the finger selection (working copy `FingerSelection`) is Cancel-safe. Either bind
-   all fields to a working copy, or document that those fields apply live.
-   *`config/Configuration.kt`.*
+   all fields to a working copy, or document that those fields apply live. *`config/Configuration.kt`.*
 2. **`Settings.getState()` returns the live instance** — `override fun getState(): Settings = this`
    exposes the live object as serializable state. Return a copy (a small data class) so the
-   serializer never holds the live instance.
-   *`config/Settings.kt`.*
+   serializer never holds the live instance. *`config/Settings.kt`.*
 
 ### Duplication / dead code
 
-1. **`buildContent()` and `reset()` duplicate input wiring** — same
-   `createTypingInputComponents(...)` + same `EnterKeyDetector(::reset) { ... }` block in both
-   methods. Extract `private fun attachTypingInput(text: String): TypingInputComponents`. Also
-   `mainPanel.remove(typingInputPanel)` before `addToCenter(...)` is redundant —
-   `BorderLayoutPanel.addToCenter` replaces the previous center component.
-   *`toolWindow/TouchTypingToolWindow.kt`.*
-2. **Border construction duplicated in the UI factory** — `createSampleTextPanel()` and
+1. **Border construction duplicated in the UI factory** — `createSampleTextPanel()` and
    `createTypingInputComponents()` build the identical compound border; extract
    `private fun sectionBorder()`. Also `createMainPanel()` is a one-line wrapper with no logic —
-   inline it.
-   *`ui/TouchTypingUIComponentsFactory.kt`.*
-3. **`PracticeTextGeneratorService` is registered but never used as a service** —
+   inline it. *`ui/TouchTypingUIComponentsFactory.kt`.*
+2. **`PracticeTextGeneratorService` is registered but never used as a service** —
    `TouchTypingToolWindow` does `PracticeTextGeneratorService()` (manual construction) instead of
    `application.service<PracticeTextGeneratorService>()`. Pick one: keep the `@Service` and look it
    up properly, or drop the service class and call `PracticeTextGenerator().generate(config)`
-   directly.
-   *`services/PracticeTextGeneratorService.kt`, `toolWindow/TouchTypingToolWindow.kt`.*
-4. **Dead code / template leftovers** —
+   directly. *`services/PracticeTextGeneratorService.kt`, `toolWindow/TouchTypingToolWindow.kt`.*
+3. **Dead code / template leftovers** —
     - `TouchTypingSessionService` is an empty scaffold with `@Suppress("unused")`, yet it is a
       registered `@Service(Service.Level.PROJECT)` — instantiated and logging for **every project**
       for no reason. Delete it until the session-stats feature exists.
@@ -69,8 +59,8 @@
    with the notification in the setter.
 3. **Manual service lookup** — `Settings.getInstance()` → `application.service<Settings>()`
    (3 call sites).
-4. **`TextFont` is a data class in name only** — it wraps a `String`, but every API
-   (`allAvailableFamilies()`, `effectiveFamily()`, `Settings.textFontFamily`) uses raw `String`;
+4. **`TextFont` is a data class in name only** — it wraps a `String`, but every API (`allAvailableFamilies()`,
+   `effectiveFamily()`, `Settings.textFontFamily`) uses raw `String`;
    only `DEFAULT` is a `TextFont`. Either use the type consistently or collapse it to an `object`
    of functions.
 5. **Unnecessary defensiveness** — `KeyboardLayout.keysFor` uses `.orEmpty()` on maps that are
@@ -83,42 +73,33 @@
    window's content) would auto-dispose it.
 8. **Logging** — remaining `logger.info` calls (reset, completion, tool-window lifecycle) →
    `debug`.
-9. **O(N) re-color per keystroke** — `TextColors.applyTo` re-colors the entire text on every
+9. **O (N) re-color per keystroke** — `TextColors.applyTo` re-colors the entire text on every
    keystroke. The `DocumentEvent` carries the changed offset/length, which is discarded. Not a
    bottleneck at 5–20 words, but won't scale. Fix: drive re-coloring from the `DocumentEvent`
-   range (only re-color the inserted/changed characters).
-   *`ui/TextColors.kt`, `ui/TouchTypingDocumentListener.kt`.*
+   range (only re-color the inserted/changed characters). *`ui/TextColors.kt`, `ui/TouchTypingDocumentListener.kt`.*
 10. **Uppercase letters are never colored** — the `KeyboardLayout` only defines lowercase keys, so
     a shifted uppercase letter stays uncolored. Consider normalizing to lowercase before
-    lookup in `colorFor()`.
-    *`ui/TextColors.kt`.*
+    lookup in `colorFor()`. *`ui/TextColors.kt`.*
 11. **`ALL_KEYS_LIMIT = 100` magic number** — silently breaks if a finger ever gains >100 keys.
     Prefer `Int.MAX_VALUE` or add a `KeyboardLayout.allKeys(mode, finger)` accessor that returns
-    the full list without a limit parameter.
-    *`ui/TextColors.kt`, `generation/KeyboardLayout.kt`.*
+    the full list without a limit parameter. *`ui/TextColors.kt`, `generation/KeyboardLayout.kt`.*
 12. **Redundant `text` parameter in `applyTo`** — every call site passes a value equal to
-    `pane.text`. Drop the parameter and read `pane.text` internally.
-    *`ui/TextColors.kt`.*
+    `pane.text`. Drop the parameter and read `pane.text` internally. *`ui/TextColors.kt`.*
 13. **Per-character `SimpleAttributeSet` allocation** — a new `SimpleAttributeSet` is allocated per
-    character per keystroke. Static sets (one per color) could be reused.
-    *`ui/TextColors.kt`.*
+    character per keystroke. Static sets (one per color) could be reused. *`ui/TextColors.kt`.*
 14. **Layering: `TextColors` (in `ui`) reaches into `generation` + `config`** — the
     character-to-hand/finger mapping is a domain concept, not a UI concern. Consider moving the
-    mapping logic to the `generation` or `config` package.
-    *`ui/TextColors.kt`.*
+    mapping logic to the `generation` or `config` package. *`ui/TextColors.kt`.*
 15. **Completion side-effects re-run on every keystroke** — `logger.info` + `addHighlight` for the
     completion state fire on every keystroke while the text is complete, not just on the
-    transition into completion. Guard with a state-change check.
-    *`ui/TouchTypingDocumentListener.kt`.*
+    transition into completion. Guard with a state-change check. *`ui/TouchTypingDocumentListener.kt`.*
 16. **Tests don't verify actual coloring** — `TextColorsTest.applyTo` tests only assert text is
     preserved, never that the foreground attribute was set on the document. Add assertions that
-    read back the character attributes and verify the expected color.
-    *`test/.../ui/TextColorsTest.kt`.*
+    read back the character attributes and verify the expected color. *`test/.../ui/TextColorsTest.kt`.*
 17. **Fix stale comments** — the generation rules are now sentence-length (word count in
     `[MIN_WORDS_COUNT, MAX_WORDS_COUNT]` = 5–20, each word ≤ `MAX_WORD_LENGTH` = 7, total 9–159
     characters); keep comments in sync as the generator evolves.
 18. **More tests** — unit tests now cover config, the pure text generator, the keyboard layout, the
     word list and word-based generation, the Enter-to-reset detector, the completion callback, the
-    tool-window toggle action, the single-mistyped-character deletion rules
-    (`TextLengthLimiterFilterTest`), and the no-selection/caret-pinned typing area
-    (`TouchTypingUIComponentsFactoryTest`); add more as new features land.
+    tool-window toggle action, the single-mistyped-character deletion rules (`TextLengthLimiterFilterTest`), and the
+    no-selection/caret-pinned typing area (`TouchTypingUIComponentsFactoryTest`); add more as new features land.

@@ -47,8 +47,8 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   `Typing errors: N | Typing speed: N WPM | Accuracy: N%`. A session starts on the first
   keystroke and the WPM/accuracy update live on every keystroke, freezing when the text is
   completed (highlighted in green); before the first keystroke all values show zero. WPM uses the
-  standard 5-character convention and counts only correct characters (net WPM =
-  (insertions − errors) / 5 / minutes); accuracy is (insertions − errors) / insertions × 100.
+  standard 5-character convention and counts only correct characters (net WPM = (insertions − errors) / 5 / minutes);
+  accuracy is (insertions − errors) / insertions × 100.
 - A **Reset** hyperlink (lowercase "reset"), plus an **Enter** key shortcut that regenerates a fresh
   practice text and clears the input once the text has been completed (highlighted in green). While
   the text is incomplete, Enter is ignored. When the text is completed and highlighted in green, a
@@ -59,13 +59,13 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   rebuilds itself without an IDE restart.
 - A **selection-free, caret-pinned typing area** — the typing area is a pure forward-typing
   surface: text cannot be selected (mouse drag, Shift+arrows, or programmatic `select` all collapse
-  to a caret at the end), and the caret is permanently pinned right after the last typed character
-  (arrow keys, Home/End, and mouse clicks do nothing). A `PinnedEndCaret` (a `DefaultCaret`
+  to a caret at the end), and the caret is permanently pinned right after the last typed character (arrow keys,
+  Home/End, and mouse clicks do nothing). A `PinnedEndCaret` (a `DefaultCaret`
   subclass) collapses every caret/selection change to a zero-length caret at the end, and a
   `DocumentListener` re-pins the caret after every document change.
 - A `DocumentFilter` that prevents typing beyond the length of the reference text, blocks new
-  input while there are unresolved errors, restricts deletion to the single mistyped character
-  (correctly typed characters cannot be deleted, multi-character deletions are blocked, and
+  input while there are unresolved errors, restricts deletion to the single mistyped character (correctly typed
+  characters cannot be deleted, multi-character deletions are blocked, and
   replacements that delete existing text are rejected — the only correction path is to delete the
   mistyped character and retype it), and makes completion a terminal state (no removals or
   replacements once the text is completed, until it is reset).
@@ -102,8 +102,8 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   (1–7). Words are separated by a single space, and the total length is 9–159 characters.
   `MIN_WORDS_COUNT`, `MAX_WORDS_COUNT`, and `MAX_WORD_LENGTH` are documented as candidates for
   future UI settings.
-- **Word-based modes** (Exact Words, Adapted Words): exercises are generated from the bundled
-  **Google 10,000 English Words** list (`src/main/resources/google-10000-english.txt`, source:
+- **Word-based modes** (Exact Words, Adapted Words): exercises are generated from the bundled **Google 10,000 English
+  Words** list (`src/main/resources/google-10000-english.txt`, source:
   <https://github.com/first20hours/google-10000-english>). Note that this is a **word-frequency
   list, not a dictionary of verified English words**: the entries were selected by their frequency
   in the Google Web Trillion Word Corpus (derived from public web pages), so the list may include
@@ -113,8 +113,8 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
   `WordExerciseGenerator` adapts each entry to the enabled keys: Exact Words keeps only entries
   typed entirely with enabled keys; Adapted Words omits unavailable letters (preserving order) and
   ranks candidates by retained letters, retention ratio, source frequency (list order as proxy),
-  and a vowel bonus, de-duplicating identical adapted strings. Candidate pools are cached per
-  (mode, enabled-key mask). If the word list is missing, the service falls back to Random Letters.
+  and a vowel bonus, de-duplicating identical adapted strings. Candidate pools are cached per (mode, enabled-key mask).
+  If the word list is missing, the service falls back to Random Letters.
   See the README "Word List and Source Attribution" section for dataset attribution and licensing.
 - The generators take an injectable `Random`, so their output is deterministic and unit-testable.
 
@@ -138,7 +138,7 @@ with no upper bound), and is built with the IntelliJ Platform Gradle Plugin on *
 |-------------|---------------------------------------------------------------|
 | Plugin name | Touch Typing Practice                                         |
 | Plugin ID   | `com.github.pyctam.touchtypingpractice`                       |
-| Version     | 0.1.15                                                        |
+| Version     | 0.1.16                                                        |
 | Language    | Kotlin (JVM 17)                                               |
 | Target IDE  | IntelliJ IDEA 2023.3 and later (`233` and up, no upper bound) |
 | Build       | Gradle 8.10.2 + IntelliJ Platform Gradle Plugin               |
