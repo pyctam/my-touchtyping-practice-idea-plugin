@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.16
+
 ### Changed
 
 - **De-duplicated typing-input wiring in the tool window** — `TouchTypingToolWindow.buildContent()`

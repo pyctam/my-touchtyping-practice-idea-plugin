@@ -21,13 +21,13 @@ deletions are blocked, and typing over selected text is not possible. New input 
 the typo is corrected.
 
 Practice with English words: the bundled word-frequency list is adapted to the keys you currently
-practice, so every generated character can be typed with your enabled keys. Choose between
-**Adapted Words** (list entries with unavailable letters removed, favoring recognizable fragments),
-**Exact Words** (only entries typed entirely with your enabled keys), or the classic **Random
+practice, so every generated character can be typed with your enabled keys. Choose between **Adapted Words** (list
+entries with unavailable letters removed, favoring recognizable fragments), **Exact Words** (only entries typed entirely
+with your enabled keys), or the classic **Random
 Letters** mode.
 
-Open or close the tool window with a single shortcut: **Ctrl+Alt+P, P** on Windows/Linux and
-**Command+Option+P, P** on macOS (a double-stroke, bound through the Action System so it shows up
+Open or close the tool window with a single shortcut: **Ctrl+Alt+P, P** on Windows/Linux and **Command+Option+P, P** on
+macOS (a double-stroke, bound through the Action System so it shows up
 in Settings | Keymap and can be rebound).
 
 Configure the practice to your hand, the specific fingers you want to train, how many keys each
@@ -103,7 +103,7 @@ In the Settings window:
 3. Select the plugin file:
 
 - Look for: `Touch Typing Practice-*.zip`
-- Example: `Touch Typing Practice-0.1.15.zip`
+- Example: `Touch Typing Practice-0.1.16.zip`
 
 4. Click **`OK`** to proceed
 
