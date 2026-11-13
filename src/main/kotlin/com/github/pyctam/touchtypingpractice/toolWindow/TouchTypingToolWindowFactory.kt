@@ -17,8 +17,9 @@ import javax.swing.SwingUtilities
  * ToolWindow factory for the Touch Typing Practice plugin.
  *
  * Responsible only for tool-window lifecycle: it creates the initial content and subscribes to
- * settings changes to rebuild the content on the EDT (hot-reload). All UI construction and the
- * reset gesture live in [TouchTypingToolWindow].
+ * settings changes to rebuild the content on the EDT (hot-reload). The settings-change subscription
+ * is scoped to the project, so it is disposed together with the project. All UI construction and
+ * the reset gesture live in [TouchTypingToolWindow].
  *
  * Implements [DumbAware] so the tool window stays available during IDE indexing.
  */
@@ -46,10 +47,12 @@ class TouchTypingToolWindowFactory : ToolWindowFactory, DumbAware {
     toolWindow.contentManager.addContent(contentFactory.createContent(mainPanel, null, false))
     SwingUtilities.invokeLater { window.requestFocus() }
 
-    // Subscribe to settings changes to support hot-reload.
+    // Subscribe to settings changes to support hot-reload. The connection is scoped to the
+    // project, so the subscription is disposed together with the project and does not
+    // accumulate across project open/close cycles.
     ApplicationManager.getApplication()
       .messageBus
-      .connect()
+      .connect(project)
       .subscribe(
         Settings.SETTINGS_CHANGE_TOPIC,
         object : SettingsChangeListener {
