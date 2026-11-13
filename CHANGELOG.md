@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Tool-window settings subscription is now disposed with the project** — `TouchTypingToolWindowFactory`
+  subscribed to `Settings.SETTINGS_CHANGE_TOPIC` on the application message bus via
+  `messageBus.connect()` with no scope, so the subscription was never disposed and accumulated
+  across project open/close cycles (stale subscriptions kept firing for already-closed projects).
+  The connection is now scoped to the project (`messageBus.connect(project)`), so the subscription
+  is disposed together with the project. No behavior change while a project is open.
+
 ## 0.1.16
 
 ### Changed
