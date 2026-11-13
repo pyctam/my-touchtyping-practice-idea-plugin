@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.17
+
 ### Fixed
 
 - **Tool-window settings subscription is now disposed with the project** — `TouchTypingToolWindowFactory`
